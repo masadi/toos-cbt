@@ -11,8 +11,13 @@
 |
 */
 
+<<<<<<< HEAD
 $app = new Illuminate\Foundation\Application(
 //$app = new Gecche\Multidomain\Foundation\Application(
+=======
+//$app = new Illuminate\Foundation\Application(
+$app = new Gecche\Multidomain\Foundation\Application(
+>>>>>>> 714d0f501389b15854f236b84a7ce92bf927dcdb
     $_ENV['APP_BASE_PATH'] ?? dirname(__DIR__)
 );
 
