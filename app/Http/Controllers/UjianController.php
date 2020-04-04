@@ -33,59 +33,64 @@ class UjianController extends Controller
         }])->find($ujian_id);
         $jumlah_jawaban_siswa = $ujian->user_question_count;
         $waktu_ujian = time() + ($ujian->durasi * 60);
-        $collection = collect($ujian->question);
-        $shuffled = $collection->shuffle();
-        $first = $shuffled->first();
-        $all = $shuffled->all();
-        $questions = [$first];
-        $current_id = $first->question_id;
-        $page = 0;
-        $user_exam = User_exam::updateOrCreate(
-            [
-                'exam_id'   => $ujian_id,
-                'anggota_rombel_id' => ($user->peserta_didik) ? $user->peserta_didik->anggota_rombel->anggota_rombel_id : NULL,
-                'ptk_id' => $user->ptk_id,
-            ],
-            [
-                'status_ujian' => 1
-            ]
-        );
-        if($ujian->user_question_count){
-            $all = User_question::where(function($query) use ($user, $ujian_id){
-                $query->whereHas('user_exam', function($sq) use ($ujian_id){
-                    $sq->where('exam_id', $ujian_id);
-                });
-                if($user->peserta_didik_id){
-                    $query->where('anggota_rombel_id', $user->peserta_didik->anggota_rombel->anggota_rombel_id);
-                } else {
-                    $query->where('ptk_id', $user->ptk_id);
+        if($ujian->question->count()){
+            $collection = collect($ujian->question);
+            $shuffled = $collection->shuffle();
+            $first = $shuffled->first();
+            $all = $shuffled->all();
+            $questions = [$first];
+            $current_id = $first->question_id;
+            $page = 0;
+            $user_exam = User_exam::updateOrCreate(
+                [
+                    'exam_id'   => $ujian_id,
+                    'anggota_rombel_id' => ($user->peserta_didik) ? $user->peserta_didik->anggota_rombel->anggota_rombel_id : NULL,
+                    'ptk_id' => $user->ptk_id,
+                ],
+                [
+                    'status_ujian' => 1
+                ]
+            );
+            if($ujian->user_question_count){
+                $all = User_question::where(function($query) use ($user, $ujian_id){
+                    $query->whereHas('user_exam', function($sq) use ($ujian_id){
+                        $sq->where('exam_id', $ujian_id);
+                    });
+                    if($user->peserta_didik_id){
+                        $query->where('anggota_rombel_id', $user->peserta_didik->anggota_rombel->anggota_rombel_id);
+                    } else {
+                        $query->where('ptk_id', $user->ptk_id);
+                    }
+                })->orderBy('nomor_urut')->get();
+                foreach($all as $s){
+                    $keys[] = $s->question_id;
                 }
-            })->orderBy('nomor_urut')->get();
-            foreach($all as $s){
-                $keys[] = $s->question_id;
+                $questions = [$all[0]];
+                $current_id = $all[0]->question_id;
+            } else {
+                $keys = [];
+                $i=1;
+                foreach($all as $s){
+                    User_question::updateOrCreate(
+                        [
+                            'question_id' => $s->question_id,
+                            'user_exam_id' => $user_exam->user_exam_id,
+                        ],
+                        [
+                            'anggota_rombel_id' => ($user->peserta_didik) ? $user->peserta_didik->anggota_rombel->anggota_rombel_id : NULL,
+                            'ptk_id' => $user->ptk_id,
+                            'nomor_urut' => $i,
+                        ]
+                    );
+                    $keys[] = $s->question_id;
+                    $i++;
+                }
             }
-            $questions = [$all[0]];
-            $current_id = $all[0]->question_id;
+            return view('ujian.proses_ujian', compact('ujian', 'questions', 'user_exam', 'user', 'jumlah_jawaban_siswa', 'all', 'page', 'keys', 'current_id'));
         } else {
-            $keys = [];
-            $i=1;
-            foreach($all as $s){
-                User_question::updateOrCreate(
-                    [
-                        'question_id' => $s->question_id,
-                        'user_exam_id' => $user_exam->user_exam_id,
-                    ],
-                    [
-                        'anggota_rombel_id' => ($user->peserta_didik) ? $user->peserta_didik->anggota_rombel->anggota_rombel_id : NULL,
-                        'ptk_id' => $user->ptk_id,
-                        'nomor_urut' => $i,
-                    ]
-                );
-                $keys[] = $s->question_id;
-                $i++;
-            }
+            $ujian = '';
+            return view('ujian.soal_tidak_lengkap', compact('ujian'));
         }
-        return view('ujian.proses_ujian', compact('ujian', 'questions', 'user_exam', 'user', 'jumlah_jawaban_siswa', 'all', 'page', 'keys', 'current_id'));
     }
     public function get_soal(Request $request){
         //dump($request->all());
@@ -147,6 +152,9 @@ class UjianController extends Controller
                 $query->where('rombongan_belajar_id', $user->peserta_didik->anggota_rombel->rombongan_belajar_id);
             }
         })->get();
+        if(!$all_ujian->count()){
+            $all_ujian = Exam::with('event')->whereAktif(1)->whereHas('event')->get();
+        }
         return view('ujian.token', compact('user', 'ujian', 'mata_ujian', 'all_ujian'));
     }
     public function konfirmasi(Request $request){

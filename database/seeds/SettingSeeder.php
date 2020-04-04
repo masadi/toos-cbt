@@ -11,9 +11,9 @@ class SettingSeeder extends Seeder
      */
     public function run()
     {
-        $url_server = 'http://portal.toos:8002/api/';
+        //$url_server = 'http://portal.toos:8002/api/';
         //$url_server = 'http://newtoos.cyberelectra.co.id/api/';
-        //$url_server = 'http://portal.smkariyametta.sch.id/api/';
+        $url_server = 'https://portal.cyberelectra.co.id/api/';
         $all_data = array(
             array('key' => 'app_name', 'value' => 'TOOS (Tes Online Offline Sekolah)'),
 			array('key' => 'app_version', 'value' => '3.0.0'),

@@ -27,6 +27,7 @@ use App\User_question;
 use DataTables;
 use Str;
 use Helper;
+use Carbon\Carbon;
 class AjaxController extends Controller
 {
     public function __construct()
@@ -89,7 +90,7 @@ class AjaxController extends Controller
             return $links;
         })
         ->addColumn('toggle', function ($item) {
-            $links = '<a data-exam_id="'.$item->exam_id.'" href="'.route('proktor.index', ['query' => 'toggle-ujian']).'" class="btn btn-sm btn-block btn-danger toggle-reset">Non Aktifkan</a>';;
+            $links = '<a data-exam_id="'.$item->exam_id.'" href="'.route('proktor.index', ['query' => 'toggle-ujian']).'" class="btn btn-sm btn-block btn-danger toggle-reset">Non Aktifkan</a>';
             return $links;
         })
         ->rawColumns(['status', 'toggle'])
@@ -128,7 +129,45 @@ class AjaxController extends Controller
     public function get_all_status_peserta($request){
         $query = User_exam::with(['exam.pembelajaran.rombongan_belajar', 'anggota_rombel.peserta_didik.agama', 'ptk']);
         return DataTables::of($query)
+        ->filter(function ($query) use ($request) {
+            if($request->sekolah_id){
+                $query->whereHas('anggota_rombel', function($query) use ($request) {
+                    $query->where('sekolah_id', $request->sekolah_id);
+                });
+            }
+            if($request->rombongan_belajar_id){
+                $query->whereHas('anggota_rombel', function($query) use ($request) {
+                    $query->where('rombongan_belajar_id', $request->rombongan_belajar_id);
+                });
+            }
+        })
+        ->orderColumn('status_ujian', function ($query, $order) {
+            $query->orderBy('status_ujian', $order);
+        })
         ->addIndexColumn()
+        ->addColumn('rombongan_belajar', function ($item) use ($request){
+            $output['query'] = FALSE;
+            if($request->sekolah_id){
+                $output['query'] = TRUE;
+                $rombongan_belajar = Rombongan_belajar::where('sekolah_id', $request->sekolah_id)->get();
+                if($rombongan_belajar->count()){
+                    foreach($rombongan_belajar as $rombel){
+                        $record= array();
+                        $record['id'] 	= $rombel->rombongan_belajar_id;
+                        $record['text'] 	= $rombel->nama;
+                        $output['result'][] = $record;
+                    }
+                } else {
+                    $record['id'] 	= '';
+                    $record['text'] 	= 'Tidak ditemukan data rombongan belajar';
+                    $output['result'][] = $record;
+                }
+            }
+            if($request->rombongan_belajar_id){
+                $output['query'] = FALSE;
+            }
+            return $output;
+        })
         ->addColumn('checkbox', function ($item) {
             if($item->status_ujian){
                 if($item->anggota_rombel_id){
@@ -165,6 +204,14 @@ class AjaxController extends Controller
             }
             return $links;
         })
+        ->addColumn('filter_nama', function ($item) {
+            if($item->anggota_rombel){
+                $links = $item->anggota_rombel->peserta_didik->nama;
+            } else {
+                $links = $item->ptk->nama;
+            }
+            return $links;
+        })
         ->addColumn('mata_ujian', function ($item) {
             return '<input class="exam_id" type="hidden" name="exam_id" value="' . $item->exam_id . '">'.$item->exam->nama;
         })
@@ -176,7 +223,15 @@ class AjaxController extends Controller
             $links = ($item->status_upload) ? 'Terupload' : 'Belum Terupload';
             return $links;
         })
-        ->rawColumns(['checkbox', 'nama', 'mata_ujian', 'detil'])
+        ->addColumn('force_selesai', function ($item) {
+            if ($item->status_ujian && $item->updated_at->diffInMinutes(Carbon::now()) >= (60 * 12)) {
+                $links = '<a href="'.route('proktor.force_selesai', ['id' => $item->user_exam_id]).'" class="btn btn-sm btn-block btn-danger force_selesai">Force Selesai</a>';
+            } else {
+                $links = '-';
+            }
+            return $links;
+        })
+        ->rawColumns(['checkbox', 'nama', 'mata_ujian', 'detil', 'force_selesai'])
         ->make(true);
     }
     public function get_all_hasil_ujian($request){
@@ -195,7 +250,7 @@ class AjaxController extends Controller
         ->make(true);
     }
     public function get_detil_hasil_ujian(Request $request){
-        $query = User_question::with(['question.correct', 'answer'])->where(function($query) use ($request){
+        $query = User_question::with(['soal.correct', 'answer'])->where(function($query) use ($request){
             $query->where('user_exam_id', $request->route('id'));
             $query->where('anggota_rombel_id', $request->anggota_rombel_id);
         });
@@ -622,6 +677,20 @@ class AjaxController extends Controller
             }
         } elseif($query == 'mata-ujian'){
             $mata_ujian = Exam::where('pembelajaran_id', $request->pembelajaran_id)->whereAktif(0)->get();
+            if($mata_ujian->count()){
+                foreach($mata_ujian as $exam){
+                    $record= array();
+                    $record['id'] 	= $exam->exam_id;
+                    $record['text'] 	= $exam->nama;
+                    $output['results'][] = $record;
+                }
+            } else {
+                $record['id'] 	= '';
+                $record['text'] 	= 'Tidak ditemukan mata ujian di mata pelajaran terpilih';
+                $output['results'][] = $record;
+            }
+        } elseif($query == 'mata-ujian-event'){
+            $mata_ujian = Exam::where('ujian_id', $request->ujian_id)->whereAktif(0)->get();
             if($mata_ujian->count()){
                 foreach($mata_ujian as $exam){
                     $record= array();

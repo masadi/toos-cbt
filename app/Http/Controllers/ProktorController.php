@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Collection;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Client;
+use App\Sekolah;
 use App\Ptk;
 use App\Rombongan_belajar;
 use App\Pembelajaran;
@@ -28,6 +29,8 @@ use Madzipper;
 use File;
 use Delight\Random\Random;
 use Codedge\Updater\UpdaterManager;
+use App\Event;
+use App\Ujian;
 class ProktorController extends Controller
 {
     public function __construct()
@@ -70,10 +73,11 @@ class ProktorController extends Controller
         return view('proktor.daftar_ptk', compact('user'));
     }
     public function status_test($user){
+        $all_ujian = Ujian::with(['mata_pelajaran', 'event'])->get();
         $rombongan_belajar = Rombongan_belajar::get();
         $aktif_token = Setting::where('key', 'token')->first();
         $token = ($aktif_token) ? '<strong>'.$aktif_token->value.' - Updated : '.date('H:i:s', strtotime($aktif_token->updated_at)). ' - Interval '.$this->menit.' Menit</strong>' : '';
-        return view('proktor.status_test', compact('user', 'rombongan_belajar', 'token'));
+        return view('proktor.status_test', compact('user', 'rombongan_belajar', 'token', 'all_ujian'));
     }
     public function status_test_old($user){
         $status = [
@@ -99,7 +103,8 @@ class ProktorController extends Controller
         return view('proktor.status_test', compact('user', 'status', 'ujian', 'mata_ujian', 'pembelajaran'));
     }
     public function status_peserta($user){
-        return view('proktor.status_peserta', compact('user'));
+        $all_sekolah = Sekolah::get();
+        return view('proktor.status_peserta', compact('user', 'all_sekolah'));
     }
     public function reset_login_peserta($user){
         return view('proktor.reset_login', compact('user'));
@@ -113,10 +118,16 @@ class ProktorController extends Controller
         ];
         return response()->json($output);
         */
-        $server = Server::first();
-        $host_server = config('global.url_server').'status-download';
+        $event = Event::with('peserta.sekolah')->first();
+        $sekolah_id = [];
+        if($event){
+            foreach($event->peserta as $peserta){
+                $sekolah_id[] = $peserta->sekolah->sekolah_id;
+            }
+        }
+        $host_server = config('global.url_server').'status-download-event';
         $arguments = [
-            'server_id' => $server->server_id,
+            'event_id' => $event->id,
         ];
         $client = new Client(); //GuzzleHttp\Client
         $curl = $client->post($host_server, [	
@@ -126,36 +137,26 @@ class ProktorController extends Controller
             $output = [
                 'server' => json_decode($curl->getBody()),
                 'local' => [
-                    'ptk' => Ptk::where('sekolah_id', $server->sekolah_id)->count(),
-                    'rombongan_belajar' => Rombongan_belajar::where(function($query) use ($server){
-                        $query->where('server_id', $server->server_id);
+                    'ptk' => Ptk::whereIn('sekolah_id', $sekolah_id)->count(),
+                    'rombongan_belajar' => Rombongan_belajar::whereIn('sekolah_id', $sekolah_id)->count(),
+                    'ujian' => Ujian::where('event_id', $event->id)->count(),
+                    'anggota_rombel' => Anggota_rombel::whereHas('rombongan_belajar', function($query) use ($sekolah_id){
+                        $query->whereIn('sekolah_id', $sekolah_id);
                     })->count(),
-                    'pembelajaran' => Pembelajaran::whereHas('rombongan_belajar', function($query) use ($server){
-                        $query->where('server_id', $server->server_id);
-                    })->count(),
-                    'anggota_rombel' => Anggota_rombel::whereHas('rombongan_belajar', function($query) use ($server){
-                        $query->where('server_id', $server->server_id);
-                    })->count(),
-                    'exams' => Exam::whereHas('pembelajaran', function($query) use ($server){
-                        $query->whereHas('rombongan_belajar', function($query) use ($server){
-                            $query->where('server_id', $server->server_id);
-                        });
+                    'exams' => Exam::whereHas('event', function($query) use ($event){
+                        $query->where('events.id', $event->id);
                         $query->whereNull('sinkron');
                     })->count(),
-                    'questions' => Question::whereHas('exam', function($query) use ($server){
-                        $query->whereHas('pembelajaran', function($query) use ($server){
-                            $query->whereHas('rombongan_belajar', function($query) use ($server){
-                                $query->where('server_id', $server->server_id);
-                            });
+                    'questions' => Question::whereHas('exam', function($query) use ($event){
+                        $query->whereHas('event', function($query) use ($event){
+                            $query->where('events.id', $event->id);
                             $query->whereNull('sinkron');
                         });
                     })->count(),
-                    'answers' => Answer::whereHas('question', function($query) use ($server){
-                        $query->whereHas('exam', function($query) use ($server){
-                            $query->whereHas('pembelajaran', function($query) use ($server){
-                                $query->whereHas('rombongan_belajar', function($query) use ($server){
-                                    $query->where('server_id', $server->server_id);
-                                });
+                    'answers' => Answer::whereHas('question', function($query) use ($event){
+                        $query->whereHas('exam', function($query) use ($event){
+                            $query->whereHas('event', function($query) use ($event){
+                                $query->where('events.id', $event->id);
                                 $query->whereNull('sinkron');
                             });
                         });
@@ -359,90 +360,100 @@ class ProktorController extends Controller
         }
         return response()->json($output);
     }
+    public function force_selesai(Request $request){
+        $user_exam = User_exam::find($request->route('id'));
+        $user_exam->status_ujian = 0;
+        if($user_exam->save()){
+            $output = [
+                'icon' => 'success',
+                'success' => TRUE,
+                'status' => 'Force Selesai Sukses',
+            ];
+        } else {
+            $output = [
+                'icon' => 'error',
+                'success' => FALSE,
+                'status' => 'Force Selesai Gagal. Silahkan coba lagi!',
+            ];
+        }
+        return response()->json($output);
+    }
     public function hitung_data($query, $jumlah){
-        $server = Server::first();
+        $event = Event::with('peserta.sekolah')->first();
+        $sekolah_id = [];
+        if($event){
+            foreach($event->peserta as $peserta){
+                $sekolah_id[] = $peserta->sekolah->sekolah_id;
+            }
+        }
         if($query == 'ptk'){
-            $count = Ptk::where('sekolah_id', $server->sekolah_id)->count();
+            $count = Ptk::whereIn('sekolah_id', $sekolah_id)->count();
         }elseif($query == 'rombongan_belajar'){
-            $count = Rombongan_belajar::where(function($query) use ($server){
-                $query->where('server_id', $server->server_id);
-            })->count();
-        }elseif($query == 'pembelajaran'){
-            $count = Pembelajaran::whereHas('rombongan_belajar', function($query) use ($server){
-                $query->where('server_id', $server->server_id);
-            })->count();
+            $count = Rombongan_belajar::whereIn('sekolah_id', $sekolah_id)->count();
+        }elseif($query == 'ujian'){
+            $count = Ujian::where('event_id', $event->id)->count();
         } elseif($query == 'anggota_rombel'){
-            $count = Anggota_rombel::whereHas('rombongan_belajar', function($query) use ($server){
-                $query->where('server_id', $server->server_id);
-            })->count();
+            $count = Anggota_rombel::whereIn('sekolah_id', $sekolah_id)->count();
         } elseif($query == 'exams'){
-            $count = Exam::whereHas('pembelajaran', function($query) use ($server){
-                $query->whereHas('rombongan_belajar', function($query) use ($server){
-                    $query->where('server_id', $server->server_id);
+            $count = Exam::where(function($query) use ($event){
+                $query->whereHas('event', function($query) use ($event){
+                    $query->where('events.id', $event->id);
                 });
                 $query->whereNull('sinkron');
             })->count();
         } elseif($query == 'questions'){
-            $count = Question::whereHas('exam', function($query) use ($server){
-                $query->whereHas('pembelajaran', function($query) use ($server){
-                    $query->whereHas('rombongan_belajar', function($query) use ($server){
-                        $query->where('server_id', $server->server_id);
-                    });
-                    $query->whereNull('sinkron');
+            $count = Question::whereHas('exam', function($query) use ($event){
+                $query->whereHas('event', function($query) use ($event){
+                    $query->where('events.id', $event->id);
                 });
+                $query->whereNull('sinkron');
             })->count();
         } elseif($query == 'answers'){
-            $count = Answer::whereHas('question', function($query) use ($server){
-                $query->whereHas('exam', function($query) use ($server){
-                    $query->whereHas('pembelajaran', function($query) use ($server){
-                        $query->whereHas('rombongan_belajar', function($query) use ($server){
-                            $query->where('server_id', $server->server_id);
-                        });
-                        $query->whereNull('sinkron');
+            $count = Answer::whereHas('question', function($query) use ($event){
+                $query->whereHas('exam', function($query) use ($event){
+                    $query->whereHas('event', function($query) use ($event){
+                        $query->where('events.id', $event->id);
                     });
+                    $query->whereNull('sinkron');
                 });
             })->count();
         }
         $output = [
             'query' => $query,
             'jumlah' => $count.'/'.$jumlah,
-            'percent' => $persentasi=round($count/$jumlah * 100,2),
+            'percent' => ($count) ? $persentasi=round($count/$jumlah * 100,2) : 0,
         ];
         return response()->json($output);
     }
     public function status_download($user){
-        $server = Server::first();
+        $event = Event::with('peserta.sekolah')->first();
+        $sekolah_id = [];
+        if($event){
+            foreach($event->peserta as $peserta){
+                $sekolah_id[] = $peserta->sekolah->sekolah_id;
+            }
+        }
         $sinkron = [
-            'ptk' => Ptk::where('sekolah_id', $server->sekolah_id)->count(),
-            'rombongan_belajar' => Rombongan_belajar::where(function($query) use ($server){
-                $query->where('server_id', $server->server_id);
+            'ptk' => Ptk::whereIn('sekolah_id', $sekolah_id)->count(),
+            'rombongan_belajar' => Rombongan_belajar::whereIn('sekolah_id', $sekolah_id)->count(),
+            'ujian' => Ujian::where('event_id', $event->id)->count(),
+            'anggota_rombel' => Anggota_rombel::whereHas('rombongan_belajar', function($query) use ($sekolah_id){
+                $query->whereIn('sekolah_id', $sekolah_id);
             })->count(),
-            'pembelajaran' => Pembelajaran::whereHas('rombongan_belajar', function($query) use ($server){
-                $query->where('server_id', $server->server_id);
-            })->count(),
-            'anggota_rombel' => Anggota_rombel::whereHas('rombongan_belajar', function($query) use ($server){
-                $query->where('server_id', $server->server_id);
-            })->count(),
-            'exams' => Exam::whereHas('pembelajaran', function($query) use ($server){
-                $query->whereHas('rombongan_belajar', function($query) use ($server){
-                    $query->where('server_id', $server->server_id);
-                });
+            'exams' => Exam::whereHas('event', function($query) use ($event){
+                $query->where('event_id', $event->id);
                 $query->whereNull('sinkron');
             })->count(),
-            'questions' => Question::whereHas('exam', function($query) use ($server){
-                $query->whereHas('pembelajaran', function($query) use ($server){
-                    $query->whereHas('rombongan_belajar', function($query) use ($server){
-                        $query->where('server_id', $server->server_id);
-                    });
+            'questions' => Question::whereHas('exam', function($query) use ($event){
+                $query->whereHas('event', function($query) use ($event){
+                    $query->where('event_id', $event->id);
                     $query->whereNull('sinkron');
                 });
             })->count(),
-            'answers' => Answer::whereHas('question', function($query) use ($server){
-                $query->whereHas('exam', function($query) use ($server){
-                    $query->whereHas('pembelajaran', function($query) use ($server){
-                        $query->whereHas('rombongan_belajar', function($query) use ($server){
-                            $query->where('server_id', $server->server_id);
-                        });
+            'answers' => Answer::whereHas('question', function($query) use ($event){
+                $query->whereHas('exam', function($query) use ($event){
+                    $query->whereHas('event', function($query) use ($event){
+                        $query->where('event_id', $event->id);
                         $query->whereNull('sinkron');
                     });
                 });
@@ -451,10 +462,16 @@ class ProktorController extends Controller
         return view('proktor.status_download', compact('user', 'sinkron'));
     }
     public function get_status_download($user){
-        $server = Server::first();
-        $host_server = config('global.url_server').'status-download';
+        $event = Event::with('peserta.sekolah')->first();
+        $sekolah_id = [];
+        if($event){
+            foreach($event->peserta as $peserta){
+                $sekolah_id[] = $peserta->sekolah->sekolah_id;
+            }
+        }
+        $host_server = config('global.url_server').'status-download-event';
         $arguments = [
-            'server_id' => $server->server_id,
+            'event_id' => $event->id,
         ];
         $client = new Client(); //GuzzleHttp\Client
         $curl = $client->post($host_server, [	
@@ -467,36 +484,26 @@ class ProktorController extends Controller
                 'message' => $response->message,
                 'server' => (array) $response->data,
                 'local' => [
-                    'ptk' => Ptk::where('sekolah_id', $server->sekolah_id)->count(),
-                    'rombongan_belajar' => Rombongan_belajar::where(function($query) use ($server){
-                        $query->where('server_id', $server->server_id);
+                    'ptk' => Ptk::whereIn('sekolah_id', $sekolah_id)->count(),
+                    'rombongan_belajar' => Rombongan_belajar::whereIn('sekolah_id', $sekolah_id)->count(),
+                    'ujian' => Ujian::where('event_id', $event->id)->count(),
+                    'anggota_rombel' => Anggota_rombel::whereHas('rombongan_belajar', function($query) use ($sekolah_id){
+                        $query->whereIn('sekolah_id', $sekolah_id);
                     })->count(),
-                    'pembelajaran' => Pembelajaran::whereHas('rombongan_belajar', function($query) use ($server){
-                        $query->where('server_id', $server->server_id);
-                    })->count(),
-                    'anggota_rombel' => Anggota_rombel::whereHas('rombongan_belajar', function($query) use ($server){
-                        $query->where('server_id', $server->server_id);
-                    })->count(),
-                    'exams' => Exam::whereHas('pembelajaran', function($query) use ($server){
-                        $query->whereHas('rombongan_belajar', function($query) use ($server){
-                            $query->where('server_id', $server->server_id);
-                        });
+                    'exams' => Exam::whereHas('event', function($query) use ($event){
+                        $query->where('event_id', $event->id);
                         $query->whereNull('sinkron');
                     })->count(),
-                    'questions' => Question::whereHas('exam', function($query) use ($server){
-                        $query->whereHas('pembelajaran', function($query) use ($server){
-                            $query->whereHas('rombongan_belajar', function($query) use ($server){
-                                $query->where('server_id', $server->server_id);
-                            });
+                    'questions' => Question::whereHas('exam', function($query) use ($event){
+                        $query->whereHas('event', function($query) use ($event){
+                            $query->where('event_id', $event->id);
                             $query->whereNull('sinkron');
                         });
                     })->count(),
-                    'answers' => Answer::whereHas('question', function($query) use ($server){
-                        $query->whereHas('exam', function($query) use ($server){
-                            $query->whereHas('pembelajaran', function($query) use ($server){
-                                $query->whereHas('rombongan_belajar', function($query) use ($server){
-                                    $query->where('server_id', $server->server_id);
-                                });
+                    'answers' => Answer::whereHas('question', function($query) use ($event){
+                        $query->whereHas('exam', function($query) use ($event){
+                            $query->whereHas('event', function($query) use ($event){
+                                $query->where('event_id', $event->id);
                                 $query->whereNull('sinkron');
                             });
                         });
@@ -514,11 +521,11 @@ class ProktorController extends Controller
         return view('proktor.get_status_download', compact('sinkron'));
     }
     public function proses_download(Request $request){
-        $server = Server::first();
-        $host_server = config('global.url_server').'proses-download';
+        $event = Event::first();
+        $host_server = config('global.url_server').'proses-download-event';
         $arguments = [
             'data' => $request->route('query'),
-            'server_id' => $server->server_id,
+            'event_id' => $event->id,
         ];
         $client = new Client(); //GuzzleHttp\Client
         $curl = $client->post($host_server, [	

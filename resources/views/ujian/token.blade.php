@@ -53,7 +53,11 @@
                         <span class="font-lg"><strong>Mata Ujian</strong></span>
                         <div class="list-group" id="list-tab" role="tablist">
                             @forelse ($all_ujian as $item)
+                            @if($item->pembelajaran)
                             <a href="#{{$item->exam_id}}" class="list-group-item list-group-item-action" data-toggle="list" data-exam_id="{{$item->exam_id}}" title="Klik untuk mengikuti Mata Ujian ini!"><span class="font-lg text-danger">{{$item->pembelajaran->nama_mata_pelajaran}} : {{$item->nama}}</span></a>
+                            @else 
+                            <a href="#{{$item->exam_id}}" class="list-group-item list-group-item-action" data-toggle="list" data-exam_id="{{$item->exam_id}}" title="Klik untuk mengikuti Mata Ujian ini!"><span class="font-lg text-danger">{{$item->event->nama}} : {{$item->nama}}</span></a>
+                            @endif
                             @empty
                             <a class="list-group-item"><span class="font-lg text-danger">Mata Ujian belum tersedia. Silahkan hubungi
                                 Proktor</span></a>

@@ -20,6 +20,24 @@
                         @csrf
                         <div class="card-body">
                             <div class="row">
+                                @if($all_ujian)
+                                <div class="col-md-5">
+                                    <select name="ujian_id" id="ujian_id" class="form-control select2" style="width:100%;">
+                                        <option value="">== Pilih Mata Pelajaran ==</option>
+                                        @foreach ($all_ujian as $ujian)
+                                            <option value="{{$ujian->id}}">{{$ujian->event->nama}} - {{$ujian->mata_pelajaran->nama}}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="col-md-5">
+                                    <select name="exam_id" id="exam_id" class="form-control select2" style="width:100%;">
+                                        <option value="">== Pilih Mata Ujian ==</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <button class="btn btn-success btn-block" type="submit"> Tambah</button>
+                                </div>
+                                @else 
                                 <div class="col-md-3">
                                     <select name="rombongan_belajar_id" id="rombongan_belajar_id" class="form-control select2" style="width:100%;">
                                         <option value="">== Pilih Rombongan Belajar ==</option>
@@ -41,6 +59,7 @@
                                 <div class="col-md-3">
                                     <button class="btn btn-success btn-block" type="submit"> Tambah</button>
                                 </div>
+                                @endif
                             </div>
                             @if (session('success'))
                             <div class="alert alert-success" role="alert">
@@ -62,6 +81,20 @@
                         </div>
                     </form>
                     <div class="card-footer">
+                        @if($all_ujian)
+                        <table id="datatable" class="table table-outline mb-0">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th class="text-center" width="10px">No</th>
+                                    <th>Nama Mata Ujian</th>
+                                    <th class="text-center">Status</th>
+                                    <th class="text-center">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                        @else 
                         <table id="datatable" class="table table-outline mb-0">
                             <thead class="thead-light">
                                 <tr>
@@ -76,6 +109,7 @@
                             <tbody>
                             </tbody>
                         </table>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -97,6 +131,14 @@
             processing: true,
             serverSide: true,
             ajax: '{{route('ajax.get_all_data', ['query' => 'ujian-aktif'])}}',
+            @if($all_ujian)
+            columns: [
+                { data: 'DT_RowIndex', name: 'DT_RowIndex', className: 'dt-body-center', orderable: false, searchable: false },
+                { data: 'nama', name: 'nama' },
+                { data: 'status', name: 'status', className: 'dt-body-center', orderable: false, searchable: false },
+                { data: 'toggle', name: 'toggle', className: 'dt-body-center', orderable: false, searchable: false },
+            ],
+            @else
             columns: [
                 { data: 'DT_RowIndex', name: 'DT_RowIndex', className: 'dt-body-center', orderable: false, searchable: false },
                 { data: 'nama', name: 'nama' },
@@ -105,6 +147,7 @@
                 { data: 'status', name: 'status', className: 'dt-body-center', orderable: false, searchable: false },
                 { data: 'toggle', name: 'toggle', className: 'dt-body-center', orderable: false, searchable: false },
             ],
+            @endif
             fnDrawCallback: function(oSettings) {
                 turn_on_icheck();
             }
@@ -231,6 +274,29 @@
         } else {
             $.ajax({
                 url: '{{route('ajax.get_data', ['query' => 'mata-ujian'])}}',
+                type: 'post',
+                data: $("#form").serialize(),
+                success: function(response){
+                    $("#exam_id").html('<option value="">== Pilih Mata Ujian ==</option>');
+                    if(!$.isEmptyObject(response.results)){
+						$.each(response.results, function (i, item) {
+							$('#exam_id').append($('<option>', { 
+								value: item.id,
+								text : item.text
+							}));
+						});
+					}
+                }
+            });
+		}
+    });
+    $('#ujian_id').change(function(){
+        var ini = $(this).val();
+        if(ini == ''){
+            return false;
+        } else {
+            $.ajax({
+                url: '{{route('ajax.get_data', ['query' => 'mata-ujian-event'])}}',
                 type: 'post',
                 data: $("#form").serialize(),
                 success: function(response){

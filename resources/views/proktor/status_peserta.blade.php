@@ -11,24 +11,45 @@
                     <div class="card-header">
                         Status Peserta
                         <div class="card-header-actions">
-                            <button class="btn btn-primary start_upload has-spinner" data-text="UPLOADING....">UPLOAD HASIL</button>
-                            <button class="btn btn-danger reset_hasil has-spinner" data-text="RESETTING....">RESET UJIAN</button>
+                            <button class="btn btn-primary start_upload has-spinner" data-text="UPLOADING....">UPLOAD
+                                HASIL</button>
+                            <button class="btn btn-danger reset_hasil has-spinner" data-text="RESETTING....">RESET
+                                UJIAN</button>
                         </div>
                     </div>
                     <div class="card-body">
-                        <table id="datatable" class="table table-responsive-sm table-outline mb-0">
-                            <thead class="thead-light">
-                                <tr>
-                                    <th class="text-center" width="10px"><input type="checkbox" name="select_all" value="1" id="datatable-select-all"></th>
-                                    <th>Nama</th>
-                                    <th>Mata Ujian</th>
-                                    <th>Status Ujian</th>
-                                    <th>Status Upload</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                            </tbody>
-                        </table>
+                        <div class="row" style="margin-bottom:10px;">
+                            <div class="col-sm-6">
+                                <select id="sekolah_id" class="form-control select2">
+                                    <option value="">== Semua Sekolah ==</option>
+                                    @foreach($all_sekolah as $sekolah)
+                                    <option value="{{$sekolah->sekolah_id}}">{{$sekolah->nama}}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-sm-6">
+                                <select id="rombongan_belajar_id" class="form-control select2">
+                                    <option value="">== Semua Rombongan Belajar ==</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table id="datatable" class="table table-outline mb-0">
+                                <thead class="thead-light">
+                                    <tr>
+                                        <th class="text-center" width="10px"><input type="checkbox" name="select_all"
+                                                value="1" id="datatable-select-all"></th>
+                                        <th>Nama</th>
+                                        <th>Mata Ujian</th>
+                                        <th>Status Ujian</th>
+                                        <th>Status Upload</th>
+                                        <th>Force Selesai</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -48,23 +69,43 @@
 <script>
     $(function() {
     var table = null;
-    function init() {
+    function init(sekolah_id, rombongan_belajar_id) {
         table = $('#datatable').DataTable({
             processing: true,
             serverSide: true,
             ajax: {
                 url: '{{route('ajax.get_all_data', ['query' => 'status-peserta'])}}',
                 data:function(data) {
-                    data.exam_id = '{{config('global.exam_id')}}';
+                    data.sekolah_id = sekolah_id;
+                    data.rombongan_belajar_id = rombongan_belajar_id;
                 }
             },
             columns: [
                 { data: 'checkbox', name: 'checkbox', className: 'dt-body-center', orderable: false, searchable: false },
-                { data: 'nama', name: 'user_exam_id' },
+                { data: 'nama', name: 'filter_nama' },
                 { data: 'mata_ujian', name: 'exam.nama' },
                 { data: 'status_ujian', name: 'status_ujian', orderable: false, searchable: false },
                 { data: 'status_upload', name: 'status_upload', orderable: false, searchable: false },
-            ]
+                { data: 'force_selesai', name: 'status_ujian', className: 'dt-body-center', searchable: false },
+            ],
+            fnDrawCallback: function(oSettings) {
+                turn_on_icheck();
+            },
+            fnRowCallback: function( nRow, aData, iDisplayIndex, iDisplayIndexFull ) {
+                if(iDisplayIndex == 0){
+                    if(aData.rombongan_belajar.query){
+                        $("#rombongan_belajar_id").html('<option value="">== Semua Rombongan Belajar ==</option>');
+                        $.each(aData.rombongan_belajar.result, function (i, item) {
+                            if(item.id){
+                                $('#rombongan_belajar_id').append($('<option>', { 
+                                    value: item.id,
+                                    text : item.text
+                                }));
+                            }
+                        });
+                    }
+                }
+            }
             /*columnDefs: [
                 {
                     targets: 0,
@@ -126,7 +167,49 @@
             ]*/
         });
     }
-    init();
+    //init();
+    init(null, null);
+    $('#sekolah_id').change(function(){
+        $("#rombongan_belajar_id").html('<option value="">== Semua Rombongan Belajar ==</option>');
+        var ini = $(this).val();
+        table.destroy();
+        init(ini, null);
+    });
+    $('#rombongan_belajar_id').change(function(){
+        var ini = $(this).val();
+        var sekolah_id = $('#sekolah_id').val();
+        table.destroy();
+        init(sekolah_id, ini);
+    });
+    function turn_on_icheck() {
+        $('a.force_selesai').bind('click', function(e) {
+            e.preventDefault();
+            var url = $(this).attr('href');
+            Swal.fire({
+                title: "Anda Yakin?",
+                text: "Tindakan ini tidak bisa dikembalikan!",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Ya!'
+            }).then((result) => {
+                if (result) {
+                    console.log(result);
+                    if (result.value) {
+                        $.get(url, function(data) {
+                            Swal.fire({
+                                icon: data.icon,
+                                text: data.status,
+                            }).then(function(e) {
+                                table.ajax.reload( null, false );
+                            });
+                        });
+                    }
+                }
+            });
+        });
+    }
     $('#datatable-select-all').on('click', function(){
         // Get all rows with search applied
         var rows = table.rows({ 'search': 'applied' }).nodes();
@@ -231,11 +314,6 @@
     });
     $('.start_upload').click(function(e){
         e.preventDefault();
-        Swal.fire({
-            icon: 'error',
-            text: 'Pengiriman hasil ujian belum diaktifkan',
-        });
-        return false;
         var selected = 0;
         var btn = $(this);
         $(btn).buttonLoader('start', $(this).data('text'));

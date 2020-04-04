@@ -12,7 +12,8 @@
                         Data Hasil Ujian
                     </div>
                     <div class="card-body">
-                        <table id="datatable" class="table table-striped table-bordered datatable">
+                        Coming Soon
+                        <table id="datatable1" class="table table-striped table-bordered datatable" style="display:none">
                             <thead>
                                 <tr>
                                     <th>No</th>

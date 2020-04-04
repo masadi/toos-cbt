@@ -7,6 +7,8 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Client;
+use App\Sekolah;
+use App\Peserta_event;
 use App\Ptk;
 use App\Jurusan_sp;
 use App\Rombongan_belajar;
@@ -19,9 +21,13 @@ use App\Anggota_rombel;
 use App\User;
 use App\User_exam;
 use App\User_question;
+use App\Ujian;
+use App\Event;
+use App\Mata_pelajaran;
 use Faker\Factory as Faker;
 use Str;
 use Helper;
+use Illuminate\Support\Facades\DB;
 class ProsesSync extends Command
 {
     /**
@@ -61,15 +67,19 @@ class ProsesSync extends Command
             $data =  (object) $data;
             if($data->query == 'ptk'){
                 if(isset($data->response['data']) && count($data->response['data'])){
+                    //DB::table('ptk')->delete();
                     foreach($data->response['data'] as $item){
                         $item = json_decode(json_encode($item));
+                        $this->insert_sekolah($item->sekolah);
                         $this->insert_ptk($item);
                     }
                 }
             } elseif($data->query == 'rombongan_belajar'){
                 if($data->response['data'] && is_array($data->response['data'])){
+                    //DB::table('rombongan_belajar')->delete();
                     foreach($data->response['data'] as $item){
                         $item = json_decode(json_encode($item));
+                        $this->insert_sekolah($item->sekolah);
                         $this->insert_ptk($item->ptk);
                         $this->insert_jurusan_sp($item->jurusan_sp);
                         $this->insert_rombel($item);
@@ -81,6 +91,7 @@ class ProsesSync extends Command
                 }
             } elseif($data->query == 'pembelajaran'){
                 if(isset($data->response['data']) && count($data->response['data'])){
+                    //DB::table('pembelajaran')->delete();
                     foreach($data->response['data'] as $item){
                         $item = json_decode(json_encode($item));
                         $this->insert_ptk($item->ptk);
@@ -88,8 +99,18 @@ class ProsesSync extends Command
                         $this->insert_pembelajaran($item);
                     }
                 }
+            } elseif($data->query == 'ujian'){
+                if(isset($data->response['data']) && count($data->response['data'])){
+                    //DB::table('ujians')->delete();
+                    foreach($data->response['data'] as $item){
+                        $item = json_decode(json_encode($item));
+                        $this->insert_ujian($item);
+                        $this->insert_mata_pelajaran($item->mata_pelajaran);
+                    }
+                }
             } elseif($data->query == 'anggota_rombel'){
                 if(isset($data->response['data']) && count($data->response['data'])){
+                    //DB::table('anggota_rombel')->delete();
                     foreach($data->response['data'] as $item){
                         $item = json_decode(json_encode($item));
                         $this->insert_peserta_didik($item->peserta_didik);
@@ -98,6 +119,7 @@ class ProsesSync extends Command
                 }
             } elseif($data->query == 'exams'){
                 if(isset($data->response['data']) && count($data->response['data'])){
+                    //DB::table('exams')->delete();
                     foreach($data->response['data'] as $item){
                         $item = json_decode(json_encode($item));
                         $this->insert_exam($item);
@@ -105,6 +127,7 @@ class ProsesSync extends Command
                 }
             } elseif($data->query == 'questions'){
                 if(isset($data->response['data']) && count($data->response['data'])){
+                    //DB::table('questions')->delete();
                     foreach($data->response['data'] as $item){
                         $item = json_decode(json_encode($item));
                         $this->insert_question($item);
@@ -112,6 +135,7 @@ class ProsesSync extends Command
                 }
             } elseif($data->query == 'answers'){
                 if(isset($data->response['data']) && count($data->response['data'])){
+                    //DB::table('answers')->delete();
                     foreach($data->response['data'] as $item){
                         $item = json_decode(json_encode($item));
                         $this->insert_answer($item);
@@ -179,44 +203,103 @@ class ProsesSync extends Command
             }
         }
     }
-    private function insert_ptk($item){
-        Ptk::updateOrCreate(
-            [
-                'ptk_id' => $item->ptk_id
-            ],
+    private function insert_mata_pelajaran($item){
+        if($item){
+            Mata_pelajaran::updateOrCreate(
+                [
+                    'mata_pelajaran_id' => $item->mata_pelajaran_id,
+                ],
+                [
+                    'nama' => $item->nama,
+                    'pilihan_sekolah' => 1,
+                    'pilihan_buku' => 1,
+                    'pilihan_kepengawasan' => 1,
+                    'pilihan_evaluasi' => 1,
+                ]
+            );
+        }
+    }
+    private function insert_sekolah($item){
+        Sekolah::updateOrCreate(
             [
                 'sekolah_id' => $item->sekolah_id,
+            ],
+            [
+                'npsn' => $item->npsn,
                 'nama' => $item->nama,
-                'nuptk' => $item->nuptk,
-                'nip' => $item->nip,
-                'jenis_kelamin' => $item->jenis_kelamin,
-                'tempat_lahir' => $item->tempat_lahir,
-                'tanggal_lahir' => $item->tanggal_lahir,
-                'nik' => $item->nik,
-                'agama_id' => $item->agama_id,
+                'bentuk_pendidikan_id' => $item->bentuk_pendidikan_id,
                 'alamat' => $item->alamat,
-                'no_hp' => $item->no_hp,
+                'desa_kelurahan' => $item->desa_kelurahan,
+                'kecamatan' => $item->kecamatan,
+                'kabupaten' => $item->kabupaten,
+                'provinsi' => $item->provinsi,
+                'kode_wilayah' => $item->kode_wilayah,
+                'kode_pos' => $item->kode_pos,
+                'no_telp' => $item->no_telp,
                 'email' => $item->email,
-                'photo' => $item->photo,
+                'website' => $item->website,
+                'status_sekolah' => $item->status_sekolah,
+                'lisensi' => $item->lisensi
             ]
         );
-        $user = User::updateOrCreate(
+        $event = Event::first();
+        Peserta_event::updateOrCreate([
+            'event_id' => $event->id,
+            'sekolah_id' => $item->sekolah_id,
+        ]);
+    }
+    private function insert_ujian($item){
+        Ujian::updateOrCreate(
             [
-                'ptk_id' => $item->ptk_id
+                'id' => $item->id
             ],
-            [ 
-                'name' => $item->nama,
-                'sekolah_id' => $item->sekolah_id,
-                'username' => $item->nuptk,
-                'email' => ($item->email) ? $item->email : $faker->unique()->name(),
-                'email_verified_at' => now(),
-                'password' => app('hash')->make('12345678'),
-                'timezone' => config('app.timezone'),
-                'remember_token' => Str::random(10),
-                'menuroles' => 'ptk'
+            [
+                'event_id' => $item->event_id,
+                'mata_pelajaran_id' => $item->mata_pelajaran_id,
+                'tanggal' => $item->tanggal,
             ]
         );
-        $user->assignRole('ptk');
+    }
+    private function insert_ptk($item){
+        if($item){
+            Ptk::updateOrCreate(
+                [
+                    'ptk_id' => $item->ptk_id
+                ],
+                [
+                    'sekolah_id' => $item->sekolah_id,
+                    'nama' => $item->nama,
+                    'nuptk' => $item->nuptk,
+                    'nip' => $item->nip,
+                    'jenis_kelamin' => $item->jenis_kelamin,
+                    'tempat_lahir' => $item->tempat_lahir,
+                    'tanggal_lahir' => $item->tanggal_lahir,
+                    'nik' => $item->nik,
+                    'agama_id' => $item->agama_id,
+                    'alamat' => $item->alamat,
+                    'no_hp' => $item->no_hp,
+                    'email' => $item->email,
+                    'photo' => $item->photo,
+                ]
+            );
+            $user = User::updateOrCreate(
+                [
+                    'ptk_id' => $item->ptk_id
+                ],
+                [ 
+                    'name' => $item->nama,
+                    'sekolah_id' => $item->sekolah_id,
+                    'username' => $item->nuptk,
+                    'email' => ($item->email) ? $item->email : $faker->unique()->name(),
+                    'email_verified_at' => now(),
+                    'password' => app('hash')->make('12345678'),
+                    'timezone' => config('app.timezone'),
+                    'remember_token' => Str::random(10),
+                    'menuroles' => 'ptk'
+                ]
+            );
+            $user->assignRole('ptk');
+        }
     }
     private function insert_jurusan_sp($item){
         Jurusan_sp::updateOrCreate(
@@ -244,7 +327,7 @@ class ProsesSync extends Command
                 'kurikulum_id' => $item->kurikulum_id,
                 'nama' => $item->nama,
                 'ptk_id' => $item->ptk_id,
-                'server_id' => $item->server_id
+                //'server_id' => $item->server_id
             ]
         );
     }
@@ -329,7 +412,8 @@ class ProsesSync extends Command
                 //'end' => $item->end,
                 'jumlah_soal' => $item->jumlah_soal,
                 //'jumlah_opsi' => $item->jumlah_opsi,
-                'durasi' => $item->durasi
+                'durasi' => $item->durasi,
+                'ujian_id' => $item->ujian_id
             ]
         );
     }

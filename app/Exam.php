@@ -20,6 +20,16 @@ class Exam extends Model
     public function question(){
 		return $this->hasMany('App\Question', 'exam_id', 'exam_id');
     }
+    public function event(){
+      return $this->hasOneThrough(
+          'App\Event',
+          'App\Ujian',
+          'id', // Foreign key on users table...
+          'id', // Foreign key on history table...
+          'ujian_id', // Local key on suppliers table...
+          'event_id' // Local key on users table...
+      );
+  }
     public function list_soal(){
         return $this->hasManyThrough(
             'App\User_question',

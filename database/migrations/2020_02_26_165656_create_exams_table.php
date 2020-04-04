@@ -15,7 +15,7 @@ class CreateExamsTable extends Migration
     {
         Schema::create('exams', function (Blueprint $table) {
             $table->uuid('exam_id');
-            $table->uuid('pembelajaran_id');
+            $table->uuid('pembelajaran_id')->nullable();
             $table->integer('mata_pelajaran_id')->unsigned();
             $table->string('nama');
             //$table->date('start');
