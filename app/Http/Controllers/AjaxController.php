@@ -24,6 +24,7 @@ use App\Anggota_rombel;
 use App\User;
 use App\User_exam;
 use App\User_question;
+use App\Event;
 use DataTables;
 use Str;
 use Helper;
@@ -127,7 +128,15 @@ class AjaxController extends Controller
         ->make(true);
     }
     public function get_all_status_peserta($request){
-        $query = User_exam::with(['exam.pembelajaran.rombongan_belajar', 'anggota_rombel.peserta_didik.agama', 'ptk']);
+        $user = auth()->user();
+        $event = Event::where('kode', $user->username)->with('peserta.sekolah')->first();
+        $query = User_exam::whereHas('exam', function($query) use ($event){
+            if($event){
+                $query->whereHas('event', function($query) use ($event){
+                    $query->where('events.id', $event->id);
+                });
+            }
+        })->with(['exam.pembelajaran.rombongan_belajar', 'anggota_rombel.peserta_didik.agama', 'ptk']);
         return DataTables::of($query)
         ->filter(function ($query) use ($request) {
             if($request->sekolah_id){

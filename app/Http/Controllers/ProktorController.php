@@ -45,7 +45,7 @@ class ProktorController extends Controller
         } elseif($query == 'get-status-download'){
             return $this->get_status_download($user);
         } elseif($query == 'hitung-server'){
-            return $this->hitung_server();
+            return $this->hitung_server($user);
         } elseif($query == 'daftar-peserta'){
             return $this->daftar_peserta($user);
         } elseif($query == 'daftar-ptk'){
@@ -73,7 +73,11 @@ class ProktorController extends Controller
         return view('proktor.daftar_ptk', compact('user'));
     }
     public function status_test($user){
-        $all_ujian = Ujian::with(['mata_pelajaran', 'event'])->get();
+        $user = auth()->user();
+        $event = Event::where('kode', $user->username)->with('peserta.sekolah')->first();
+        $all_ujian = Ujian::whereHas('event', function($query) use ($event){
+            $query->where('id', $event->id);
+        })->with(['mata_pelajaran', 'event'])->get();
         $rombongan_belajar = Rombongan_belajar::get();
         $aktif_token = Setting::where('key', 'token')->first();
         $token = ($aktif_token) ? '<strong>'.$aktif_token->value.' - Updated : '.date('H:i:s', strtotime($aktif_token->updated_at)). ' - Interval '.$this->menit.' Menit</strong>' : '';
@@ -109,7 +113,7 @@ class ProktorController extends Controller
     public function reset_login_peserta($user){
         return view('proktor.reset_login', compact('user'));
     }
-    public function hitung_server(){
+    public function hitung_server($user){
         /*
         $output = [
             'query' => $query,
@@ -118,7 +122,7 @@ class ProktorController extends Controller
         ];
         return response()->json($output);
         */
-        $event = Event::with('peserta.sekolah')->first();
+        $event = Event::where('kode', $user->username)->with('peserta.sekolah')->first();
         $sekolah_id = [];
         if($event){
             foreach($event->peserta as $peserta){
@@ -379,7 +383,9 @@ class ProktorController extends Controller
         return response()->json($output);
     }
     public function hitung_data($query, $jumlah){
-        $event = Event::with('peserta.sekolah')->first();
+        //$event = Event::with('peserta.sekolah')->first();
+        $user = auth()->user();
+        $event = Event::where('kode', $user->username)->with('peserta.sekolah')->first();
         $sekolah_id = [];
         if($event){
             foreach($event->peserta as $peserta){
@@ -426,7 +432,8 @@ class ProktorController extends Controller
         return response()->json($output);
     }
     public function status_download($user){
-        $event = Event::with('peserta.sekolah')->first();
+        //$event = Event::with('peserta.sekolah')->first();
+        $event = Event::where('kode', $user->username)->with('peserta.sekolah')->first();
         $sekolah_id = [];
         if($event){
             foreach($event->peserta as $peserta){
@@ -462,7 +469,7 @@ class ProktorController extends Controller
         return view('proktor.status_download', compact('user', 'sinkron'));
     }
     public function get_status_download($user){
-        $event = Event::with('peserta.sekolah')->first();
+        $event = Event::where('kode', $user->username)->with('peserta.sekolah')->first();
         $sekolah_id = [];
         if($event){
             foreach($event->peserta as $peserta){
@@ -521,7 +528,9 @@ class ProktorController extends Controller
         return view('proktor.get_status_download', compact('sinkron'));
     }
     public function proses_download(Request $request){
-        $event = Event::first();
+        //$event = Event::first();
+        $user = auth()->user();
+        $event = Event::where('kode', $user->username)->with('peserta.sekolah')->first();
         $host_server = config('global.url_server').'proses-download-event';
         $arguments = [
             'data' => $request->route('query'),

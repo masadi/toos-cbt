@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
 use App\Sekolah;
 use App\Ptk;
 use App\Peserta_didik;
@@ -16,6 +17,10 @@ class HomeController extends Controller
 {
     public function index(Request $request){
         $user = auth()->user();
+        /*$data = DB::table('sessions')->where('user_id', $user->user_id)->get();
+        if($data){
+            DB::table('sessions')->where('user_id', $user->user_id)->delete();
+        }*/
         if($user->hasRole('sekolah')){
             $sekolah = Sekolah::where(function($query) use ($user){
                 if($user){

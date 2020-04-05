@@ -115,7 +115,7 @@ class UjianController extends Controller
             ]
         );
         if($request->sisa_waktu){
-            $user_exam->sisa_waktu = $request->sisa_waktu;
+            $user_exam->sisa_waktu = date('H:i:s', strtotime($request->sisa_waktu));
             $user_exam->save();
         }
         if($request->has('answer_id')){
@@ -218,7 +218,7 @@ class UjianController extends Controller
             ]
         );
         if($request->sisa_waktu){
-            $user_exam->sisa_waktu = $request->sisa_waktu;
+            $user_exam->sisa_waktu = date('H:i:s', strtotime($request->sisa_waktu));
             $user_exam->status_ujian = 0;
             $user_exam->save();
         }
