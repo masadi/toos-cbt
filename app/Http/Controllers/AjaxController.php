@@ -140,12 +140,17 @@ class AjaxController extends Controller
     public function get_all_status_peserta($request){
         $user = auth()->user();
         $event = Event::where('kode', $user->username)->with('peserta.sekolah')->first();
-        $query = User_exam::whereHas('exam', function($query) use ($event){
+        $query = User_exam::whereHas('exam', function($query) use ($event, $user){
             if($event){
                 $query->whereHas('event', function($query) use ($event){
                     $query->where('events.id', $event->id);
                 });
+            } else {
+                $query->whereHas('pembelajaran', function($query) use ($user){
+                    $query->where('sekolah_id', $user->sekolah_id);
+                });
             }
+            $query->whereAktif(1);
         })->with(['exam.pembelajaran.rombongan_belajar', 'anggota_rombel.peserta_didik.agama', 'ptk']);
         return DataTables::of($query)
         ->filter(function ($query) use ($request) {
