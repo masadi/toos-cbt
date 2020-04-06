@@ -61,7 +61,7 @@
               <h2>Login Sekolah</h2>
               <br>
               <p><img src="{{asset('assets/img/logo.png')}}" alt="" title="" style="width:300px;"></p>
-              {!!($server) ? '<h4>'.$server->sekolah->nama.'</h4>' : ''!!}
+              <?php /* {!!($server) ? '<h4>'.$server->sekolah->nama.'</h4>' : ''!!} */ ?>
             </div>
           </div>
         </div>

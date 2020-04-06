@@ -14,6 +14,9 @@ Route::get('/login-sekolah',      'LoginController@sekolah');
 Route::get('/login-proktor',      'LoginController@proktor');
 Route::post('/sekolah-login',      'LoginController@login_sekolah')->name('sekolah_login');
 Route::post('/proktor-login',      'LoginController@login_proktor')->name('proktor_login');
+Route::get('/add-domain', function () {
+	Artisan::call('domain:add us.smkplus.sch.id');
+});
 Auth::routes();
 Route::group(['middleware' => ['auth', 'get.menu']], function () {
     //Route::get('/', function () {           return view('dashboard.homepage'); });
@@ -77,7 +80,7 @@ Route::group(['middleware' => ['auth', 'get.menu']], function () {
         Route::get('/{query}','ProktorController@index')->name('proktor.index');
         Route::get('/reset-login/{user_id}','ProktorController@reset_login')->name('proktor.reset_login');
         Route::get('/force-selesai/{id}','ProktorController@force_selesai')->name('proktor.force_selesai');
-        Route::get('/proses-download/{query}','ProktorController@proses_download')->name('proktor.download');
+        Route::get('/proses-download/{query}/{offset}','ProktorController@proses_download')->name('proktor.download');
         Route::post('/simpan/{query}','ProktorController@simpan')->name('proktor.simpan');
         Route::get('/hitung-data/{query}/{jumlah}','ProktorController@hitung_data')->name('proktor.hitung_data');
         Route::get('/referensi/detil/{query}/{id}','ReferensiController@detil')->name('referensi.detil');

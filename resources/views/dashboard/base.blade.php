@@ -67,6 +67,11 @@ $user = auth()->user();
     </script>
     @yield('javascript')
     @role('proktor')
+    <?php
+    $segmen = Request::segments();
+    if($segmen){
+        if($segmen[0] != 'status-download'){
+    ?>
     <script>
         let detik = 1 * 60000;
         let intervalId = setInterval(callback, detik);
@@ -82,6 +87,10 @@ $user = auth()->user();
             $('#token_ujian').html(data);
         });
     </script>
+    <?php
+        }
+    }
+    ?>
     @endrole
 </body>
 

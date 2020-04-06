@@ -113,19 +113,19 @@ $(function() {
             }
         });
     }
-    function proses_download(query){
-        $.get("{{url('/proses-download')}}/"+query, function(data, status){
+    function proses_download(query, offset){
+        $.get("{{url('/proses-download')}}/"+query+'/'+offset, function(data, status){
             if(status === 'success'){
-                var chekArray = Array.isArray(data.response.data);
+                /*var chekArray = Array.isArray(data.response.data);
                 var panjang;
                 if(chekArray){
                     panjang = data.response.data.length;
                 } else {
                     panjang = data.response.data;
-                }
+                }*/
                 if(data.response){
                     var myVar = setInterval(function(){
-                        myTimer(query, panjang);
+                        myTimer(query, data.response.count);
                     }, 500);
                     $.ajax({
                         url: '{{route('proktor.simpan', ['query' => 'sync'])}}',
@@ -137,7 +137,7 @@ $(function() {
                                 myVar = 0;
                                 if(data.response.next){
                                     console.log('next disini');
-                                    proses_download(data.response.next);
+                                    proses_download(data.response.next, data.response.offset);
                                 } else {
                                     Swal.fire({
                                         icon: 'success',
@@ -175,7 +175,7 @@ $(function() {
         if($(this).hasClass('btn-danger')){
             var btn = $(this);
             $(btn).buttonLoader('start', $(this).data('text'));
-            proses_download('ptk');
+            proses_download('ptk', 0);
         } else {
             Swal.fire({
                 icon: 'error',

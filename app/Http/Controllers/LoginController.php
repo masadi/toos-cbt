@@ -113,6 +113,82 @@ class LoginController extends Controller
                     return redirect()->back()->withInput($request->except(['_token']))->with('error', 'ID Server/Password salah');
                 }
             } else {
+                /*$server = Server::where('status', 1)->first();
+                if($server){
+                    if($server->id_server == $request->id_server){
+                        $email = $request->id_server;
+                        $password = $request->password;
+                        $remember_me = 1;
+                        $login_type = filter_var($email, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
+                        if (Auth::attempt([$login_type => $email, 'password' => $password], $remember_me)) {
+                            //Auth successful here
+                            return redirect('/');//->intended($this->redirectPath());
+                        } else {
+                            return redirect()->back()->withInput($request->except(['_token']))->with('error', 'ID Server/Password salah');
+                        }
+                    } else {
+                        return redirect()->back()->withInput($request->except(['_token']))->with('error', 'ID Server tidak terdaftar di server ini');
+                    }
+                } else {
+                }*/
+                $find_server = Server::where('id_server', $request->id_server)->first();
+                if($find_server){
+                    if (Auth::attempt(['username' => $request->id_server, 'password' => $request->password], 1)) {
+                        //Auth successful here
+                        return redirect('/');
+                    } else {
+                        return redirect()->back()->withInput($request->except(['_token']))->with('error', 'ID Server/Password salah');
+                    }
+                } else {
+                    $timezone =  $this->getTimezone($request);
+                    $arguments = [
+                        'id_server' => $request->id_server,
+                        'password' => $request->password,
+                        'sn' => $request->sn
+                    ];
+                    $host_server = config('global.url_server').'validasi-server';
+                    $client = new Client(); //GuzzleHttp\Client
+                    $curl = $client->post($host_server, [	
+                        'form_params' => $arguments
+                    ]);
+                    if($curl->getStatusCode() == 200){
+                        $response = json_decode($curl->getBody());
+                        if($response->success){
+                            $sekolah = Sekolah::find($response->data->sekolah_id);
+                            if($sekolah){
+                                $server = (array) $response->data;
+                                unset($server['created_at'], $server['updated_at']);
+                                Server::firstOrCreate($server);
+                                $user = User::where('name', $response->data->id_server)->first();
+                                if(!$user){
+                                    $user = User::firstOrCreate([ 
+                                        'name' => $response->data->id_server,
+                                        'sekolah_id' => $response->data->sekolah_id,
+                                        'username' => $response->data->id_server,
+                                        'email' => strtolower(str_replace(' ', '', $response->data->id_server)).'@cyberelectra.co.id',
+                                        'timezone' => $timezone,
+                                        'password' => app('hash')->make($request->password),
+                                        'menuroles' => 'proktor'
+                                    ]);
+                                    $user->assignRole('proktor');
+                                    $email = $user->email;
+                                    $password = $request->password;
+                                    $remember_me = 1;
+                                    $login_type = filter_var($email, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
+                                    if (Auth::attempt([$login_type => $email, 'password' => $password], $remember_me)) {
+                                        return redirect()->intended($this->redirectPath());
+                                    }
+                                }
+                            } else {
+                                return redirect()->back()->withInput($request->except(['_token']))->with('error', 'ID Server tidak terdaftar di Sekolah Anda');
+                            }
+                        } else {
+                            return redirect()->back()->withInput($request->except(['_token']))->with('error', $response->message);
+                        }
+                    } else {
+                        return redirect()->back()->withInput($request->except(['_token']))->with('error', 'Server tidak merespon');
+                    }
+                }
                 return redirect()->back()->withInput($request->except(['_token']))->with('error', 'ID Server tidak terdaftar di server ini');
             }
         }

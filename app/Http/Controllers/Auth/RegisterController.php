@@ -94,7 +94,12 @@ class RegisterController extends Controller
                 'npsn' => $request->npsn,
                 'lisensi' => $request->lisensi
             ];
-            $host_server = config('global.url_server').'validasi-kode';
+            $id_server = explode('-', $request->npsn);
+            if(count($id_server) > 1){
+                $host_server = config('global.url_server').'validasi-kode';
+            } else {
+                $host_server = config('global.url_server').'validasi';
+            }
             $client = new Client(); //GuzzleHttp\Client
             $curl = $client->post($host_server, [	
                 'form_params' => $arguments
@@ -102,28 +107,68 @@ class RegisterController extends Controller
             if($curl->getStatusCode() == 200){
                 $response = json_decode($curl->getBody());
                 if($response->success){
-                    $data = $response->data;
-                    $peserta = $data->peserta;
-                    unset($data->peserta);
-                    $insert_event = (array) $data;
-                    $event = Event::updateOrCreate($insert_event);
-                    foreach($peserta as $pes){
-                        $sekolah = (array) $pes->sekolah;
-                        Sekolah::updateOrCreate($sekolah);
-                        unset($pes->sekolah);
-                        $insert_peserta = (array) $pes;
-                        $create_peserta = Peserta_event::updateOrCreate($insert_peserta);
+                    if(count($id_server) > 1){
+                        $data = $response->data;
+                        $peserta = $data->peserta;
+                        unset($data->peserta);
+                        $insert_event = (array) $data;
+                        $event = Event::updateOrCreate($insert_event);
+                        foreach($peserta as $pes){
+                            $sekolah = (array) $pes->sekolah;
+                            Sekolah::updateOrCreate($sekolah);
+                            unset($pes->sekolah);
+                            $insert_peserta = (array) $pes;
+                            $create_peserta = Peserta_event::updateOrCreate($insert_peserta);
+                        }
+                        $user = User::firstOrCreate([ 
+                            'name' => $data->nama,
+                            'username' => $data->kode,
+                            'email' => strtolower(str_replace(' ', '', $data->kode)).'@cyberelectra.co.id',
+                            //'email_verified_at' => now(),
+                            'password' => app('hash')->make($data->password),
+                            'timezone' => $timezone,
+                            'menuroles' => 'proktor'
+                        ]);
+                        $user->assignRole('proktor');
+                    } else {
+                        $sekolah = $response->data;
+                        $data_server = $sekolah->server;
+                        unset($sekolah->server);
+                        $array = (array) $sekolah;
+                        Sekolah::create($array);
+                        $user = User::create([ 
+                            'name' => $sekolah->nama,
+                            'sekolah_id' => $sekolah->sekolah_id,
+                            'username' => $sekolah->npsn,
+                            'email' => $sekolah->email,
+                            'email_verified_at' => now(),
+                            'password' => app('hash')->make($sekolah->npsn),
+                            'timezone' => $timezone,
+                            'menuroles' => 'sekolah'
+                        ]);
+                        $user->assignRole('sekolah');
+                        if($data_server){
+                            foreach($data_server as $server){
+                                unset($server->created_at, $server->updated_at);
+                                $array_server = (array) $server;
+                                Server::firstOrCreate($array_server);
+                                $user = User::where('name', $server->id_server)->first();
+                                if(!$user){
+                                    $user = User::firstOrCreate([ 
+                                        'name' => $server->id_server,
+                                        'sekolah_id' => $server->sekolah_id,
+                                        'username' => $server->id_server,
+                                        'email' => strtolower(str_replace(' ', '', $server->id_server)).'@cyberelectra.co.id',
+                                        //'email_verified_at' => now(),
+                                        'password' => app('hash')->make($server->password),
+                                        'timezone' => $timezone,
+                                        'menuroles' => 'proktor'
+                                    ]);
+                                    $user->assignRole('proktor');
+                                }
+                            }
+                        }
                     }
-                    $user = User::firstOrCreate([ 
-                        'name' => $data->nama,
-                        'username' => $data->kode,
-                        'email' => strtolower(str_replace(' ', '', $data->kode)).'@cyberelectra.co.id',
-                        //'email_verified_at' => now(),
-                        'password' => app('hash')->make($data->password),
-                        'timezone' => $timezone,
-                        'menuroles' => 'proktor'
-                    ]);
-                    $user->assignRole('proktor');
                     //return redirect('/login-proktor')->with('success', 'Aktivasi Lisensi berhasil. Silahkan login menggunakan username <b>'.$user->username.'</b> dan password <b>'.$sekolah->npsn.'</b>');
                     return redirect('/login-proktor')->with('success', 'Aktivasi Lisensi berhasil. Silahkan login menggunakan <b>ID Server</b> dan <b>password</b> yang sudah dibuat di server');
                 } else {

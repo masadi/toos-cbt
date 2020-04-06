@@ -83,7 +83,17 @@ class AjaxController extends Controller
         }
     }
     public function ujian_aktif($request){
-        $query = Exam::whereAktif(1)->with(['pembelajaran.rombongan_belajar']);
+        $user = auth()->user();
+        $event = Event::where('kode', $user->username)->with('peserta.sekolah')->first();
+        if($event){
+            $query = Exam::whereAktif(1)->whereHas('event', function($query) use ($event){
+                $query->where('event_id', $event->id);
+            })->with(['pembelajaran.rombongan_belajar']);
+        } else {
+            $query = Exam::whereAktif(1)->whereHas('pembelajaran', function($query) use ($user){
+                $query->where('sekolah_id', $user->sekolah_id);
+            })->with(['pembelajaran.rombongan_belajar']);
+        }
         return DataTables::of($query)
         ->addIndexColumn()
         ->addColumn('status', function ($item) {
@@ -487,11 +497,28 @@ class AjaxController extends Controller
         ->make(true);
     }
     public function get_all_ptk($request){
-        $query = Ptk::with('user')->where(function($query) use ($request){
-            if($request->sekolah_id){
-                $query->where('sekolah_id', $request->sekolah_id);
+        $user = auth()->user();
+        $event = Event::where('kode', $user->username)->with('peserta.sekolah')->first();
+        $sekolah_id = [];
+        if($event){
+            foreach($event->peserta as $peserta){
+                $sekolah_id[] = $peserta->sekolah->sekolah_id;
             }
-        })->orderBy('sekolah_id')->orderBy('nama');
+            $query = Ptk::with('user')->where(function($query) use ($sekolah_id){
+                $query->whereIn('sekolah_id', $sekolah_id);
+            })->orderBy('sekolah_id')->orderBy('nama');
+        } else {
+            $server = Server::where('id_server', $user->username)->first();
+            if($server){
+                $query = Ptk::with('user')->where(function($query) use ($server){
+                     $query->where('sekolah_id', $server->sekolah_id);
+                })->orderBy('sekolah_id')->orderBy('nama');
+            } else {
+                $query = Ptk::with('user')->where(function($query) use ($server){
+                    $query->whereNull('sekolah_id');
+               })->orderBy('sekolah_id')->orderBy('nama');
+            }
+        }
         return DataTables::of($query)
         ->addIndexColumn()
         ->addColumn('sekolah', function ($item) {

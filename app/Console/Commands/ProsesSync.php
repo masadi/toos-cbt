@@ -66,20 +66,26 @@ class ProsesSync extends Command
         if($query == 'download'){
             $data =  (object) $data;
             if($data->query == 'ptk'){
+                $data->response = (array) $data->response;
                 if(isset($data->response['data']) && count($data->response['data'])){
                     //DB::table('ptk')->delete();
                     foreach($data->response['data'] as $item){
                         $item = json_decode(json_encode($item));
-                        $this->insert_sekolah($item->sekolah);
+                        if(isset($item->sekolah)){
+                            $this->insert_sekolah($item->sekolah);
+                        }
                         $this->insert_ptk($item);
                     }
                 }
             } elseif($data->query == 'rombongan_belajar'){
+                $data->response = (array) $data->response;
                 if($data->response['data'] && is_array($data->response['data'])){
                     //DB::table('rombongan_belajar')->delete();
                     foreach($data->response['data'] as $item){
                         $item = json_decode(json_encode($item));
-                        $this->insert_sekolah($item->sekolah);
+                        if(isset($item->sekolah)){
+                            $this->insert_sekolah($item->sekolah);
+                        }
                         $this->insert_ptk($item->ptk);
                         $this->insert_jurusan_sp($item->jurusan_sp);
                         $this->insert_rombel($item);
@@ -90,6 +96,7 @@ class ProsesSync extends Command
                     }
                 }
             } elseif($data->query == 'pembelajaran'){
+                $data->response = (array) $data->response;
                 if(isset($data->response['data']) && count($data->response['data'])){
                     //DB::table('pembelajaran')->delete();
                     foreach($data->response['data'] as $item){
@@ -100,6 +107,7 @@ class ProsesSync extends Command
                     }
                 }
             } elseif($data->query == 'ujian'){
+                $data->response = (array) $data->response;
                 if(isset($data->response['data']) && count($data->response['data'])){
                     //DB::table('ujians')->delete();
                     foreach($data->response['data'] as $item){
@@ -109,6 +117,7 @@ class ProsesSync extends Command
                     }
                 }
             } elseif($data->query == 'anggota_rombel'){
+                $data->response = (array) $data->response;
                 if(isset($data->response['data']) && count($data->response['data'])){
                     //DB::table('anggota_rombel')->delete();
                     foreach($data->response['data'] as $item){
@@ -118,6 +127,7 @@ class ProsesSync extends Command
                     }
                 }
             } elseif($data->query == 'exams'){
+                $data->response = (array) $data->response;
                 if(isset($data->response['data']) && count($data->response['data'])){
                     //DB::table('exams')->delete();
                     foreach($data->response['data'] as $item){
@@ -126,6 +136,7 @@ class ProsesSync extends Command
                     }
                 }
             } elseif($data->query == 'questions'){
+                $data->response = (array) $data->response;
                 if(isset($data->response['data']) && count($data->response['data'])){
                     //DB::table('questions')->delete();
                     foreach($data->response['data'] as $item){
@@ -134,6 +145,7 @@ class ProsesSync extends Command
                     }
                 }
             } elseif($data->query == 'answers'){
+                $data->response = (array) $data->response;
                 if(isset($data->response['data']) && count($data->response['data'])){
                     //DB::table('answers')->delete();
                     foreach($data->response['data'] as $item){
@@ -327,7 +339,7 @@ class ProsesSync extends Command
                 'kurikulum_id' => $item->kurikulum_id,
                 'nama' => $item->nama,
                 'ptk_id' => $item->ptk_id,
-                //'server_id' => $item->server_id
+                'server_id' => (isset($item->server_id)) ? $item->server_id : NULL,
             ]
         );
     }

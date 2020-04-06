@@ -31,7 +31,7 @@ class UjianController extends Controller
                 $query->where('user_exams.ptk_id', $user->ptk_id);
             }
         }])->find($ujian_id);
-        $jumlah_jawaban_siswa = $ujian->user_question_count;
+        $jumlah_jawaban_siswa = (isset($ujian->user_question_count)) ? $ujian->user_question_count : 0;
         $waktu_ujian = time() + ($ujian->durasi * 60);
         if($ujian->question->count()){
             $collection = collect($ujian->question);
