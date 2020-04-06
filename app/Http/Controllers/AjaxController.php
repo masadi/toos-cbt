@@ -108,7 +108,18 @@ class AjaxController extends Controller
         ->make(true);
     }
     public function reset_login($request){
-        $query = User::with(['ptk.user_exam.exam', 'peserta_didik.anggota_rombel.rombongan_belajar', 'peserta_didik.anggota_rombel.user_exam.exam'])->role(['peserta_didik', 'ptk'])->where('logout', FALSE);
+        $user = auth()->user();
+        $event = Event::where('kode', $user->username)->with('peserta.sekolah')->first();
+        $query = User::with(['ptk.user_exam.exam', 'peserta_didik.anggota_rombel.rombongan_belajar', 'peserta_didik.anggota_rombel.user_exam.exam'])->role(['peserta_didik', 'ptk'])->where(function($query) use ($user, $event){
+            if($event){
+                $sekolah_id = $event->peserta->pluck('sekolah_id');
+                $query->whereIn('sekolah_id', $sekolah_id->all());
+                //
+            } else {
+                $query->where('sekolah_id', $user->sekolah_id);
+            }
+            $query->where('logout', FALSE);
+        });
         return DataTables::of($query)
         ->addColumn('checkbox', function ($item) {
             $links = '<input type="checkbox" name="user_id[]" value="'.$item->user_id.'">';
