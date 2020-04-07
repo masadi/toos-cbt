@@ -19,6 +19,16 @@ class User_exam extends Model
     public function anggota_rombel(){
 		return $this->hasOne('App\Anggota_rombel', 'anggota_rombel_id', 'anggota_rombel_id');
     }
+    public function peserta_didik(){
+      return $this->hasOneThrough(
+        'App\Peserta_didik',
+        'App\Anggota_rombel',
+        'anggota_rombel_id', // Foreign key on users table...
+        'peserta_didik_id', // Foreign key on history table...
+        'anggota_rombel_id', // Local key on suppliers table...
+        'peserta_didik_id' // Local key on users table...
+      );
+    }
     public function ptk(){
 		return $this->hasOne('App\Ptk', 'ptk_id', 'ptk_id');
     }

@@ -42,6 +42,7 @@
                                         <th>Nama</th>
                                         <th>Mata Ujian</th>
                                         <th>Status Ujian</th>
+                                        <th>Sisa Waktu</th>
                                         <th>Status Upload</th>
                                         <th>Force Selesai</th>
                                     </tr>
@@ -82,14 +83,18 @@
             },
             columns: [
                 { data: 'checkbox', name: 'checkbox', className: 'dt-body-center', orderable: false, searchable: false },
-                { data: 'nama', name: 'filter_nama' },
+                { data: 'nama', name: 'filter_nama.nama' },
                 { data: 'mata_ujian', name: 'exam.nama' },
                 { data: 'status_ujian', name: 'status_ujian', orderable: false, searchable: false },
+                { data: 'sisa_waktu', name: 'sisa_waktu', className: 'dt-body-center' },
                 { data: 'status_upload', name: 'status_upload', orderable: false, searchable: false },
                 { data: 'force_selesai', name: 'status_ujian', className: 'dt-body-center', searchable: false },
             ],
             fnDrawCallback: function(oSettings) {
                 turn_on_icheck();
+            },
+            search: {
+                "regex": true
             },
             fnRowCallback: function( nRow, aData, iDisplayIndex, iDisplayIndexFull ) {
                 if(iDisplayIndex == 0){

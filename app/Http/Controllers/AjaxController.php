@@ -162,7 +162,7 @@ class AjaxController extends Controller
                 });
             }
             $query->whereAktif(1);
-        })->with(['exam.pembelajaran.rombongan_belajar', 'anggota_rombel.peserta_didik.agama', 'ptk']);
+        })->with(['exam.pembelajaran.rombongan_belajar', 'anggota_rombel.peserta_didik.agama', 'ptk', 'peserta_didik']);
         return DataTables::of($query)
         ->filter(function ($query) use ($request) {
             if($request->sekolah_id){
@@ -239,13 +239,20 @@ class AjaxController extends Controller
             }
             return $links;
         })
-        ->addColumn('filter_nama', function ($item) {
+        /*->addColumn('filter_nama', function ($item) {
             if($item->anggota_rombel){
                 $links = $item->anggota_rombel->peserta_didik->nama;
             } else {
                 $links = $item->ptk->nama;
             }
             return $links;
+        })*/
+        ->addColumn('filter_nama', function (User_exam $User_exam) {
+            if($User_exam->ptk){
+                return $User_exam->ptk->nama;
+            } else {
+                return $User_exam->peserta_didik->nama;
+            }
         })
         ->addColumn('mata_ujian', function ($item) {
             return '<input class="exam_id" type="hidden" name="exam_id" value="' . $item->exam_id . '">'.$item->exam->nama;
@@ -259,7 +266,7 @@ class AjaxController extends Controller
             return $links;
         })
         ->addColumn('force_selesai', function ($item) {
-            if ($item->status_ujian && $item->updated_at->diffInMinutes(Carbon::now()) >= (60 * 12)) {
+            if ($item->status_ujian && $item->updated_at->diffInMinutes(Carbon::now()) >= (60 * 2)) {
                 $links = '<a href="'.route('proktor.force_selesai', ['id' => $item->user_exam_id]).'" class="btn btn-sm btn-block btn-danger force_selesai">Force Selesai</a>';
             } else {
                 $links = '-';
