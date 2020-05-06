@@ -10,9 +10,6 @@ $ cd  toos-cbt
 # install app's dependencies
 $ composer install
 
-# install app's dependencies
-$ npm install
-
 ```
 
 ## PostgreSQL
@@ -59,7 +56,7 @@ To this:
 ### Set APP_URL
 
 > If your project url looks like: example.com/sub-folder 
-Then go to `my-project/.env`
+Then go to `toos-cbt/.env`
 And modify this line:
 
 * APP_URL = ;
@@ -79,11 +76,6 @@ $ php artisan key:generate
 # run database migration and seed
 $ php artisan migrate:refresh --seed
 
-# generate mixing
-$ npm run dev
-
-# and repeat generate mixing
-$ npm run dev
 ```
 
 ## Usage
