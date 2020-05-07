@@ -9,10 +9,10 @@
 <div class="card">
     <div class="card-header">
         Status Peserta
-        <div class="card-header-actions">
-            <button class="btn btn-primary start_upload has-spinner" data-text="UPLOADING....">UPLOAD
+        <div class="card-tools">
+            <button class="btn btn-sm btn-primary start_upload has-spinner" data-text="UPLOADING....">UPLOAD
                 HASIL</button>
-            <button class="btn btn-danger reset_hasil has-spinner" data-text="RESETTING....">RESET
+            <button class="btn btn-sm btn-danger reset_hasil has-spinner" data-text="RESETTING....">RESET
                 UJIAN</button>
         </div>
     </div>
