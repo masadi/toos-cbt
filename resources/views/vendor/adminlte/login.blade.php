@@ -38,7 +38,7 @@
         <div class="card-body login-card-body">
             <p class="login-box-msg">{{ __('adminlte::adminlte.login_message') }}</p>
             @if (Session::get('success'))
-            <div class="alert alert-danger alert-block alert-dismissable"><i class="fa fa-ban"></i>
+            <div class="alert alert-success alert-block alert-dismissable"><i class="fa fa-ban"></i>
                 <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
                 <strong>Berhasil</strong><br />
                 {!! Session::get('success') !!}
