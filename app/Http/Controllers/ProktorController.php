@@ -527,6 +527,7 @@ class ProktorController extends Controller
         }
     }
     public function rilis_token($request){
+        $user = auth()->user();
         $opsi = $request->opsi;
         Setting::updateOrCreate(
             [
