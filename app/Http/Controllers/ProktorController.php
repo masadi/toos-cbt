@@ -146,7 +146,12 @@ class ProktorController extends Controller
             })->first();
             $rombongan_belajar = Rombongan_belajar::where('sekolah_id', $user->sekolah_id)->get();
         }
-        $token = ($aktif_token) ? '<strong>'.$aktif_token->token.' - Updated : '.date('H:i:s', strtotime($aktif_token->updated_at)). ' - Interval '.$this->menit.' Menit</strong>' : '';
+        $opsi_token = config('global.opsi_token');
+        if($opsi_token == 'statis'){
+            $token = ($aktif_token) ? '<strong>'.$aktif_token->token : '';
+        } else {
+            $token = ($aktif_token) ? '<strong>'.$aktif_token->token.' - Updated : '.date('H:i:s', strtotime($aktif_token->updated_at)). ' - Interval '.$this->menit.' Menit</strong>' : '';
+        }
         return view('proktor.status_test', compact('user', 'rombongan_belajar', 'token', 'all_ujian', 'event'));
     }
     public function status_test_old($user){
