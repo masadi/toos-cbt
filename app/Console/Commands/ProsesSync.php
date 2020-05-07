@@ -28,6 +28,7 @@ use Faker\Factory as Faker;
 use Str;
 use Helper;
 use Illuminate\Support\Facades\DB;
+use Delight\Random\Random;
 class ProsesSync extends Command
 {
     /**
@@ -282,7 +283,7 @@ class ProsesSync extends Command
     }
     private function insert_ptk($item, $timezone){
         if($item){
-            $password = Str::random(8);
+            $password = Random::alphanumericLowercaseString(8);
             Ptk::updateOrCreate(
                 [
                     'ptk_id' => $item->ptk_id
@@ -394,7 +395,7 @@ class ProsesSync extends Command
         );
     }
     private function insert_peserta_didik($item, $timezone){
-        $password = Str::random(8);
+        $password = Random::alphanumericLowercaseString(8);
         Peserta_didik::updateOrCreate(
             [
                 'peserta_didik_id' => $item->peserta_didik_id,
