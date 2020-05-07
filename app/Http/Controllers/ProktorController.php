@@ -499,7 +499,7 @@ class ProktorController extends Controller
                 if($job){
                     $payload = json_decode($job->payload,true);
                     $available_at = $job->available_at;
-                    $now = strtotime(date('H:i:s', strtotime(Carbon::now())));
+                    $now = strtotime(date('H:i:s', strtotime(Carbon::now($user->timezone))));
                     if($available_at <= $now){
                         Artisan::call('queue:work --once');
                         //$aktif_token = Setting::where('key', 'token')->first();
@@ -546,7 +546,7 @@ class ProktorController extends Controller
             $aktif_token = Setting::where('key', 'token')->first();
             if($aktif_token){
                 if($opsi == 'dinamis'){
-                    if ($aktif_token->updated_at->diffInMinutes(Carbon::now()) >= $this->menit) {
+                    if ($aktif_token->updated_at->diffInMinutes(Carbon::now($user->timezone)) >= $this->menit) {
                         $aktif_token->value = $token;
                         //$exam->save();
                         TokenJob::dispatch()->delay(now()->addMinutes($this->menit));
@@ -564,7 +564,7 @@ class ProktorController extends Controller
                         'value' => $token
                     ]
                 );
-                TokenJob::dispatch()->delay(now()->addMinutes($this->menit));
+                TokenJob::dispatch()->delay(now($user->timezone)->addMinutes($this->menit));
                 if($opsi == 'dinamis'){
                     $generatedToken = '<strong>'.$new_token->value.' - Updated : '.date('H:i:s', strtotime($new_token->updated_at)). ' - Interval '.$this->menit.' Menit</strong>';
                 } else {
