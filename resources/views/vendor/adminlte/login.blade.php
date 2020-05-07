@@ -44,6 +44,13 @@
                 {!! Session::get('success') !!}
             </div>
             @endif
+            @if (Session::get('error'))
+            <div class="alert alert-danger alert-block alert-dismissable"><i class="fa fa-ban"></i>
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                <strong>Gagal</strong><br />
+                {!! Session::get('error') !!}
+            </div>
+            @endif
             <form action="{{ $login_url }}" method="post">
                 {{ csrf_field() }}
                 <div class="input-group mb-3">

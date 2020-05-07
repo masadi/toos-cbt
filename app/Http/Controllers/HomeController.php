@@ -17,6 +17,10 @@ class HomeController extends Controller
 {
     public function index(Request $request){
         $user = auth()->user();
+        $user->logout = FALSE;
+        $user->save();
+        return view('home');
+        dd($user);
         /*$data = DB::table('sessions')->where('user_id', $user->user_id)->get();
         if($data){
             DB::table('sessions')->where('user_id', $user->user_id)->delete();

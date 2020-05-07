@@ -15,12 +15,14 @@ use Illuminate\Support\Facades\Route;
 
 Auth::routes();
 Route::group(['middleware' => ['auth', 'get.route']], function () {
-    Route::get('/', function () {
+    /*Route::get('/', function () {
         return view('home');
     });
     Route::get('/home', function() {
         return view('home');
-    })->name('home');
+    })->name('home');*/
+    Route::get('/','HomeController@index')->name('index');
+    Route::get('/home','HomeController@index')->name('home');
     Route::get('/logout', 'HomeController@logout');
     Route::group(['middleware' => ['role:proktor']], function () {
         Route::get('/{query}','ProktorController@index')->name('proktor.index');

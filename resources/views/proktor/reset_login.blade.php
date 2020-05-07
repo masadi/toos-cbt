@@ -9,7 +9,7 @@
 <div class="card">
     <div class="card-header">
         <h3 class="float-left">Reset Login Peserta</h3>
-        <div class="card-header-actions">
+        <div class="card-tools">
             <button class="btn btn-danger reset_all has-spinner" data-text="RESETING....">RESET ALL</button>
         </div>
     </div>
