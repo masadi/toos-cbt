@@ -5,6 +5,7 @@ namespace App\Providers;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Schema;
 use App\Setting;
+use Carbon\Carbon;
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -35,5 +36,7 @@ class AppServiceProvider extends ServiceProvider
                 ->toArray()
             ]);
         }
+        setlocale(LC_TIME, 'id_ID.utf8');
+        Carbon::setLocale(LC_TIME, 'id_ID.utf8');
     }
 }

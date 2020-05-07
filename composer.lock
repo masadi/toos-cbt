@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "e3272c7f47f5cde4cbcea6111d26b9e5",
+    "content-hash": "85c668297a79839a976d9a63fa813b20",
     "packages": [
         {
             "name": "almasaeed2010/adminlte",
@@ -142,6 +142,104 @@
                 "math"
             ],
             "time": "2020-04-15T15:59:35+00:00"
+        },
+        {
+            "name": "delight-im/alphabets",
+            "version": "v1.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/delight-im/PHP-Alphabets.git",
+                "reference": "54bbe2672875264e583414446b102a1f84bd5b9e"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/delight-im/PHP-Alphabets/zipball/54bbe2672875264e583414446b102a1f84bd5b9e",
+                "reference": "54bbe2672875264e583414446b102a1f84bd5b9e",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.6.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Delight\\Alphabets\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "Sets of digits or characters that may be used for base conversions, encoding and decoding tasks, and input validation",
+            "homepage": "https://github.com/delight-im/PHP-Alphabets",
+            "keywords": [
+                "alpha",
+                "alphabet",
+                "alphabets",
+                "alphanumeric",
+                "ascii",
+                "base32",
+                "base58",
+                "base64",
+                "base64url",
+                "base85",
+                "binary",
+                "decimal",
+                "decode",
+                "decoding",
+                "encode",
+                "encoding",
+                "hex",
+                "hexadecimal",
+                "octal"
+            ],
+            "time": "2019-11-17T23:48:59+00:00"
+        },
+        {
+            "name": "delight-im/random",
+            "version": "v1.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/delight-im/PHP-Random.git",
+                "reference": "133aed6cc760065c8dbfc4ae0e8bdacfbb6ce273"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/delight-im/PHP-Random/zipball/133aed6cc760065c8dbfc4ae0e8bdacfbb6ce273",
+                "reference": "133aed6cc760065c8dbfc4ae0e8bdacfbb6ce273",
+                "shasum": ""
+            },
+            "require": {
+                "delight-im/alphabets": "^1.0",
+                "php": ">=7.0.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Delight\\Random\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "The most convenient way to securely generate anything random in PHP",
+            "homepage": "https://github.com/delight-im/PHP-Random",
+            "keywords": [
+                "PRNG",
+                "cryptography",
+                "csprng",
+                "generator",
+                "integers",
+                "numbers",
+                "pseudo-random",
+                "pseudorandom",
+                "random",
+                "random-numbers",
+                "random-strings",
+                "strings"
+            ],
+            "time": "2019-11-19T23:07:00+00:00"
         },
         {
             "name": "dnoegel/php-xdg-base-dir",
@@ -1945,6 +2043,100 @@
                 "serialize"
             ],
             "time": "2019-11-29T22:36:02+00:00"
+        },
+        {
+            "name": "pcrov/jsonreader",
+            "version": "1.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/pcrov/JsonReader.git",
+                "reference": "83ff905fbea18c74bd438c6aa85cb3500763bfdb"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/pcrov/JsonReader/zipball/83ff905fbea18c74bd438c6aa85cb3500763bfdb",
+                "reference": "83ff905fbea18c74bd438c6aa85cb3500763bfdb",
+                "shasum": ""
+            },
+            "require": {
+                "ext-ctype": "*",
+                "ext-intl": "*",
+                "pcrov/unicode": "^0.1",
+                "php": "^7.0",
+                "psr/http-message": "^1"
+            },
+            "require-dev": {
+                "nst/jsontestsuite": "^1",
+                "phpunit/phpunit": "^6.5"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "pcrov\\JsonReader\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Paul Crovella",
+                    "role": "developer"
+                }
+            ],
+            "description": "JSON Pull Parser",
+            "homepage": "https://github.com/pcrov/jsonreader",
+            "keywords": [
+                "json",
+                "parser",
+                "pull",
+                "streaming"
+            ],
+            "time": "2019-01-13T22:25:20+00:00"
+        },
+        {
+            "name": "pcrov/unicode",
+            "version": "0.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/pcrov/Unicode.git",
+                "reference": "d2d9d433294ea3b41fd17ff29b4b47fe6f71d83e"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/pcrov/Unicode/zipball/d2d9d433294ea3b41fd17ff29b4b47fe6f71d83e",
+                "reference": "d2d9d433294ea3b41fd17ff29b4b47fe6f71d83e",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^7.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^6.0.8"
+            },
+            "type": "library",
+            "autoload": {
+                "files": [
+                    "src/functions.php"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Paul Crovella"
+                }
+            ],
+            "description": "Miscellaneous Unicode utility functions",
+            "homepage": "https://github.com/pcrov/unicode",
+            "keywords": [
+                "unicode",
+                "utf-8"
+            ],
+            "time": "2018-03-01T09:26:35+00:00"
         },
         {
             "name": "phpoffice/phpspreadsheet",

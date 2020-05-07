@@ -20,7 +20,7 @@
         {{-- Navbar collapsible menu --}}
         <div class="collapse navbar-collapse order-3" id="navbarCollapse">
             {{-- Navbar left links --}}
-            <ul class="nav navbar-nav">
+            <ul class="nav navbar-nav {{ config('adminlte.classes_navbar', 'mx-auto') }}">
                 {{-- Configured left links --}}
                 @each('adminlte::partials.menuitems.menu-item-top-nav-left', $adminlte->menu(), 'item')
 

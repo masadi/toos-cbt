@@ -109,7 +109,8 @@ return [
     'classes_sidebar_nav' => '',
     'classes_topnav' => 'navbar-white navbar-light',
     'classes_topnav_nav' => 'navbar-expand-md',
-    'classes_topnav_container' => 'container',
+    'classes_topnav_container' => 'container-fluid',
+    'classes_navbar' => '',
 
     /*
     |--------------------------------------------------------------------------
@@ -147,7 +148,7 @@ return [
 
     'right_sidebar' => false,
     'right_sidebar_icon' => 'fas fa-cogs',
-    'right_sidebar_theme' => 'dark',
+    'right_sidebar_theme' => 'light',
     'right_sidebar_slide' => true,
     'right_sidebar_push' => true,
     'right_sidebar_scrollbar_theme' => 'os-theme-light',
@@ -208,60 +209,6 @@ return [
     */
 
     'menu' => [
-        [
-            'text' => 'sekolah',
-            'search' => false,
-            'topnav' => true,
-        ],
-        [
-            'text' => 'Dashboard',
-            'url'  => 'home',
-            'permision'  => 'admin',
-            'icon' => 'fas fa-fw fa-tachometer-alt',
-            'active' => ['/']
-        ],
-        [
-            'text' => 'Status Download',
-            'url'  => 'status-download',
-            'permision'  => 'admin',
-            'icon' => 'fas fa-fw fa-cloud-download-alt',
-        ],
-        [
-            'text' => 'Daftar Peserta Didik',
-            'url'  => 'daftar-peserta',
-            'permision'  => 'admin',
-            'icon' => 'fas fa-fw fa-users',
-        ],
-        [
-            'text' => 'Daftar PTK',
-            'url'  => 'daftar-ptk',
-            'permision'  => 'admin',
-            'icon' => 'fas fa-fw fa-user-plus',
-        ],
-        [
-            'text' => 'Status Tes',
-            'url'  => 'status-test',
-            'permision'  => 'admin',
-            'icon' => 'fas fa-fw fa-pencil-ruler',
-        ],
-        [
-            'text' => 'Status Peserta',
-            'url'  => 'status-peserta',
-            'permision'  => 'admin',
-            'icon' => 'fas fa-fw fa-user-clock',
-        ],
-        [
-            'text' => 'Reset Login',
-            'url'  => 'reset-login',
-            'permision'  => 'admin',
-            'icon' => 'fas fa-fw fa-sync-alt',
-        ],
-        [
-            'text' => 'Logout',
-            'url'  => 'logout',
-            'icon' => 'fas fa-fw fa-sign-out-alt',
-            'icon_color' => 'red',
-        ],
     ],
 
     /*
@@ -282,7 +229,8 @@ return [
         JeroenNoten\LaravelAdminLte\Menu\Filters\ActiveFilter::class,
         JeroenNoten\LaravelAdminLte\Menu\Filters\SubmenuFilter::class,
         JeroenNoten\LaravelAdminLte\Menu\Filters\ClassesFilter::class,
-        JeroenNoten\LaravelAdminLte\Menu\Filters\GateFilter::class,
+        //JeroenNoten\LaravelAdminLte\Menu\Filters\GateFilter::class,
+        App\MyMenuFilter::class,
         JeroenNoten\LaravelAdminLte\Menu\Filters\LangFilter::class,
         JeroenNoten\LaravelAdminLte\Menu\Filters\DataFilter::class,
     ],
@@ -363,9 +311,14 @@ return [
             'active' => false,
             'files' => [
                 [
+                    'type' => 'css',
+                    'asset' => true,
+                    'location' => '/vendor/sweetalert2/sweetalert2.min.css',
+                ],
+                [
                     'type' => 'js',
                     'asset' => true,
-                    'location' => '//cdn.jsdelivr.net/npm/sweetalert2@8',
+                    'location' => '/vendor/sweetalert2/sweetalert2.min.js',
                 ],
             ],
         ],
@@ -382,6 +335,52 @@ return [
                     'type' => 'js',
                     'asset' => true,
                     'location' => '/vendor/moment/moment-timezone-with-data-2012-2022.min.js',
+                ],
+            ],
+        ],
+        [
+            'name' => 'Ujian',
+            'active' => false,
+            'files' => [
+                [
+                    'type' => 'css',
+                    'asset' => true,
+                    'location' => '/vendor/ujian/bootstrap4-toggle/css/bootstrap4-toggle.min.css',
+                ],
+                [
+                    'type' => 'css',
+                    'asset' => true,
+                    'location' => '/vendor/ujian/jquery.toggleinput.css',
+                ],
+                [
+                    'type' => 'css',
+                    'asset' => true,
+                    'location' => '/vendor/ujian/ujian.css',
+                ],
+                [
+                    'type' => 'js',
+                    'asset' => true,
+                    'location' => '/vendor/ujian/bootstrap4-toggle/js/bootstrap4-toggle.min.js',
+                ],
+                [
+                    'type' => 'js',
+                    'asset' => true,
+                    'location' => '/vendor/ujian/ujian.js',
+                ],
+                [
+                    'type' => 'js',
+                    'asset' => true,
+                    'location' => '/vendor/ujian/player.js',
+                ],
+                [
+                    'type' => 'js',
+                    'asset' => true,
+                    'location' => '/vendor/ujian/jquery.idle.min.js',
+                ],
+                [
+                    'type' => 'js',
+                    'asset' => true,
+                    'location' => '/vendor/ujian/jquery.countdown.min.js',
                 ],
             ],
         ],

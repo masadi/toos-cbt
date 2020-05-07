@@ -14,17 +14,19 @@ use App\User_question;
 use App\Event;
 use Illuminate\Support\Facades\Storage;
 use pcrov\JsonReader\JsonReader;
+use Carbon\Carbon;
 class UjianController extends Controller
 {
     public function index(Request $request){
-        $reader = new JsonReader();
         $user = auth()->user();
+        $now = Carbon::now($user->timezone)->toDateTimeString();
+        $reader = new JsonReader();
         $ujian_id = $request->ujian_id;
         $json_file_ujian = 'ujian-'.$user->user_id.'-'.$ujian_id.'.json';
         if(Storage::disk('public')->exists($json_file_ujian)){
             //$ujian = Storage::disk('public')->get($json_file_ujian);
             //$ujian = json_decode($ujian);
-            $reader->open('public/'.$json_file_ujian);
+            $reader->open('storage/'.$json_file_ujian);
             $ujian = '';
             if($reader->read()) {
                 $collection = collect($reader->value());
@@ -59,7 +61,7 @@ class UjianController extends Controller
                 $all = collect($all);
                 $first = $all->first();
                 $all = $all->all();*/
-                $reader->open('public/'.$json_file_all);
+                $reader->open('storage/'.$json_file_all);
                 if ($reader->read()) {
                     $collection = collect($reader->value());
                     $all = $collection->toJson();
@@ -109,17 +111,17 @@ class UjianController extends Controller
             $jawaban_siswa = NULL;
             if(Storage::disk('public')->exists($json_file_jawaban)){
                 //$jawaban_siswa = Storage::disk('public')->get($json_file_jawaban);
-                $reader->open('public/'.$json_file_jawaban);
+                $reader->open('storage/'.$json_file_jawaban);
                 if ($reader->read()) {
                     $jawaban_siswa = collect($reader->value());
                     $jawaban_siswa = $jawaban_siswa->toJson();
                 }
                 $jawaban_siswa = json_decode($jawaban_siswa);
             }
-            return view('ujian.proses_ujian', compact('ujian', 'questions', 'user_exam', 'user', 'jumlah_jawaban_siswa', 'jawaban_siswa', 'all', 'page', 'keys', 'current_id', 'reader'));
+            return view('ujian.proses_ujian', compact('ujian', 'questions', 'user_exam', 'user', 'jumlah_jawaban_siswa', 'jawaban_siswa', 'all', 'page', 'keys', 'current_id', 'reader', 'now'));
         } else {
             $ujian = '';
-            return view('ujian.soal_tidak_lengkap', compact('ujian'));
+            return view('ujian.soal_tidak_lengkap', compact('ujian', 'now'));
         }
     }
     private function jumlah_jawaban_siswa($user_id){
@@ -138,7 +140,7 @@ class UjianController extends Controller
         $json_file_utama = 'all-'.$user->user_id.'-'.$request->ujian_id.'.json';
         //$all = Storage::disk('public')->get($json_file_utama);
         //$all = json_decode($all);
-        $reader->open('public/'.$json_file_utama);
+        $reader->open('storage/'.$json_file_utama);
         if ($reader->read()) {
             $all = collect($reader->value());
             //$all = $all->toJson();

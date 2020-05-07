@@ -8,7 +8,7 @@
 @section('content')
 <div class="card">
     <div class="card-header">
-        <div class="card-header-actions">
+        <div class="card-tools">
             <a class="rilis_token btn btn-sm btn-danger" href="{{route('proktor.index', ['query' => 'rilis-token'])}}">RILIS TOKEN</a>
         </div>
         Mata Ujian Aktif 
