@@ -36,7 +36,7 @@
     </div>
     <div class="card">
         <div class="card-body login-card-body">
-            <p class="login-box-msg">{{ __('adminlte::adminlte.login_message') }}</p>
+            <p class="login-box-msg">Silahkan Masuk dengan ID Server / NISN</p>
             @if (Session::get('success'))
             <div class="alert alert-success alert-block alert-dismissable"><i class="fa fa-ban"></i>
                 <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
