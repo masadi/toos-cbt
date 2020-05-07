@@ -221,7 +221,59 @@ $(function() {
     $("#form").submit(function(e){
         e.preventDefault();
         console.log($(this));
-        $.ajax({
+        let token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        Swal.fire({
+            title: 'Aktifkan Ujian',
+            text: "Proses ini akan menggenerate file json ujian peserta didik!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            cancelButtonText: 'Batal',
+            confirmButtonText: 'Lanjutkan',
+            showLoaderOnConfirm: true,
+            preConfirm: (login) => {
+                return fetch($(this).attr('action'), {
+                    method: 'POST',
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Accept": "application/json, text-plain, */*",
+                        "X-Requested-With": "XMLHttpRequest",
+                        "X-CSRF-TOKEN": token
+                    },
+                    body:JSON.stringify({
+                        rombongan_belajar_id: $('#rombongan_belajar_id').val(),
+                        pembelajaran_id: $('#pembelajaran_id').val(),
+                        exam_id: $('#exam_id').val()
+                    })
+                }).then(response => {
+                    console.log(response)
+                    if (!response.ok) {
+                        throw new Error(response.statusText)
+                    }
+                    return response.json()
+                /*}).then((data) => {
+                    if (data.errors) {
+                        throw new Error('<br>'+data.errors.join('<br>'))
+                    }*/
+                }).catch(error => {
+                    Swal.showValidationMessage(
+                    `Request failed: ${error}`
+                    )
+                })
+            },
+            allowOutsideClick: () => !Swal.isLoading()
+        }).then((result) => {
+            console.log(result.value);
+            if (result.value) {
+                Swal.fire(
+                    result.value.title,
+                    result.value.status,
+                    result.value.icon
+                )
+            }
+        })
+        /*$.ajax({
                 url: $(this).attr('action'),
                 type: 'post',
                 data: $(this).serialize(),
@@ -237,6 +289,7 @@ $(function() {
                     });
                 }
             });
+        */
     })
     $('#rombongan_belajar_id').change(function(){
         var ini = $(this).val();

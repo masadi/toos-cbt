@@ -344,27 +344,60 @@ class ProktorController extends Controller
             $data = User_exam::with(['user','user_question'])->withCount('user_question')->find($request->user_exam_id);
             Artisan::call('proses:sync', ['query' => 'upload', 'data' => $data]);
         } elseif($query == 'ujian'){
-            $exam = Exam::find($request->exam_id);
+            $messages = [
+                'rombongan_belajar_id.required' => 'Rombongan Belajar tidak boleh kosong',
+                'pembelajaran_id.required' => 'Mata Pelajaran tidak boleh kosong',
+                'exam_id.required' => 'Mata Ujian tidak boleh kosong',
+            ];
+            $validator = Validator::make(request()->all(), [
+                'rombongan_belajar_id' => 'required',
+                'pembelajaran_id' => 'required',
+                'exam_id' => 'required',
+             ],
+            $messages
+            )->validate();
+            $exam = Exam::with('pembelajaran')->find($request->exam_id);
+            $all_user = User::whereHas('peserta_didik', function($query) use ($exam){
+                $query->whereHas('anggota_rombel', function($query) use ($exam){
+                    $query->where('rombongan_belajar_id', $exam->pembelajaran->rombongan_belajar_id);
+                });
+            })->get();
+            if($all_user->count()){
+                foreach($all_user as $user){
+                    $json_file_ujian = 'ujian-'.$user->user_id.'-'.$exam->exam_id.'.json';
+                    if(!Storage::disk('public')->exists($json_file_ujian)){
+                        $get_ujian = Exam::withCount(['question', 'user_question' => function($query) use ($user){
+                            $query->where('user_questions.user_id', $user->user_id);
+                        }])->with(['question' => function($query){
+                            $query->with('answers');
+                            $query->orderBy('soal_ke');
+                        }, 'user_exam' => function($query) use ($user){
+                            $query->where('user_exams.user_id', $user->user_id);
+                        }])->find($exam->exam_id);
+                        Storage::disk('public')->put($json_file_ujian, $get_ujian->toJson());
+                    }
+                }
+            }
             if($exam){
                 $exam->aktif = 1;
                 $exam->token = config('global.token');
                 if($exam->save()){
                     $output = [
                         'icon' => 'success',
-                        'success' => TRUE,
+                        'title' => 'Berhasil',
                         'status' => 'Sukses menambah Mata Ujian Aktif',
                     ];
                 } else {
                     $output = [
                         'icon' => 'error',
-                        'success' => FALSE,
+                        'title' => 'Gagal',
                         'status' => 'Gagal menambah Mata Ujian Aktif',
                     ];
                 }
             } else {
                 $output = [
                     'icon' => 'error',
-                    'success' => FALSE,
+                    'title' => 'Gagal',
                     'status' => 'Mata Ujian tidak boleh kosong',
                 ];
             }
