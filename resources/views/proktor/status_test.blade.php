@@ -119,35 +119,31 @@
 <script>
 $(function() {
     $('.select2').select2({theme:'bootstrap4'});
-    var table = null;
-    function init() {
-        table = $('#datatable').DataTable({
-            processing: true,
-            serverSide: true,
-            ajax: '{{route('ajax.get_all_data', ['query' => 'ujian-aktif'])}}',
-            @if($all_ujian)
-            columns: [
-                { data: 'DT_RowIndex', name: 'DT_RowIndex', className: 'dt-body-center', orderable: false, searchable: false },
-                { data: 'nama', name: 'nama' },
-                { data: 'status', name: 'status', className: 'dt-body-center', orderable: false, searchable: false },
-                { data: 'toggle', name: 'toggle', className: 'dt-body-center', orderable: false, searchable: false },
-            ],
-            @else
-            columns: [
-                { data: 'DT_RowIndex', name: 'DT_RowIndex', className: 'dt-body-center', orderable: false, searchable: false },
-                { data: 'nama', name: 'nama' },
-                { data: 'pembelajaran.rombongan_belajar.nama', name: 'pembelajaran.rombongan_belajar.nama' },
-                { data: 'pembelajaran.nama_mata_pelajaran', name: 'pembelajaran.nama_mata_pelajaran' },
-                { data: 'status', name: 'status', className: 'dt-body-center', orderable: false, searchable: false },
-                { data: 'toggle', name: 'toggle', className: 'dt-body-center', orderable: false, searchable: false },
-            ],
-            @endif
-            fnDrawCallback: function(oSettings) {
-                turn_on_icheck();
-            }
-        });//.attr('style','border-collapse: collapse !important');
-    }
-    init();
+    var oTable = $('#datatable').DataTable({
+        processing: true,
+        serverSide: true,
+        ajax: '{{route('ajax.get_all_data', ['query' => 'ujian-aktif'])}}',
+        @if($all_ujian)
+        columns: [
+            { data: 'DT_RowIndex', name: 'DT_RowIndex', className: 'dt-body-center', orderable: false, searchable: false },
+            { data: 'nama', name: 'nama' },
+            { data: 'status', name: 'status', className: 'dt-body-center', orderable: false, searchable: false },
+            { data: 'toggle', name: 'toggle', className: 'dt-body-center', orderable: false, searchable: false },
+        ],
+        @else
+        columns: [
+            { data: 'DT_RowIndex', name: 'DT_RowIndex', className: 'dt-body-center', orderable: false, searchable: false },
+            { data: 'nama', name: 'nama' },
+            { data: 'pembelajaran.rombongan_belajar.nama', name: 'pembelajaran.rombongan_belajar.nama' },
+            { data: 'pembelajaran.nama_mata_pelajaran', name: 'pembelajaran.nama_mata_pelajaran' },
+            { data: 'status', name: 'status', className: 'dt-body-center', orderable: false, searchable: false },
+            { data: 'toggle', name: 'toggle', className: 'dt-body-center', orderable: false, searchable: false },
+        ],
+        @endif
+        fnDrawCallback: function(oSettings) {
+            turn_on_icheck();
+        }
+    });//.attr('style','border-collapse: collapse !important');
     function turn_on_icheck() {
         $('a.toggle-reset').bind('click', function(e) {
             e.preventDefault();
@@ -175,7 +171,7 @@ $(function() {
                                 $('#rombongan_belajar_id').val('');
                                 $("#pembelajaran_id").html('<option value="">== Pilih Mata Pelajaran ==</option>');
                                 $("#exam_id").html('<option value="">== Pilih Mata Ujian ==</option>');
-                                table.ajax.reload( null, false );
+                                oTable.ajax.reload( null, false );
                             });
                         });
                     }
@@ -207,7 +203,7 @@ $(function() {
                                 $('#rombongan_belajar_id').val('');
                                 $("#pembelajaran_id").html('<option value="">== Pilih Mata Pelajaran ==</option>');
                                 $("#exam_id").html('<option value="">== Pilih Mata Ujian ==</option>');
-                                table.ajax.reload( null, false );
+                                oTable.ajax.reload( null, false );
                             });
                         });
                     } else {
@@ -266,11 +262,13 @@ $(function() {
         }).then((result) => {
             console.log(result.value);
             if (result.value) {
-                Swal.fire(
-                    result.value.title,
-                    result.value.status,
-                    result.value.icon
-                )
+                Swal.fire({
+                    title: result.value.title,
+                    status: result.value.status,
+                    icon: result.value.icon
+                }).then(function(e){
+                    oTable.ajax.reload( null, false );
+                })
             }
         })
         /*$.ajax({

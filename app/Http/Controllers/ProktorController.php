@@ -482,6 +482,7 @@ class ProktorController extends Controller
         $count = Exam::whereAktif(1)->count();
         if(!$count){
             Setting::where('key', 'token')->delete();
+            Setting::where('key', 'opsi_token')->delete();
         }
         $output['count'] = $count;
         return response()->json($output);
