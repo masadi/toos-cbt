@@ -331,9 +331,49 @@ class UjianController extends Controller
                 [
                     'user_exam_id' => $user_exam->user_exam_id,
                     'answer_id' => ($isUuid) ? $request->answer_id : NULL,
+                    'user_id' => $user->user_id,
                 ]
             );
         }
+        $all_files = Storage::disk('public')->files();
+        $all_files = collect($all_files)->filter(function ($item) use ($user) {
+            // replace stristr with your choice of matching function
+            return false !== stristr($item, 'user_question-'.$user->user_id);
+        });
+        if($all_files->count()){
+            foreach($all_files as $file){
+                $user_question = Storage::disk('public')->get($file);
+                $user_question = json_decode($user_question);
+                try {
+                    User_question::updateOrCreate(
+                        [
+                            'question_id' => $user_question->question_id,
+                            'anggota_rombel_id' => $user_question->anggota_rombel_id,
+                            'ptk_id' => $user_question->ptk_id,
+                        ],
+                        [
+                            'user_exam_id' => $user_question->user_exam_id,
+                            'answer_id' => $user_question->answer_id,
+                            'ragu' => $user_question->ragu,
+                            'nomor_urut' => $user_question->nomor_urut,
+                            'user_id' => $user_question->user_id,
+                        ]
+                    );
+                } catch (\Exception $e) {
+                    //
+                }
+                Storage::disk('public')->delete($file);
+            }
+        }
+        $json_file_all = 'all-'.$user->user_id.'-'.$ujian_id.'.json';
+        $json_file_ujian = 'ujian-'.$user->user_id.'-'.$ujian_id.'.json';
+        Storage::disk('public')->delete([$json_file_all, $json_file_ujian]);
+        $response = [
+            'title' => 'Berhasil',
+            'text' => 'Nilai berhasil disimpan',
+            'icon' => 'success',
+        ];
+        return response()->json($response);
     }
     public function detil_hasil(Request $request){
         $user = auth()->user();

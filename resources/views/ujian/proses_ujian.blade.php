@@ -143,6 +143,7 @@ $sisa_waktu_ujian = date('Y/m/d H:i:s', strtotime($waktu_ujian));
                     window.location.replace("{{url('/')}}");
                 });
             });*/
+            selesaiUjian(1, ujian_id, question_id, answer_id, sisa_waktu);
         });
         $('body').on('click', 'a.navigasi', function(e) {
             e.preventDefault();
@@ -161,7 +162,97 @@ $sisa_waktu_ujian = date('Y/m/d H:i:s', strtotime($waktu_ujian));
             //$('.loader').show();
             getExams(url);
             //window.history.pushState("", "", url);
-        });    
+        });
+        function selesaiUjian(type, ujian_id, question_id, answer_id, sisa_waktu){
+            if(type == 1){
+                Swal.fire({
+                    text: "Waktu Habis!",
+                    icon: 'error',
+                    confirmButtonColor: '#3085d6',
+                    confirmButtonText: 'Simpan Ujian',
+                    showLoaderOnConfirm: true,
+                    preConfirm: (login) => {
+                        return fetch('{{route('ujian.selesai')}}?ujian_id='+ujian_id+'&question_id='+question_id+'&answer_id='+answer_id+'&sisa_waktu='+sisa_waktu)
+                        .then(response => {
+                            if (!response.ok) {
+                            throw new Error(response.statusText)
+                            }
+                            return response.json()
+                        })
+                        .catch(error => {
+                            Swal.showValidationMessage(
+                            `Request failed: ${error}`
+                            )
+                        })
+                    },
+                    allowOutsideClick: () => !Swal.isLoading()
+                }).then((result) => {
+                    if (result.value) {
+                        Swal.fire({
+                            icon: result.value.icon,
+                            title: result.value.title,
+                            text: result.value.text,
+                            allowOutsideClick: false,
+                        }).then(function(e) {
+                            window.location.replace("{{url('/')}}");
+                        });
+                    }
+                })
+            } else {
+                Swal.fire({
+                    title: 'Selesai Ujian',
+                    input: 'checkbox',
+                    inputValue: 0,
+                    inputPlaceholder: 'Saya yakin akan menyelesaikan proses ujian',
+                    confirmButtonText: 'Selesai<i class="fa fa-arrow-right"></i>',
+                    allowOutsideClick: false,
+                    showCancelButton: true,
+                    inputValidator: (result) => {
+                        return !result && 'Anda harus menceklist terlebih dahulu!'
+                    },
+                    preConfirm: (login) => {
+                        return fetch('{{route('ujian.selesai')}}?ujian_id='+ujian_id+'&question_id='+question_id+'&answer_id='+answer_id+'&sisa_waktu='+sisa_waktu)
+                        .then(response => {
+                            if (!response.ok) {
+                            throw new Error(response.statusText)
+                            }
+                            return response.json()
+                        })
+                        .catch(error => {
+                            Swal.showValidationMessage(
+                            `Request failed: ${error}`
+                            )
+                        })
+                    },
+                    allowOutsideClick: () => !Swal.isLoading()
+                }).then(function(result) {
+                    if (result.dismiss === Swal.DismissReason.cancel) {
+                        return false;
+                    }
+                    Swal.fire({
+                        icon: result.value.icon,
+                        title: result.value.title,
+                        text: result.value.text,
+                        allowOutsideClick: false,
+                    }).then(function(e) {
+                        window.location.replace("{{url('/')}}");
+                    });
+                    /*$.ajax({
+                        url : '{{route('ujian.selesai')}}',
+                        data: {ujian_id:ujian_id, question_id:question_id, answer_id:answer_id, sisa_waktu:sisa_waktu}
+                    }).done(function (data) {
+                        Swal.fire({
+                            icon: 'success',
+                            text: 'Ujian Selesai',
+                            allowOutsideClick: false,
+                        }).then(function(e) {
+                            window.location.replace("{{url('/')}}");
+                        });
+                    });*/
+                    
+                });
+            }
+        }
         function getExams(url) {
             var nomor_soal = getUrlParameter(url);
             if(nomor_soal == 0){
@@ -187,7 +278,6 @@ $sisa_waktu_ujian = date('Y/m/d H:i:s', strtotime($waktu_ujian));
                 url : url,
                 data: {ujian_id:ujian_id, question_id:question_id, answer_id:answer_id, sisa_waktu:sisa_waktu,ragu:ragu, keys:kunci}
             }).done(function (data) {
-                console.log(data);
                 $('#load').html(data);
                 $('.loader').hide();
                 checkPilihan();
@@ -214,34 +304,7 @@ $sisa_waktu_ujian = date('Y/m/d H:i:s', strtotime($waktu_ujian));
                 answer_id = 'kosong';
             }
             var sisa_waktu = $('#sisa_waktu').val();
-            Swal.fire({
-                title: 'Selesai Ujian',
-                input: 'checkbox',
-                inputValue: 0,
-                inputPlaceholder: 'Saya yakin akan menyelesaikan proses ujian',
-                confirmButtonText: 'Selesai<i class="fa fa-arrow-right"></i>',
-                allowOutsideClick: false,
-                showCancelButton: true,
-                inputValidator: (result) => {
-                    return !result && 'Anda harus menceklist terlebih dahulu!'
-                }
-            }).then(function(result) {
-                if (result.dismiss === Swal.DismissReason.cancel) {
-                    return false;
-                }
-                $.ajax({
-                    url : '{{route('ujian.selesai')}}',
-                    data: {ujian_id:ujian_id, question_id:question_id, answer_id:answer_id, sisa_waktu:sisa_waktu}
-                }).done(function (data) {
-                    Swal.fire({
-                        icon: 'success',
-                        text: 'Ujian Selesai',
-                        allowOutsideClick: false,
-                    }).then(function(e) {
-                        window.location.replace("{{url('/')}}");
-                    });
-                });
-            });
+            selesaiUjian(2, ujian_id, question_id, answer_id, sisa_waktu);
         });
     });    
 </script>

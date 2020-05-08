@@ -65,6 +65,30 @@
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             }
         });
+        @role('proktor')
+    <?php
+    $segmen = Request::segments();
+    if($segmen){
+        if($segmen[0] != 'status-download'){
+    ?>
+        let detik = 1 * 60000;
+        let intervalId = setInterval(callback, detik);
+        function callback () {
+            console.log(new Date());
+            $.get("{{route('proktor.index', ['query' => 'check-job'])}}", function( data ) {
+                $('#token_ujian').html(data);
+            });
+            clearInterval(intervalId);
+            intervalId = setInterval(callback, detik);
+        }
+        $.get("{{route('proktor.index', ['query' => 'check-job'])}}", function( data ) {
+            $('#token_ujian').html(data);
+        });
+    <?php
+        }
+    }
+    ?>
+    @endrole
     </script>
     @stack('js')
     @yield('js')
