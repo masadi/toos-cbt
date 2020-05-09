@@ -15,7 +15,7 @@ class CreatePesertaEventsTable extends Migration
     {
         Schema::create('peserta_events', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->bigInteger('event_id');
+            $table->unsignedBigInteger('event_id');
             $table->uuid('sekolah_id');
             $table->timestamps();
             $table->foreign('sekolah_id')->references('sekolah_id')->on('sekolah')->onUpdate('CASCADE')->onDelete('CASCADE');
