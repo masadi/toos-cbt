@@ -16,7 +16,7 @@ class CreateAnswersTable extends Migration
         Schema::create('answers', function (Blueprint $table) {
             $table->uuid('answer_id');
             $table->uuid('question_id');
-            $table->text('answer')->nullable();
+            $table->longText('answer')->nullable();
             $table->decimal('jawaban_ke',1,0);
             $table->decimal('correct',1,0);
             $table->timestamps();

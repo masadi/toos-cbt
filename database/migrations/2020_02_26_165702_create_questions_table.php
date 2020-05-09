@@ -17,7 +17,7 @@ class CreateQuestionsTable extends Migration
             $table->uuid('question_id');
             $table->uuid('exam_id');
             $table->integer('soal_ke')->unsigned();
-            $table->text('question');
+            $table->longText('question');
             $table->uuid('bank_soal_id')->nullable();
             $table->timestamps();
             $table->foreign('exam_id')->references('exam_id')->on('exams')->onUpdate('CASCADE')->onDelete('CASCADE');
