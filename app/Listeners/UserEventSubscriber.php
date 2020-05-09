@@ -13,11 +13,11 @@ class UserEventSubscriber
     public function handleUserLogin($event) {
         if($event->user->hasRole('peserta_didik')){
             if(!$event->user->logout){
-                dd($event);
                 Auth::logout();
                 return redirect()->route('login')->with('error', 'Pengguna sedang aktif. Silahkan hubungi Proktor');
             }
         }
+        dd($event);
     }
 
     /**
