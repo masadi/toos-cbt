@@ -14,7 +14,7 @@ class AddFieldUjianIdToExamsTable extends Migration
     public function up()
     {
         Schema::table('exams', function (Blueprint $table) {
-            $table->integer('ujian_id')->unsigned()->nullable();
+            $table->unsignedBigInteger('ujian_id')->nullable();
             $table->foreign('ujian_id')->references('id')->on('ujians')->onUpdate('CASCADE')->onDelete('CASCADE');
         });
     }
