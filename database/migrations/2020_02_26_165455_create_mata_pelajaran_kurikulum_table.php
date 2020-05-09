@@ -13,7 +13,7 @@ class CreateMataPelajaranKurikulumTable extends Migration
      */
     public function up()
     {
-        Schema::create('mata_pelajaran_kurikulum', function (Blueprint $table) {
+        Schema::create('mapel_kur', function (Blueprint $table) {
             $table->smallInteger('kurikulum_id');
 			$table->integer('mata_pelajaran_id');
 			$table->decimal('tingkat_pendidikan_id', 2, 0);
@@ -40,10 +40,10 @@ class CreateMataPelajaranKurikulumTable extends Migration
      */
     public function down()
     {
-        Schema::table('mata_pelajaran_kurikulum', function (Blueprint $table) {
+        Schema::table('mapel_kur', function (Blueprint $table) {
             $table->dropForeign(['kurikulum_id']);
 			$table->dropForeign(['mata_pelajaran_id']);
         });
-        Schema::dropIfExists('mata_pelajaran_kurikulum');
+        Schema::dropIfExists('mapel_kur');
     }
 }

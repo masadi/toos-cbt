@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Mata_pelajaran_kurikulum extends Model
 {
     public $incrementing = false;
-	protected $table = 'mata_pelajaran_kurikulum';
+	protected $table = 'mapel_kur';
 	protected $primaryKey = ['kurikulum_id', 'mata_pelajaran_id', 'tingkat_pendidikan_id'];
 	protected $guarded = [];
 	public function mata_pelajaran(){
