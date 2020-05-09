@@ -9,22 +9,24 @@
 <div class="card">
     <div class="card-header">
         <div class="card-tools">
-            <a class="rilis_token btn btn-sm btn-danger" href="{{route('proktor.index', ['query' => 'rilis-token'])}}">RILIS TOKEN</a>
+            <a class="rilis_token btn btn-sm btn-danger"
+                href="{{route('proktor.index', ['query' => 'rilis-token'])}}">RILIS TOKEN</a>
         </div>
-        Mata Ujian Aktif 
-        <br><div id="token_ujian">{!!($token) ? $token : ''!!} </div>
+        Mata Ujian Aktif
+        <br>
+        <div id="token_ujian">{!!($token) ? $token : ''!!} </div>
     </div>
-    <form id="form" class="form-inline" action="{{route('proktor.simpan', ['query' => 'ujian'])}}"
-        method="post">
-        @csrf
-        <div class="card-body">
+    <div class="card-body">
+        <form id="form" class="form-inline" action="{{route('proktor.simpan', ['query' => 'ujian'])}}" method="post">
+            @csrf
             <div class="row">
                 @if($all_ujian)
                 <div class="col-md-5">
                     <select name="ujian_id" id="ujian_id" class="form-control select2" style="width:100%;">
                         <option value="">== Pilih Mata Pelajaran ==</option>
                         @foreach ($all_ujian as $ujian)
-                            <option value="{{$ujian->id}}">{{$ujian->event->nama}} - {{$ujian->mata_pelajaran->nama}}</option>
+                        <option value="{{$ujian->id}}">{{$ujian->event->nama}} - {{$ujian->mata_pelajaran->nama}}
+                        </option>
                         @endforeach
                     </select>
                 </div>
@@ -36,17 +38,19 @@
                 <div class="col-md-2">
                     <button class="btn btn-success btn-block" type="submit"> Tambah</button>
                 </div>
-                @else 
+                @else
                 <div class="col-md-3">
-                    <select name="rombongan_belajar_id" id="rombongan_belajar_id" class="form-control select2" style="width:100%;">
+                    <select name="rombongan_belajar_id" id="rombongan_belajar_id" class="form-control select2"
+                        style="width:100%;">
                         <option value="">== Pilih Rombongan Belajar ==</option>
                         @foreach ($rombongan_belajar as $rombel)
-                            <option value="{{$rombel->rombongan_belajar_id}}">{{$rombel->nama}}</option>
+                        <option value="{{$rombel->rombongan_belajar_id}}">{{$rombel->nama}}</option>
                         @endforeach
                     </select>
                 </div>
                 <div class="col-md-3">
-                    <select name="pembelajaran_id" id="pembelajaran_id" class="form-control select2" style="width:100%;">
+                    <select name="pembelajaran_id" id="pembelajaran_id" class="form-control select2"
+                        style="width:100%;">
                         <option value="">== Pilih Mata Pelajaran ==</option>
                     </select>
                 </div>
@@ -77,9 +81,7 @@
                 @endforeach
             </div>
             @endif
-        </div>
-    </form>
-    <div class="card-footer">
+        </form>
         @if($all_ujian)
         <table id="datatable" class="table table-outline mb-0">
             <thead class="thead-light">
@@ -93,7 +95,7 @@
             <tbody>
             </tbody>
         </table>
-        @else 
+        @else
         <table id="datatable" class="table table-outline mb-0">
             <thead class="thead-light">
                 <tr>
@@ -117,7 +119,7 @@
 @section('plugins.Datatables', true)
 @section('js')
 <script>
-$(function() {
+    $(function() {
     $('.select2').select2({theme:'bootstrap4'});
     var oTable = $('#datatable').DataTable({
         processing: true,
