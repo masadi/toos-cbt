@@ -17,7 +17,6 @@ class UserEventSubscriber
                 return redirect()->route('login')->with('error', 'Pengguna sedang aktif. Silahkan hubungi Proktor');
             }
         }
-        dd($event);
     }
 
     /**
