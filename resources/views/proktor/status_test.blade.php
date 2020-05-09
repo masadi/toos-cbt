@@ -143,7 +143,7 @@ $(function() {
         fnDrawCallback: function(oSettings) {
             turn_on_icheck();
         }
-    });//.attr('style','border-collapse: collapse !important');
+    });
     function turn_on_icheck() {
         $('a.toggle-reset').bind('click', function(e) {
             e.preventDefault();
@@ -248,10 +248,6 @@ $(function() {
                         throw new Error(response.statusText)
                     }
                     return response.json()
-                /*}).then((data) => {
-                    if (data.errors) {
-                        throw new Error('<br>'+data.errors.join('<br>'))
-                    }*/
                 }).catch(error => {
                     Swal.showValidationMessage(
                     `Request failed: ${error}`
@@ -264,30 +260,13 @@ $(function() {
             if (result.value) {
                 Swal.fire({
                     title: result.value.title,
-                    status: result.value.status,
+                    text: result.value.status,
                     icon: result.value.icon
                 }).then(function(e){
                     oTable.ajax.reload( null, false );
                 })
             }
         })
-        /*$.ajax({
-                url: $(this).attr('action'),
-                type: 'post',
-                data: $(this).serialize(),
-                success: function(response){
-                    Swal.fire({
-                        icon: response.icon,
-                        text: response.status,
-                    }).then(function(e) {
-                        $('#rombongan_belajar_id').val('');
-                        $("#pembelajaran_id").html('<option value="">== Pilih Mata Pelajaran ==</option>');
-                        $("#exam_id").html('<option value="">== Pilih Mata Ujian ==</option>');
-                        table.ajax.reload( null, false );
-                    });
-                }
-            });
-        */
     })
     $('#rombongan_belajar_id').change(function(){
         var ini = $(this).val();
