@@ -20,7 +20,7 @@ class CreateRombonganBelajarTable extends Migration
 			$table->uuid('jurusan_sp_id')->nullable();
             $table->string('semester_id', 5);
 			$table->string('jurusan_id', 25)->nullable();
-			$table->integer('kurikulum_id');
+			$table->smallInteger('kurikulum_id')->unsigned();
 			$table->string('nama');
             $table->uuid('ptk_id')->nullable();
             $table->uuid('server_id')->nullable();
