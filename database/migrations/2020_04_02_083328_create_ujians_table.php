@@ -15,7 +15,7 @@ class CreateUjiansTable extends Migration
     {
         Schema::create('ujians', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->integer('event_id')->unsigned();
+            $table->unsignedBigInteger('event_id');
             $table->integer('mata_pelajaran_id')->unsigned();
             $table->date('tanggal');
             $table->foreign('event_id')->references('id')->on('events')->onUpdate('CASCADE')->onDelete('CASCADE');
