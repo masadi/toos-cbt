@@ -16,7 +16,7 @@ class CreateRombonganBelajarTable extends Migration
         Schema::create('rombongan_belajar', function (Blueprint $table) {
             $table->uuid('rombongan_belajar_id');
 			$table->uuid('sekolah_id');
-			$table->integer('tingkat');
+            $table->decimal('tingkat', 2, 0);
 			$table->uuid('jurusan_sp_id')->nullable();
             $table->string('semester_id', 5);
 			$table->string('jurusan_id', 25)->nullable();
