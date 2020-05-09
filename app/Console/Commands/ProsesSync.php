@@ -368,7 +368,7 @@ class ProsesSync extends Command
             ],
             [
                 'sekolah_id' => $item->sekolah_id,
-                'tingkat_pendidikan_id' => $item->tingkat_pendidikan_id,
+                'tingkat' => $item->tingkat_pendidikan_id,
                 'jurusan_sp_id' => $item->jurusan_sp_id,
                 'semester_id' => $item->semester_id,
                 'jurusan_id' => $item->jurusan_id,
