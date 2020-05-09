@@ -110,7 +110,7 @@ class ProktorController extends Controller
     }
     public function daftar_peserta($user){
         $event = Event::where('kode', $user->username)->first();
-        $all_tingkat = Rombongan_belajar::select('tingkat_pendidikan_id')->groupBy('tingkat_pendidikan_id')->orderBy('tingkat_pendidikan_id')->where(function($query) use ($event, $user){
+        $all_tingkat = Rombongan_belajar::select('tingkat')->groupBy('tingkat')->orderBy('tingkat')->where(function($query) use ($event, $user){
             if($event){
                 $query->whereIn('sekolah_id', function($query) use ($event){
                     $query->select('sekolah_id')->from('peserta_events')->where('event_id', $event->id);
