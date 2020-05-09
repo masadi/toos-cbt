@@ -26,9 +26,9 @@ class JurusanSeeder extends Seeder
 				'jenjang_pendidikan_id'	=> $obj->jenjang_pendidikan_id,
 				'jurusan_induk'			=> $obj->jurusan_induk,
 				'level_bidang_id'		=> $obj->level_bidang_id,
-				'created_at' 			=> $obj->created_at,
-				'updated_at' 			=> $obj->updated_at,
-				'deleted_at'			=> $obj->deleted_at,
+				'created_at' 			=> date('Y-m-d H:i:s', strtotime($obj->created_at)),
+				'updated_at' 			=> date('Y-m-d H:i:s', strtotime($obj->updated_at)),
+				'deleted_at'			=> ($obj->deleted_at) ? date('Y-m-d H:i:s', strtotime($obj->deleted_at)) : NULL,
 			]);
     	}
     }
