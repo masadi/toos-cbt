@@ -70,6 +70,7 @@ class LoginController extends Controller
 
         if (Auth::attempt([$login_type => $email, 'password' => $password], $remember_me)) {
             //Auth successful here
+            return redirect('/home');
             $user = Auth::user();
             if(!$user->logout){
                 Auth::logout();
@@ -77,7 +78,7 @@ class LoginController extends Controller
                     'login_error' => 'Maaf, username sedang aktif. Silahkan hubungi proktor untuk me-reset login',
                 ]);
             } else {
-                return redirect('/');
+                return redirect('/home');
             }
         }
         return redirect()->back()->withInput()->withErrors([
