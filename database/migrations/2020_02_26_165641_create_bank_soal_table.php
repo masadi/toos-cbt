@@ -16,7 +16,7 @@ class CreateBankSoalTable extends Migration
         Schema::create('bank_soal', function (Blueprint $table) {
             $table->uuid('bank_soal_id');
             $table->integer('tingkat_pendidikan_id')->unsigned();
-            $table->integer('mata_pelajaran_id')->unsigned();
+            $table->integer('mata_pelajaran_id');
             $table->uuid('ptk_id');
             $table->integer('soal_ke')->unsigned();
             $table->text('soal');
