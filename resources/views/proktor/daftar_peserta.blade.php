@@ -12,18 +12,21 @@
     </div>
     <div class="card-body">
         <div class="row mb-3">
-            <div class="col-sm-6">
+            <div class="col-sm-5">
                 <select name="tingkat_pendidikan_id" id="tingkat_pendidikan_id" class="form-control select2">
                     <option value="">== Filter Tingkat Kelas ==</option>
                     @foreach($all_tingkat as $tingkat)
-                    <option value="{{$tingkat->tingkat_pendidikan_id}}">Tingkat {{$tingkat->tingkat_pendidikan_id}}</option>
+                    <option value="{{$tingkat->tingkat}}">Tingkat {{$tingkat->tingkat}}</option>
                     @endforeach
                 </select>
             </div>
-            <div class="col-sm-6">
+            <div class="col-sm-5">
                 <select name="rombongan_belajar_id" id="rombongan_belajar_id" class="form-control select2">
                     <option value="">== Filter Rombongan Belajar ==</option>
                 </select>
+            </div>
+            <div class="col-sm-2">
+                <a class="cetak btn btn-success btn-block" href="javascript:void(0)">Cetak Kartu Peserta</a>
             </div>
         </div>
         <table id="datatable" class="table table-responsive-sm table-outline mb-0">
@@ -49,6 +52,18 @@
 @section('js')
 <script>
     $('.select2').select2({theme:'bootstrap4'});
+    $('.cetak').click(function(e){
+        var rombongan_belajar_id = $('#rombongan_belajar_id').val();
+        if(rombongan_belajar_id == ''){
+            Swal.fire({
+                icon: 'error',
+                text: 'Rombongan Belajar tidak boleh kosong!',
+                title: 'Gagal',
+            });
+        } else {
+            window.open('{{url('cetak-kartu')}}/'+rombongan_belajar_id, '_blank');
+        }
+    });
     $(function() {
         var table = null;
     function init(tingkat_pendidikan_id, rombongan_belajar_id) {

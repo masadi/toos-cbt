@@ -27,6 +27,7 @@ Route::group(['middleware' => ['auth', 'get.route']], function () {
     Route::group(['middleware' => ['role:proktor']], function () {
         Route::get('/{query}','ProktorController@index')->name('proktor.index');
         Route::get('/reset-login/{user_id}','ProktorController@reset_login')->name('proktor.reset_login');
+        Route::get('/cetak-kartu/{id}','ProktorController@cetak_kartu')->name('proktor.cetak_kartu');
         Route::get('/force-selesai/{id}','ProktorController@force_selesai')->name('proktor.force_selesai');
         Route::get('/proses-download/{query}/{offset}','ProktorController@proses_download')->name('proktor.download');
         Route::post('/simpan/{query}','ProktorController@simpan')->name('proktor.simpan');

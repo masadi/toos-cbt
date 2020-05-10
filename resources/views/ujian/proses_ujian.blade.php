@@ -77,21 +77,6 @@ $sisa_waktu_ujian = date('Y/m/d H:i:s', strtotime($waktu_ujian));
 </div>
 <div class="loader" style="display:none;"></div>
 @endsection
-<?php
-/*
-@section('javascript')
-<!--link href="{{ asset('assets/ujian/jquery.toggleinput.css') }}" rel="stylesheet"-->
-<link href="{{ asset('assets/ujian/ujian.css') }}" rel="stylesheet">
-<link href="{{ asset('assets/bootstrap4-toggle@3.6.1/bootstrap4-toggle.min.css') }}" rel="stylesheet">
-<script src="{{ asset('assets/bootstrap4-toggle@3.6.1/bootstrap4-toggle.min.js') }}"></script>
-<script src="{{ asset('assets/sweetalert2/dist/sweetalert2.all.min.js') }}"></script>
-<script src="{{ asset('js/jquery.countdown.min.js') }}"></script>
-<script src="{{ asset('assets/ujian/ujian.js') }}"></script>
-<script src="{{ asset('assets/ujian/player.js') }}"></script>
-<script src="{{ asset('assets/ujian/jquery.idle.min.js') }}"></script>
-@endsection
-*/
-?>
 @section('plugins.Sweetalert2', true)
 @section('plugins.Ujian', true)
 @section('js')
@@ -270,6 +255,9 @@ $sisa_waktu_ujian = date('Y/m/d H:i:s', strtotime($waktu_ujian));
             }
             var sisa_waktu = $('#sisa_waktu').val();
             var ragu = $('#ragu').val();
+            if(ragu){
+                $('.'+question_id).removeClass('btn-success').removeClass('btn-default').addClass("btn-warning");
+            }
             var kunci = [];
             $('input[name=kunci]').each(function(k,v){
                 kunci.push(this.value);

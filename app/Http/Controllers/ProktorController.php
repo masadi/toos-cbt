@@ -34,12 +34,37 @@ use App\Ujian;
 use App\User_question;
 use ZipArchive;
 use Helper;
+use PDF;
+/*
+output(): Outputs the PDF as a string.
+save($filename): Save the PDF to a file
+download($filename): Make the PDF downloadable by the user.
+stream($filename): Return a response with the PDF to show in the browser.
+*/
 class ProktorController extends Controller
 {
     public function __construct()
     {
         $this->menit = 15;
     }
+    public function cetak_kartu($id) 
+	{
+		$all_anggota = Anggota_rombel::where('rombongan_belajar_id', $id)->get();
+        $pdf = PDF::loadView('proktor.blank');
+        foreach($all_anggota as $anggota){
+            $rapor_cover = view('proktor.document', $anggota);
+            $pdf->getMpdf()->WriteHTML($rapor_cover);
+            $pdf->getMpdf()->AddPage('L');
+        }
+        $pdfFilePath = 'document.pdf';
+        /*
+		$pdf = PDF::loadView('proktor.document', $data, [], [
+            'title' => 'Another Title',
+            'margin_top' => 0,
+            'format' => [190, 236]
+        ]);//->save($pdfFilePath);*/
+		return $pdf->stream($pdfFilePath);
+	}
     public function index(Request $request){
         $user = auth()->user();
         $query = $request->route('query');

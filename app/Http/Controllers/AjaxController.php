@@ -603,11 +603,11 @@ class AjaxController extends Controller
                 $query->whereIn('peserta_didik_id', function($query) use ($request, $event){
                     $query->select('peserta_didik_id')->from('anggota_rombel')->whereIn('rombongan_belajar_id', function($query) use ($request, $event){
                         if($event){
-                            $query->select('rombongan_belajar_id')->from('rombongan_belajar')->where('tingkat_pendidikan_id', $request->tingkat_pendidikan_id)->whereIn('sekolah_id', function($query) use ($event){
+                            $query->select('rombongan_belajar_id')->from('rombongan_belajar')->where('tingkat', $request->tingkat_pendidikan_id)->whereIn('sekolah_id', function($query) use ($event){
                                 $query->select('sekolah_id')->from('peserta_events')->where('event_id', $event->id);
                             });
                         } else {
-                            $query->select('rombongan_belajar_id')->from('rombongan_belajar')->where('tingkat_pendidikan_id', $request->tingkat_pendidikan_id)->where('sekolah_id', $request->sekolah_id);
+                            $query->select('rombongan_belajar_id')->from('rombongan_belajar')->where('tingkat', $request->tingkat_pendidikan_id)->where('sekolah_id', $request->sekolah_id);
                         }
                     });
                 });
@@ -635,7 +635,7 @@ class AjaxController extends Controller
                     } else {
                         $query->where('sekolah_id', $request->sekolah_id);
                     }
-                    $query->where('tingkat_pendidikan_id', $request->tingkat_pendidikan_id);
+                    $query->where('tingkat', $request->tingkat_pendidikan_id);
                 })->get();
                 if($all_data->count()){
                     foreach($all_data as $rombel){
@@ -698,7 +698,7 @@ class AjaxController extends Controller
                 $query->where('sekolah_id', $request->sekolah_id);
             }
             $query->where('semester_id', config('global.semester_id'));
-        })->orderBy('sekolah_id')->orderBy('tingkat_pendidikan_id');
+        })->orderBy('sekolah_id')->orderBy('tingkat');
         return DataTables::of($query)
         ->addIndexColumn()
         ->addColumn('sekolah', function ($item) {
