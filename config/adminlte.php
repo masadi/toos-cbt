@@ -423,12 +423,12 @@ return [
                 [
                     'type' => 'js',
                     'asset' => true,
-                    'location' => '/vendor/Datepair.js/src/Datepair.js',
+                    'location' => '/vendor/Datepair.js/dist/Datepair.js',
                 ],
                 [
                     'type' => 'js',
                     'asset' => true,
-                    'location' => '/vendor/Datepair.js/src/jquery.datepair.js',
+                    'location' => '/vendor/Datepair.js/dist/jquery.datepair.js',
                 ],
             ],
         ],
