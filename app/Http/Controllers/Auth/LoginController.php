@@ -8,6 +8,7 @@ use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Auth;
+use Session;
 use App\Sekolah;
 use App\Server;
 class LoginController extends Controller
@@ -70,19 +71,18 @@ class LoginController extends Controller
 
         if (Auth::attempt([$login_type => $email, 'password' => $password], $remember_me)) {
             //Auth successful here
-            return redirect('/home');
-            $user = Auth::user();
-            if(!$user->logout){
-                Auth::logout();
-                return redirect()->route('login')->withErrors([
-                    'login_error' => 'Maaf, username sedang aktif. Silahkan hubungi proktor untuk me-reset login',
-                ]);
+            //dd(Auth::user());
+            if(Auth::user()->isLogout()) { 
+                Auth::user()->logout = FALSE;
+                Auth::user()->save();
+                return redirect('/');
             } else {
-                return redirect('/home');
+                Auth::logout();
+                return redirect('login')->withInput()->with('error', 'Pengguna sedang aktif. Silahkan hubungi Proktor');
             }
         }
-        return redirect()->back()->withInput()->withErrors([
-                'login_error' => 'Email/Username dan password salah.',
-            ]);
+        return redirect()->back()->withInput()->with([
+            'error' => 'Email/Username dan password salah.',
+        ]);
     }
 }

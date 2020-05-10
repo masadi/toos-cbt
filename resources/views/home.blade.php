@@ -13,6 +13,11 @@ $user = Auth::user();
     <div class="col-12">
         <div class="card">
             <div class="card-body">
+                @if(session('login-success'))
+                            <div class="alert alert-success" role="alert">
+                                {{ session('login-success') }}
+                            </div>
+                        @endif
                 @role('proktor')
                 <h2 class="text-success"><strong>AKTIF</strong></h2>
                 <div class="alert alert-success" role="alert">Aplikasi siap digunakan</div>

@@ -71,6 +71,10 @@ class User extends Authenticatable
             return $user->display_name;
         })->toArray());
     }
+    public function isLogout()
+    {
+        return $this->logout;
+    }
     protected static function boot()
     {
         parent::boot();

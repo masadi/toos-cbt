@@ -15,12 +15,6 @@ use Illuminate\Support\Facades\Route;
 
 Auth::routes();
 Route::group(['middleware' => ['auth', 'get.route']], function () {
-    /*Route::get('/', function () {
-        return view('home');
-    });
-    Route::get('/home', function() {
-        return view('home');
-    })->name('home');*/
     Route::get('/','HomeController@index')->name('index');
     Route::get('/home','HomeController@index')->name('home');
     Route::get('/logout', 'HomeController@logout');

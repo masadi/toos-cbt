@@ -65,6 +65,13 @@
                 </a>
             @endif
             <a class="btn btn-default btn-flat float-right @if(!$profile_url) btn-block @endif"
+               href="{{route('logout')}}">
+                <i class="fa fa-fw fa-power-off"></i>
+                {{ __('adminlte::adminlte.log_out') }}
+            </a>
+            <?php
+            /*
+            <a class="btn btn-default btn-flat float-right @if(!$profile_url) btn-block @endif"
                href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                 <i class="fa fa-fw fa-power-off"></i>
                 {{ __('adminlte::adminlte.log_out') }}
@@ -75,6 +82,8 @@
                 @endif
                 {{ csrf_field() }}
             </form>
+            */
+            ?>
         </li>
 
     </ul>
