@@ -38,13 +38,17 @@
 							<td class="border strong text-center">Mata Pelajaran</td>
 							<td class="border strong text-center">Jam</td>
 						</tr>
-						@foreach ($anggota->rombongan_belajar->jadwal as $jadwal)
+						@forelse ($anggota->rombongan_belajar->jadwal as $jadwal)
 						<tr>
 							<td class="border text-center">{{Helper::nama_hari(date('D', strtotime($jadwal->tanggal)))}}, {{Helper::TanggalIndo($jadwal->tanggal)}}</td>
 							<td class="border text-center">{{$jadwal->pembelajaran->nama_mata_pelajaran}}</td>
 							<td class="border text-center">{{date('H:i', strtotime($jadwal->from))}}-{{date('H:i', strtotime($jadwal->to))}}</td>
 						</tr>
-						@endforeach
+						@empty
+						<tr>
+							<td class="border text-center" colspan="3">Belum ada jadwal</td>
+						</tr>
+						@endforelse
 					</table>
 				</td>
 			</tr>
