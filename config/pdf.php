@@ -1,7 +1,7 @@
 <?php
 return [
 	'mode'                  => 'utf-8',
-    'format'                => 'A8',
+    'format'                => 'A7',
     'orientation'           => 'L',
 	'default_font_size'    => '10',
 	'default_font'         => 'arial',

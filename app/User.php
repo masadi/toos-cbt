@@ -5,6 +5,7 @@ namespace App;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Hash;
 //use Illuminate\Database\Eloquent\SoftDeletes;
 //use Spatie\Permission\Traits\HasRoles;
 //use App\Traits\HasLocalDates;
@@ -74,6 +75,12 @@ class User extends Authenticatable
     public function isLogout()
     {
         return $this->logout;
+    }
+    public function checkPassword(){
+        if(Hash::check($this->default_password, $this->password)){
+            return $this->default_password;
+        }
+        return '-';
     }
     protected static function boot()
     {

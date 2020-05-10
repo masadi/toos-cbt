@@ -61,6 +61,12 @@ class GetRoute
                     'icon' => 'fas fa-fw fa-cloud-download-alt',
                 ]);
                 $event->menu->add([
+                    'text' => 'Jadwal Ujian',
+                    'url'  => 'jadwal-ujian',
+                    'permission'  => 'proktor',
+                    'icon' => 'fas fa-fw fa-calendar',
+                ]);
+                $event->menu->add([
                     'text' => 'Daftar Peserta Didik',
                     'url'  => 'daftar-peserta',
                     'permission'  => 'proktor',

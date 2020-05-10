@@ -25,6 +25,7 @@ use App\User;
 use App\User_exam;
 use App\User_question;
 use App\Event;
+use App\Jadwal;
 use DataTables;
 use Str;
 use Helper;
@@ -46,6 +47,8 @@ class AjaxController extends Controller
             return $this->get_all_peserta_didik($request);
         } elseif($query == 'rombongan-belajar'){
             return $this->get_all_rombongan_belajar($request);
+        } elseif($query == 'rombel'){
+            return $this->get_rombel($request);
         } elseif($query == 'mata-pelajaran-kurikulum'){
             return $this->get_all_mata_pelajaran_kurikulum($request);
         } elseif($query == 'mata-pelajaran'){
@@ -60,9 +63,94 @@ class AjaxController extends Controller
             return $this->reset_login($request);
         } elseif($query == 'ujian-aktif'){
             return $this->ujian_aktif($request);
+        } elseif($query == 'jadwal-ujian'){
+            return $this->jadwal_ujian($request);
         } else {
             echo 'fungsi '.$query.' belum ada!';
         }
+    }
+    public function get_rombel(Request $request){
+        $user = auth()->user();
+		$all_rombel = Rombongan_belajar::where(function($query) use ($user){
+			$query->where('sekolah_id', $user->sekolah_id);
+		})->get();
+		if($all_rombel->count()){
+            foreach($all_rombel as $rombel){
+                $record[$rombel->rombongan_belajar_id] 	= $rombel->nama;
+                $output = $record;
+            }
+        } else {
+            $record[''] 	= 'Tidak ditemukan data rombongan belajar';
+            $output= $record;
+        }
+		$response = [
+            'rombongan_belajar' => (object) $output,
+        ];
+        return response()->json($response);
+	}
+    public function jadwal_ujian($request){
+        $query = Jadwal::query()->with(['rombongan_belajar', 'pembelajaran'])->where(function($query) use ($request){
+            if($request->sekolah_id){
+                $query->whereHas('rombongan_belajar', function($query) use ($request){
+                    $query->where('sekolah_id', $request->sekolah_id);
+                });
+            }
+            if($request->tingkat){
+                $query->whereHas('rombongan_belajar', function($query) use ($request){
+                    $query->where('tingkat', $request->tingkat);
+                });
+            }
+            if($request->rombongan_belajar_id){
+                $query->whereHas('pembelajaran', function($query) use ($request){
+                    $query->where('rombongan_belajar_id', $request->rombongan_belajar_id);
+                });
+            }
+        })->with(['pembelajaran.rombongan_belajar']);
+        return DataTables::of($query)
+        ->addColumn('all_rombel', function ($item) use ($request){
+            if($request->tingkat){
+                $all_data = Rombongan_belajar::where(function($query) use ($request){
+                    $query->where('sekolah_id', $request->sekolah_id);
+                    $query->where('tingkat', $request->tingkat);
+                })->get();
+                if($all_data->count()){
+                    foreach($all_data as $rombel){
+                        $record= array();
+                        $record['id'] 	= $rombel->rombongan_belajar_id;
+                        $record['text'] 	= $rombel->nama;
+                        $output['result'][] = $record;
+                    }
+                } else {
+                    $record['id'] 	= '';
+                    $record['text'] 	= 'Tidak ditemukan data rombongan belajar';
+                    $output['result'][] = $record;
+                }
+                $output['query'] = TRUE;
+            } else {
+                $output['query'] = FALSE;
+            }
+            if($request->rombongan_belajar_id){
+                $output['query'] = FALSE;
+            }
+            return $output;
+        })
+        ->addColumn('action', function ($item) {
+            $links = '<div class="text-center">';
+            $links .= '<div class="btn-group">';
+            $links .= '<button class="btn btn-sm btn-info dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Aksi</button>';
+            $links .= '<div class="dropdown-menu dropdown-menu-right">';
+            $links .= '<a class="dropdown-item toggle-modal" href="'.route('referensi.detil', ['query' => 'jadwal','id' => $item->id]).'">Edit</a>';
+            $links .= '<a class="dropdown-item confirm" href="'.route('referensi.hapus', ['query' => 'jadwal','id' => $item->id]).'">Hapus</a>';
+            $links .= '</div>';
+            $links .= '</div>';
+            $links .= '</div>';
+            return $links;
+        })
+        ->addColumn('tanggal', function ($item) {
+            return Helper::TanggalIndo($item->tanggal);
+        })
+        ->rawColumns(['action'])
+        ->make(true);
     }
     public function get_all_materi(Request $request){
         $query = $request->route('query');

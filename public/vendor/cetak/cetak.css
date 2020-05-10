@@ -9,8 +9,8 @@ h3 {
     font-size: 14px;
 }
 
-table tr td,
-table tr th {
+.table tr td,
+.table tr th {
     padding: 5px;
 }
 
@@ -36,4 +36,13 @@ table tr th {
 .center {
     margin: auto;
     width: 50%;
+}
+
+.border {
+    border: 1px solid black;
+}
+
+.foto {
+    width: 10px !important;
+    height: 20px !important;
 }

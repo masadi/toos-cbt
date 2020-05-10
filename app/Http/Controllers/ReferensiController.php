@@ -18,6 +18,8 @@ use App\Mata_pelajaran_kurikulum;
 use App\Pembelajaran;
 use App\Server;
 use App\User;
+use App\Jadwal;
+use App\Event;
 use Helper;
 use Validator;
 use File;
@@ -419,6 +421,21 @@ class ReferensiController extends Controller
                     'icon' => 'error'
                 ];
             }
+        } elseif($query == 'jadwal'){
+            $delete = Jadwal::find($id);
+            if($delete->delete()){
+                $response = [
+                    'status' => 'Jadwal berhasil dihapus',
+                    'success' => true,
+                    'icon' => 'success'
+                ];
+            } else {
+                $response = [
+                    'status' => 'Jadwal gagal dihapus',
+                    'success' => false,
+                    'icon' => 'error'
+                ];
+            }
         } else {
             $response = [
                 'status' => 'Query tidak dikenal',
@@ -469,6 +486,20 @@ class ReferensiController extends Controller
                 $data_satu = Rombongan_belajar::where('sekolah_id', $data->sekolah_id)->get();
             }
             $modal_s = 'modalku';
+        } elseif($query == 'jadwal'){
+            $event = Event::where('kode', $user->username)->first();
+            $all_tingkat = Rombongan_belajar::select('tingkat')->groupBy('tingkat')->orderBy('tingkat')->where(function($query) use ($event, $user){
+                if($event){
+                    $query->whereIn('sekolah_id', function($query) use ($event){
+                        $query->select('sekolah_id')->from('peserta_events')->where('event_id', $event->id);
+                    });
+                } else {
+                    $query->where('sekolah_id', $user->sekolah_id);
+                }
+            })->get();
+            $jadwal = Jadwal::find($id);
+            $rombongan_belajar = Rombongan_belajar::with('pembelajaran')->find($jadwal->rombongan_belajar_id);
+            return view('referensi.jadwal.detil', compact('all_tingkat', 'rombongan_belajar', 'jadwal'));
         }
         return view('referensi.'.$query.'.detil', compact('data', 'title', 'data_satu', 'data_dua', 'modal_s'));
     }

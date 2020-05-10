@@ -384,5 +384,53 @@ return [
                 ],
             ],
         ],
+        [
+            'name' => 'Datepicker',
+            'active' => false,
+            'files' => [
+                [
+                    'type' => 'css',
+                    'asset' => true,
+                    'location' => '/vendor/bootstrap-datepicker/css/bootstrap-datepicker.min.css',
+                ],
+                [
+                    'type' => 'js',
+                    'asset' => true,
+                    'location' => '/vendor/bootstrap-datepicker/js/bootstrap-datepicker.min.js',
+                ],
+            ],
+        ],
+        [
+            'name' => 'Timepicker',
+            'active' => false,
+            'files' => [
+                [
+                    'type' => 'css',
+                    'asset' => true,
+                    'location' => '/vendor/jquery-timepicker/css/jquery.timepicker.css',
+                ],
+                [
+                    'type' => 'js',
+                    'asset' => true,
+                    'location' => '/vendor/jquery-timepicker/js/jquery.timepicker.min.js',
+                ],
+            ],
+        ],
+        [
+            'name' => 'Datepair',
+            'active' => false,
+            'files' => [
+                [
+                    'type' => 'js',
+                    'asset' => true,
+                    'location' => '/vendor/Datepair.js/src/Datepair.js',
+                ],
+                [
+                    'type' => 'js',
+                    'asset' => true,
+                    'location' => '/vendor/Datepair.js/src/jquery.datepair.js',
+                ],
+            ],
+        ],
     ],
 ];

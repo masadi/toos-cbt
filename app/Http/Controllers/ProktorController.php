@@ -19,19 +19,19 @@ use App\Server;
 use App\Anggota_rombel;
 use App\User_exam;
 use App\Setting;
-use Carbon\Carbon;
-use App\Jobs\TokenJob;
 use App\User;
-use Artisan;
-use Validator;
-use Str;
-use Madzipper;
-use File;
-use Delight\Random\Random;
-use Codedge\Updater\UpdaterManager;
 use App\Event;
 use App\Ujian;
 use App\User_question;
+use App\Jadwal;
+use Delight\Random\Random;
+use Codedge\Updater\UpdaterManager;
+use Carbon\Carbon;
+use App\Jobs\TokenJob;
+use Artisan;
+use Validator;
+use Str;
+use File;
 use ZipArchive;
 use Helper;
 use PDF;
@@ -49,11 +49,11 @@ class ProktorController extends Controller
     }
     public function cetak_kartu($id) 
 	{
-        return view('proktor.document');
-		$all_anggota = Anggota_rombel::where('rombongan_belajar_id', $id)->get();
+        //return view('proktor.document');
+		$all_anggota = Anggota_rombel::with(['rombongan_belajar.jadwal', 'rombongan_belajar.jurusan_sp', 'peserta_didik.user'])->where('rombongan_belajar_id', $id)->get();
         $pdf = PDF::loadView('proktor.blank');
         foreach($all_anggota as $anggota){
-            $rapor_cover = view('proktor.document', $anggota);
+            $rapor_cover = view('proktor.document', compact('anggota'));
             $pdf->getMpdf()->WriteHTML($rapor_cover);
             $pdf->getMpdf()->AddPage('L');
         }
@@ -93,11 +93,32 @@ class ProktorController extends Controller
             return $this->rilis_token($request);
         } elseif($query == 'proses-sync'){
             return $this->proses_sync($request);
+        } elseif($query == 'jadwal-ujian'){
+            return $this->jadwal_ujian($user);
+        } elseif($query == 'tambah-jadwal'){
+            return $this->tambah_jadwal($request);
         } elseif($query == 'test'){
             return $this->test($request);
         } else {
             echo $query;
         }
+    }
+    public function jadwal_ujian($user){
+        $event = Event::where('kode', $user->username)->first();
+        $all_tingkat = Rombongan_belajar::select('tingkat')->groupBy('tingkat')->orderBy('tingkat')->where(function($query) use ($event, $user){
+            if($event){
+                $query->whereIn('sekolah_id', function($query) use ($event){
+                    $query->select('sekolah_id')->from('peserta_events')->where('event_id', $event->id);
+                });
+            } else {
+                $query->where('sekolah_id', $user->sekolah_id);
+            }
+        })->get();
+        return view('proktor.jadwal_ujian', compact('user', 'all_tingkat'));
+    }
+    public function tambah_jadwal($request){
+        $rombongan_belajar = Rombongan_belajar::with('pembelajaran')->find($request->rombongan_belajar_id);
+        return view('proktor.tambah_jadwal', compact('rombongan_belajar'));
     }
     public function proses_sync($request){
         $sync_file = Storage::disk('local')->get('public/uploads/'.$request->sync_file);
@@ -481,6 +502,73 @@ class ProktorController extends Controller
                     'success' => FALSE,
                     'status' => 'File harus ekstensi ZIP',
                     'sync_file' => NULL,
+                ];
+            }
+            return response()->json($output);
+        } elseif($query == 'jadwal-ujian'){
+            $messages = [
+                'rombongan_belajar_id.required' => 'Rombongan Belajar tidak boleh kosong',
+                'pembelajaran_id.required' => 'Mata Pelajaran tidak boleh kosong',
+                'from.required' => 'Jam Mulai tidak boleh kosong',
+                'to.required' => 'Jam Berakhir tidak boleh kosong',
+            ];
+            $validator = Validator::make(request()->all(), [
+                'rombongan_belajar_id' => 'required',
+                'pembelajaran_id' => 'required',
+                'from' => 'required',
+                'to' => 'required',
+             ],
+            $messages
+            )->validate();
+            Jadwal::updateOrCreate(
+                [
+                    'pembelajaran_id' => $request->pembelajaran_id,
+                ],
+                [
+                    'tanggal' => $request->date,
+                    'rombongan_belajar_id' => $request->rombongan_belajar_id,
+                    'from' => $request->from,
+                    'to' => $request->to,
+                ]
+            );
+            $output = [
+                'icon' => 'success',
+                'text' => 'Jadwal berhasil disimpan',
+                'title' => 'Berhasil',
+            ];
+            return response()->json($output);
+        } elseif($query == 'update-jadwal-ujian'){
+            $messages = [
+                'rombongan_belajar_id.required' => 'Rombongan Belajar tidak boleh kosong',
+                'pembelajaran_id.required' => 'Mata Pelajaran tidak boleh kosong',
+                'from.required' => 'Jam Mulai tidak boleh kosong',
+                'to.required' => 'Jam Berakhir tidak boleh kosong',
+            ];
+            $validator = Validator::make(request()->all(), [
+                'rombongan_belajar_id' => 'required',
+                'pembelajaran_id' => 'required',
+                'from' => 'required',
+                'to' => 'required',
+             ],
+            $messages
+            )->validate();
+            $jadwal = Jadwal::find($request->jadwal_id);
+            $jadwal->pembelajaran_id = $request->pembelajaran_id;
+            $jadwal->tanggal = $request->date;
+            $jadwal->rombongan_belajar_id = $request->rombongan_belajar_id;
+            $jadwal->from = $request->from;
+            $jadwal->to = $request->to;
+            if($jadwal->save()){
+                $output = [
+                    'icon' => 'success',
+                    'text' => 'Jadwal berhasil diperbaharui',
+                    'title' => 'Berhasil',
+                ];
+            } else {
+                $output = [
+                    'icon' => 'error',
+                    'text' => 'Jadwal gagal diperbaharui',
+                    'title' => 'Gagal',
                 ];
             }
             return response()->json($output);
