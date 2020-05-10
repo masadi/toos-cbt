@@ -49,6 +49,7 @@ class ProktorController extends Controller
     }
     public function cetak_kartu($id) 
 	{
+        return view('proktor.document');
 		$all_anggota = Anggota_rombel::where('rombongan_belajar_id', $id)->get();
         $pdf = PDF::loadView('proktor.blank');
         foreach($all_anggota as $anggota){

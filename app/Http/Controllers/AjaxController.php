@@ -183,7 +183,7 @@ class AjaxController extends Controller
             if($request->search['value']){
                 $query->whereIn('user_id', function($query) use ($request){
                     //$query->select('user_id')->from('users')->whereRaw("LOWER(name) like '%?%'", [strtolower($request->search['value'])]);
-                    $query->select('user_id')->from('users')->where('name', 'ILIKE', '%'.$request->search['value'].'%');
+                    $query->select('user_id')->from('users')->where('name', 'like', '%'.$request->search['value'].'%');
                 });
             }
         })
@@ -846,7 +846,7 @@ class AjaxController extends Controller
     }
     public function get_all_mata_pelajaran($request){
         if ($request->has('q')) {
-            $mata_pelajaran = Mata_pelajaran::where('nama', 'ilike', '%' . $request->q . '%')->get();
+            $mata_pelajaran = Mata_pelajaran::where('nama', 'like', '%' . $request->q . '%')->get();
             if($mata_pelajaran->count()){
                 foreach($mata_pelajaran as $mapel){
                     $record= array();

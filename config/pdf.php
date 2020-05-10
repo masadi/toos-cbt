@@ -1,10 +1,10 @@
 <?php
 return [
 	'mode'                  => 'utf-8',
-    'format'                => 'B0',
+    'format'                => 'A8',
     'orientation'           => 'L',
 	'default_font_size'    => '10',
-	'default_font'         => 'sans-serif',
+	'default_font'         => 'arial',
 	'margin_left'          => 2,
 	'margin_right'         => 2,
 	'margin_top'           => 2,
