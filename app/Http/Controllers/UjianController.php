@@ -12,6 +12,7 @@ use App\Answer;
 use App\User_exam;
 use App\User_question;
 use App\Event;
+use File;
 use Illuminate\Support\Facades\Storage;
 use pcrov\JsonReader\JsonReader;
 use Carbon\Carbon;
@@ -125,7 +126,9 @@ class UjianController extends Controller
         }
     }
     private function jumlah_jawaban_siswa($user_id){
-        $all_files = Storage::disk('public')->files();
+        $path = public_path('storage');
+        $all_files = File::allfiles($path);
+        //$all_files = Storage::disk('public')->files();
         $all_files = collect($all_files)->filter(function ($item) use ($user_id) {
             // replace stristr with your choice of matching function
             return false !== stristr($item, 'user_question-'.$user_id);
