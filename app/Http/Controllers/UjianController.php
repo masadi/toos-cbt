@@ -140,6 +140,14 @@ class UjianController extends Controller
         $reader = new JsonReader();
         $user = auth()->user();
         //dd($request->all());
+        if(!$request->ujian_id){
+            $output = [
+                'icon' => 'error',
+                'title' => 'Gagal',
+                'text' => 'Permintaan tidak sah'
+            ];
+            return response()->json($output);
+        }
         $json_file_utama = 'all-'.$user->user_id.'-'.$request->ujian_id.'.json';
         //$all = Storage::disk('public')->get($json_file_utama);
         //$all = json_decode($all);

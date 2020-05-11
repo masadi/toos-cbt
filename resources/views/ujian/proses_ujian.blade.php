@@ -265,10 +265,35 @@ $sisa_waktu_ujian = date('Y/m/d H:i:s', strtotime($waktu_ujian));
             $.ajax({
                 url : url,
                 data: {ujian_id:ujian_id, question_id:question_id, answer_id:answer_id, sisa_waktu:sisa_waktu,ragu:ragu, keys:kunci}
-            }).done(function (data) {
-                $('#load').html(data);
-                $('.loader').hide();
-                checkPilihan();
+            }).done(function (response) {
+                if(typeof response =='object'){
+                    Swal.fire({
+                        icon: response.icon,
+                        title: response.title,
+                        text: response.text,
+                        confirmButtonText: 'Refresh',
+                        allowOutsideClick: false,
+                    }).then(function(e) {
+                        window.location.replace(window.location.href);
+                    });
+                } else {
+                    if(response ===false){
+                        // the response was a string "false", parseJSON will convert it to boolean false
+                        Swal.fire({
+                            icon: 'error',
+                            text: 'Server tidak merespon. Silahkan refresh halaman ini!',
+                            confirmButtonText: 'Refresh',
+                            allowOutsideClick: false,
+                        }).then(function(e) {
+                            //window.location.replace(window.location.href);
+                            getExams(url);
+                        });
+                    } else {
+                        $('#load').html(response);
+                        $('.loader').hide();
+                        checkPilihan();
+                    }
+                }
             }).fail(function () {
                 //alert('Articles could not be loaded.');
                 Swal.fire({
