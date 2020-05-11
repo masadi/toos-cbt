@@ -1,5 +1,5 @@
 <li class="nav-item">
-    <a class="nav-link" href="#" data-widget="control-sidebar"
+    <a class="nav-link active" href="#" data-widget="control-sidebar"
         @if(!config('adminlte.right_sidebar_slide'))
             data-controlsidebar-slide="false"
         @endif
@@ -10,5 +10,6 @@
             data-scrollbar-auto-hide="{{ config('adminlte.right_sidebar_scrollbar_auto_hide') }}"
         @endif>
         <i class="{{ config('adminlte.right_sidebar_icon') }}"></i>
+        <strong>PANEL SOAL</strong>
     </a>
 </li>
