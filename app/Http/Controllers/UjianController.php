@@ -151,7 +151,7 @@ class UjianController extends Controller
             }
         } else {
             $json_file_ujian = 'ujian-'.$user->user_id.'-'.$request->ujian_id.'.json';
-            $json_file_all = 'all-'.$user->user_id.'-'.$ujian_id.'.json';
+            $json_file_all = 'all-'.$user->user_id.'-'.$request->ujian_id.'.json';
             $ujian = Exam::withCount(['question', 'user_question' => function($query) use ($user){
                 $query->where('user_questions.user_id', $user->user_id);
             }])->with(['question' => function($query){
