@@ -304,47 +304,50 @@ class ProsesSync extends Command
                     'photo' => $item->photo,
                 ]
             );
-            if(isset($item->user)){
-                $user = User::updateOrCreate(
-                    [
-                        'ptk_id' => $item->user->ptk_id, 
-                    ],
-                    [
-                        'name' => $item->user->name,
-                        'sekolah_id' => $item->user->sekolah_id,
-                        'username' => $item->user->username,
-                        'email' => $item->user->email,
-                        'email_verified_at' => now(),
-                        'password' => app('hash')->make($password),
-                        'timezone' => $timezone,
-                        'remember_token' => Str::random(10),
-                        'menuroles' => 'ptk',
-                        'default_password' => $password,
-                    ]
-                );
-                if(!$user->hasRole('ptk')){
-                    $user->attachRole('ptk');
-                }
-            } else {
-                $user = User::updateOrCreate(
-                    [
-                        'ptk_id' => $item->ptk_id, 
-                    ],
-                    [
-                        'name' => $item->nama,
-                        'sekolah_id' => $item->sekolah_id,
-                        'username' => $item->nuptk,
-                        'email' => $item->email,
-                        'email_verified_at' => now(),
-                        'password' => app('hash')->make($password),
-                        'timezone' => $timezone,
-                        'remember_token' => Str::random(10),
-                        'menuroles' => 'ptk',
-                        'default_password' => $password,
-                    ]
-                );
-                if(!$user->hasRole('ptk')){
-                    $user->attachRole('ptk');
+            $find = User::where('ptk_id', $item->user->ptk_id)->first();
+            if(!$find){
+                if(isset($item->user)){
+                    $user = User::updateOrCreate(
+                        [
+                            'ptk_id' => $item->user->ptk_id, 
+                        ],
+                        [
+                            'name' => $item->user->name,
+                            'sekolah_id' => $item->user->sekolah_id,
+                            'username' => $item->user->username,
+                            'email' => $item->user->email,
+                            'email_verified_at' => now(),
+                            'password' => app('hash')->make($password),
+                            'timezone' => $timezone,
+                            'remember_token' => Str::random(10),
+                            'menuroles' => 'ptk',
+                            'default_password' => $password,
+                        ]
+                    );
+                    if(!$user->hasRole('ptk')){
+                        $user->attachRole('ptk');
+                    }
+                } else {
+                    $user = User::updateOrCreate(
+                        [
+                            'ptk_id' => $item->ptk_id, 
+                        ],
+                        [
+                            'name' => $item->nama,
+                            'sekolah_id' => $item->sekolah_id,
+                            'username' => $item->nuptk,
+                            'email' => $item->email,
+                            'email_verified_at' => now(),
+                            'password' => app('hash')->make($password),
+                            'timezone' => $timezone,
+                            'remember_token' => Str::random(10),
+                            'menuroles' => 'ptk',
+                            'default_password' => $password,
+                        ]
+                    );
+                    if(!$user->hasRole('ptk')){
+                        $user->attachRole('ptk');
+                    }
                 }
             }
         }
@@ -416,48 +419,51 @@ class ProsesSync extends Command
                 'photo' => $item->photo,
             ]
         );
-        if(isset($item->user)){
-            $user = User::updateOrCreate(
-                [
-                    'peserta_didik_id' => $item->user->peserta_didik_id,
-                ],
-                [
-                    'name' => $item->user->name,
-                    'sekolah_id' => $item->user->sekolah_id,
-                    'username' => $item->user->username,
-                    'email' => $item->user->email,
-                    'email_verified_at' => now(),
-                    'password' => app('hash')->make($password),
-                    'timezone' => $timezone,
-                    'remember_token' => Str::random(10),
-                    'menuroles' => 'peserta_didik',
-                    'default_password' => $password,
-                ]
-            );
-            if(!$user->hasRole('peserta_didik')){
-                $user->attachRole('peserta_didik');
-            }
-            //
-        } else {
-            $user = User::updateOrCreate(
-                [
-                    'peserta_didik_id' => $item->peserta_didik_id,
-                ],
-                [
-                    'name' => $item->nama,
-                    'sekolah_id' => $item->sekolah_id,
-                    'username' => $item->nisn,
-                    'email' => $item->email,
-                    'email_verified_at' => now(),
-                    'password' => app('hash')->make($password),
-                    'timezone' => $timezone,
-                    'remember_token' => Str::random(10),
-                    'menuroles' => 'peserta_didik',
-                    'default_password' => $password,
-                ]
-            );
-            if(!$user->hasRole('peserta_didik')){
-                $user->attachRole('peserta_didik');
+        $find = User::where('peserta_didik_id', $item->user->peserta_didik_id)->first();
+        if(!$find){
+            if(isset($item->user)){
+                $user = User::updateOrCreate(
+                    [
+                        'peserta_didik_id' => $item->user->peserta_didik_id,
+                    ],
+                    [
+                        'name' => $item->user->name,
+                        'sekolah_id' => $item->user->sekolah_id,
+                        'username' => $item->user->username,
+                        'email' => $item->user->email,
+                        'email_verified_at' => now(),
+                        'password' => app('hash')->make($password),
+                        'timezone' => $timezone,
+                        'remember_token' => Str::random(10),
+                        'menuroles' => 'peserta_didik',
+                        'default_password' => $password,
+                    ]
+                );
+                if(!$user->hasRole('peserta_didik')){
+                    $user->attachRole('peserta_didik');
+                }
+                //
+            } else {
+                $user = User::updateOrCreate(
+                    [
+                        'peserta_didik_id' => $item->peserta_didik_id,
+                    ],
+                    [
+                        'name' => $item->nama,
+                        'sekolah_id' => $item->sekolah_id,
+                        'username' => $item->nisn,
+                        'email' => $item->email,
+                        'email_verified_at' => now(),
+                        'password' => app('hash')->make($password),
+                        'timezone' => $timezone,
+                        'remember_token' => Str::random(10),
+                        'menuroles' => 'peserta_didik',
+                        'default_password' => $password,
+                    ]
+                );
+                if(!$user->hasRole('peserta_didik')){
+                    $user->attachRole('peserta_didik');
+                }
             }
         }
     }
