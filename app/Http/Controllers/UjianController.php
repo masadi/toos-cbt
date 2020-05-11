@@ -140,10 +140,28 @@ class UjianController extends Controller
         $json_file_utama = 'all-'.$user->user_id.'-'.$request->ujian_id.'.json';
         //$all = Storage::disk('public')->get($json_file_utama);
         //$all = json_decode($all);
-        $reader->open('storage/'.$json_file_utama);
-        if ($reader->read()) {
-            $all = collect($reader->value());
-            //$all = $all->toJson();
+        if(Storage::disk('public')->exists($json_file_utama)){
+            $reader->open('storage/'.$json_file_utama);
+            if ($reader->read()) {
+                $all = collect($reader->value());
+                //$all = $all->toJson();
+            }
+        } else {
+            $json_file_ujian = 'ujian-'.$user->user_id.'-'.$request->ujian_id.'.json';
+            $ujian = Exam::withCount(['question', 'user_question' => function($query) use ($user){
+                $query->where('user_questions.user_id', $user->user_id);
+            }])->with(['question' => function($query){
+                $query->with('answers');
+                $query->orderBy('soal_ke');
+            }, 'user_exam' => function($query) use ($user){
+                $query->where('user_exams.user_id', $user->user_id);
+            }])->find($request->ujian_id);
+            Storage::disk('public')->put($json_file_ujian, $ujian->toJson());
+            $collection = collect($ujian->question);
+            $shuffled = $collection->shuffle();
+            $first = $shuffled->first();
+            $all = $shuffled->all();
+            Storage::disk('public')->put($json_file_all, $shuffled->toJson());
         }
         //$jawaban_siswa = json_decode($jawaban_siswa);
         //$all = collect($all);
