@@ -338,7 +338,7 @@ class AjaxController extends Controller
             //return $links;
         //})
         ->addColumn('user', function (User_exam $item) {
-            return $item->user->name;
+            return ($item->user) ? $item->user->name : '-';
         })
         /*->addColumn('filter_nama', function ($item) {
             if($item->anggota_rombel){
