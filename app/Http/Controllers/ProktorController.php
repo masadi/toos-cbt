@@ -201,29 +201,6 @@ class ProktorController extends Controller
         }
         return view('proktor.status_test', compact('user', 'rombongan_belajar', 'token', 'all_ujian', 'event'));
     }
-    public function status_test_old($user){
-        $status = [
-            'selesai' => User_exam::where(function($query){
-                $query->where('exam_id', config('global.exam_id'));
-                $query->where('status_ujian', 0);
-            })->count(),
-            'sedang' => User_exam::where(function($query){
-                $query->where('exam_id', config('global.exam_id'));
-                $query->where('status_ujian', 1);
-            })->count()
-        ];
-        $ujian = Exam::find(config('global.exam_id'));
-        /*if(!$status['sedang'] && $status['selesai']){
-            $ujian = NULL;
-            $exam->token = NULL;
-            $exam->save();
-        } else {
-            $ujian = $exam;
-        }*/
-        $mata_ujian = ($ujian) ? Exam::where('pembelajaran_id', $ujian->pembelajaran_id)->get() : [];
-        $pembelajaran = Pembelajaran::with('rombongan_belajar')->get();
-        return view('proktor.status_test', compact('user', 'status', 'ujian', 'mata_ujian', 'pembelajaran'));
-    }
     public function status_peserta($user){
         $all_sekolah = Sekolah::get();
         return view('proktor.status_peserta', compact('user', 'all_sekolah'));
@@ -710,9 +687,63 @@ class ProktorController extends Controller
         return response()->json($output);
     }
     public function force_selesai(Request $request){
+        /*
         $user_exam = User_exam::find($request->route('id'));
         $user_exam->status_ujian = 0;
         if($user_exam->save()){
+            $output = [
+                'icon' => 'success',
+                'success' => TRUE,
+                'status' => 'Force Selesai Sukses',
+            ];
+        } else {
+            $output = [
+                'icon' => 'error',
+                'success' => FALSE,
+                'status' => 'Force Selesai Gagal. Silahkan coba lagi!',
+            ];
+        }
+        return response()->json($output);*/
+        $user = auth()->user();
+        $ujian_id = $request->ujian_id;
+        $question_id = $request->question_id;
+        $answer_id = $request->answer_id;
+        $user_exam = User_exam::find($request->route('id'));
+        $user_exam->status_ujian = 0;
+        if($user_exam->save()){
+            $all_files = Storage::disk('public')->files();
+            $all_files = collect($all_files)->filter(function ($item) use ($user_exam) {
+                // replace stristr with your choice of matching function
+                return false !== stristr($item, 'user_question-'.$user_exam->user_id);
+            });
+            if($all_files->count()){
+                foreach($all_files as $file){
+                    $user_question = Storage::disk('public')->get($file);
+                    $user_question = json_decode($user_question);
+                    try {
+                        User_question::updateOrCreate(
+                            [
+                                'question_id' => $user_question->question_id,
+                                'anggota_rombel_id' => $user_question->anggota_rombel_id,
+                                'ptk_id' => $user_question->ptk_id,
+                            ],
+                            [
+                                'user_exam_id' => $user_question->user_exam_id,
+                                'answer_id' => $user_question->answer_id,
+                                'ragu' => $user_question->ragu,
+                                'nomor_urut' => $user_question->nomor_urut,
+                                'user_id' => $user_question->user_id,
+                            ]
+                        );
+                    } catch (\Exception $e) {
+                        //
+                    }
+                    Storage::disk('public')->delete($file);
+                }
+            }
+            $json_file_all = 'all-'.$user->user_id.'-'.$ujian_id.'.json';
+            $json_file_ujian = 'ujian-'.$user->user_id.'-'.$ujian_id.'.json';
+            Storage::disk('public')->delete([$json_file_all, $json_file_ujian]);
             $output = [
                 'icon' => 'success',
                 'success' => TRUE,
