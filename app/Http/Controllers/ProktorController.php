@@ -386,6 +386,7 @@ class ProktorController extends Controller
             }
             return response()->json($output);
         } elseif($query == 'upload-hasil'){
+            $user = auth()->user();
             /*dd($request->all());
             $data = [
                 'anggota_rombel_id' => $request->anggota_rombel_id,
@@ -394,7 +395,7 @@ class ProktorController extends Controller
                 'exam_id' => $request->exam_id
             ];*/
             $data = User_exam::with(['user','user_question'])->withCount('user_question')->find($request->user_exam_id);
-            Artisan::call('proses:sync', ['query' => 'upload', 'data' => $data]);
+            Artisan::call('proses:sync', ['query' => 'upload', 'data' => $data, 'timezone' => $user->timezone]);
         } elseif($query == 'ujian'){
             $messages = [
                 'rombongan_belajar_id.required' => 'Rombongan Belajar tidak boleh kosong',
