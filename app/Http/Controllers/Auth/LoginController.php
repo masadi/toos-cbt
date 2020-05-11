@@ -72,13 +72,17 @@ class LoginController extends Controller
         if (Auth::attempt([$login_type => $email, 'password' => $password], $remember_me)) {
             //Auth successful here
             //dd(Auth::user());
-            if(Auth::user()->isLogout()) { 
-                Auth::user()->logout = FALSE;
-                Auth::user()->save();
-                return redirect('/');
+            if(Auth::user()->hasRole('peserta_didik')){
+                if(Auth::user()->isLogout()) { 
+                    Auth::user()->logout = FALSE;
+                    Auth::user()->save();
+                    return redirect('/');
+                } else {
+                    Auth::logout();
+                    return redirect('login')->withInput()->with('error', 'Pengguna sedang aktif. Silahkan hubungi Proktor');
+                }
             } else {
-                Auth::logout();
-                return redirect('login')->withInput()->with('error', 'Pengguna sedang aktif. Silahkan hubungi Proktor');
+                return redirect('/');
             }
         }
         return redirect()->back()->withInput()->with([
