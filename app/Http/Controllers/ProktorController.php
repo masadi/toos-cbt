@@ -704,7 +704,7 @@ class ProktorController extends Controller
             ];
         }
         return response()->json($output);*/
-        $user = auth()->user();
+        $insert = 0;
         $ujian_id = $request->ujian_id;
         $question_id = $request->question_id;
         $answer_id = $request->answer_id;
@@ -735,15 +735,18 @@ class ProktorController extends Controller
                                 'user_id' => $user_question->user_id,
                             ]
                         );
+                        $insert++;
                     } catch (\Exception $e) {
                         //
                     }
                     Storage::disk('public')->delete($file);
                 }
             }
-            $json_file_all = 'all-'.$user->user_id.'-'.$ujian_id.'.json';
-            $json_file_ujian = 'ujian-'.$user->user_id.'-'.$ujian_id.'.json';
+            $json_file_all = 'all-'.$user_exam->user_id.'-'.$ujian_id.'.json';
+            $json_file_ujian = 'ujian-'.$user_exam->user_id.'-'.$ujian_id.'.json';
             Storage::disk('public')->delete([$json_file_all, $json_file_ujian]);
+        }
+        if($insert){
             $output = [
                 'icon' => 'success',
                 'success' => TRUE,
