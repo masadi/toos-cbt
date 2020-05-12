@@ -70,10 +70,10 @@
                 <div class="input-group mb-3">
                     <input type="password" name="password"
                         class="form-control {{ $errors->has('password') ? 'is-invalid' : '' }}"
-                        placeholder="{{ __('adminlte::adminlte.password') }}">
+                        placeholder="{{ __('adminlte::adminlte.password') }}" data-toggle="password">
                     <div class="input-group-append">
                         <div class="input-group-text">
-                            <span class="fas fa-lock"></span>
+                            <span class="fas fa-eye"></span>
                         </div>
                     </div>
                     @if ($errors->has('password'))

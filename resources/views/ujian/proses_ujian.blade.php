@@ -82,6 +82,9 @@ $sisa_waktu_ujian = date('Y/m/d H:i:s', strtotime($waktu_ujian));
 @section('js')
 <script>
     $(function() {
+        $(document).bind("contextmenu",function(e){
+            return false;
+        });
         $('.navbar-brand').attr('href', 'javascript:void');
         var idleTime = 60000 * 10;
         $(document).idle({
