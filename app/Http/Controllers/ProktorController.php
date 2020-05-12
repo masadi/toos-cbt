@@ -41,6 +41,8 @@ save($filename): Save the PDF to a file
 download($filename): Make the PDF downloadable by the user.
 stream($filename): Return a response with the PDF to show in the browser.
 */
+use App\Mail\KirimAkun;
+use Illuminate\Support\Facades\Mail;
 class ProktorController extends Controller
 {
     public function __construct()
@@ -1116,5 +1118,12 @@ class ProktorController extends Controller
             ];
         }
         return response()->json($output);
+    }
+    public function kirim_pengguna(Request $request, $rombongan_belajar_id)
+    {
+        $all_anggota = Anggota_rombel::where('rombongan_belajar_id', $rombongan_belajar_id)->get();
+        foreach($all_anggota as $anggota){
+            Mail::to($anggota->peserta_didik->user->email)->send(new KirimAkun($anggota));
+        }
     }
 }
