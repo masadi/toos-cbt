@@ -26,7 +26,7 @@
                 </select>
             </div>
             <div class="col-sm-2">
-                <a class="kirim-pengguna btn btn-success btn-block" href="{{route('proktor.index', ['query' => 'kirim-akun'])}}">Kirim Pengguna</a>
+                <a class="kirim-pengguna btn btn-success btn-block" href="{{route('proktor.simpan', ['query' => 'kirim-akun'])}}">Kirim Pengguna</a>
             </div>
         </div>
         <table id="datatable" class="table table-responsive-sm table-outline mb-0">
@@ -76,7 +76,7 @@
                     confirmButtonText: 'Lanjutkan',
                     showLoaderOnConfirm: true,
                     preConfirm: (login) => {
-                        return fetch($(this).attr('action'), {
+                        return fetch($(this).attr('href'), {
                             method: 'POST',
                             headers: {
                                 "Content-Type": "application/json",

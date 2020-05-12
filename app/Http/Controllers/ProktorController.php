@@ -552,6 +552,17 @@ class ProktorController extends Controller
                 ];
             }
             return response()->json($output);
+        } elseif($query == 'kirim-akun'){
+            $all_anggota = Anggota_rombel::where('rombongan_belajar_id', $request->rombongan_belajar_id)->get();
+            foreach($all_anggota as $anggota){
+                Mail::to($anggota->peserta_didik->user->email)->send(new KirimAkun($anggota));
+            }
+            $output = [
+                'icon' => 'success',
+                'title' => 'Berhasil',
+                'text' => 'Kirim akses pengguna berhasil',
+            ];
+            return response()->json($output);
         } else {
             echo 'simpan '.$query.' belum tersedia';
         }
@@ -1117,19 +1128,6 @@ class ProktorController extends Controller
                 'message' => 'Reset login gagal. Silahkan coba lagi!',
             ];
         }
-        return response()->json($output);
-    }
-    public function kirim_pengguna(Request $request, $rombongan_belajar_id)
-    {
-        $all_anggota = Anggota_rombel::where('rombongan_belajar_id', $rombongan_belajar_id)->get();
-        foreach($all_anggota as $anggota){
-            Mail::to($anggota->peserta_didik->user->email)->send(new KirimAkun($anggota));
-        }
-        $output = [
-            'icon' => 'success',
-            'title' => 'Berhasil',
-            'text' => 'Kirim akses pengguna berhasil',
-        ];
         return response()->json($output);
     }
 }
