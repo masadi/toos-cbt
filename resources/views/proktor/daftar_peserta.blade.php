@@ -26,7 +26,7 @@
                 </select>
             </div>
             <div class="col-sm-2">
-                <a class="kirim-pengguna btn btn-success btn-block" href="javascript:void(0)">Kirim Pengguna</a>
+                <a class="kirim-pengguna btn btn-success btn-block" href="{{route('proktor.index', ['query' => 'kirim-akun'])}}">Kirim Pengguna</a>
             </div>
         </div>
         <table id="datatable" class="table table-responsive-sm table-outline mb-0">
@@ -54,6 +54,7 @@
     $('.select2').select2({theme:'bootstrap4'});
     $(function() {
         $('.kirim-pengguna').click(function(e){
+            e.preventDefault();
             var rombongan_belajar_id = $('#rombongan_belajar_id').val();
             if(rombongan_belajar_id == ''){
                 Swal.fire({
@@ -61,8 +62,54 @@
                     text: 'Rombongan Belajar tidak boleh kosong!',
                     title: 'Gagal',
                 });
+                return false;
             } else {
-                window.open('{{url('cetak-kartu')}}/'+rombongan_belajar_id, '_blank');
+                let token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                Swal.fire({
+                    title: 'Anda Yakin?',
+                    text: "Proses ini akan mengirim akses pengguna ke email peserta didik!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    cancelButtonText: 'Batal',
+                    confirmButtonText: 'Lanjutkan',
+                    showLoaderOnConfirm: true,
+                    preConfirm: (login) => {
+                        return fetch($(this).attr('action'), {
+                            method: 'POST',
+                            headers: {
+                                "Content-Type": "application/json",
+                                "Accept": "application/json, text-plain, */*",
+                                "X-Requested-With": "XMLHttpRequest",
+                                "X-CSRF-TOKEN": token
+                            },
+                            body:JSON.stringify({
+                                rombongan_belajar_id: $('#rombongan_belajar_id').val(),
+                            })
+                        }).then(response => {
+                            console.log(response)
+                            if (!response.ok) {
+                                throw new Error(response.statusText)
+                            }
+                            return response.json()
+                        }).catch(error => {
+                            Swal.showValidationMessage(
+                            `Request failed: ${error}`
+                            )
+                        })
+                    },
+                    allowOutsideClick: () => !Swal.isLoading()
+                }).then((result) => {
+                    console.log(result.value);
+                    if (result.value) {
+                        Swal.fire({
+                            title: result.value.title,
+                            text: result.value.status,
+                            icon: result.value.icon
+                        })
+                    }
+                })
             }
         });
         var table = null;

@@ -1125,5 +1125,11 @@ class ProktorController extends Controller
         foreach($all_anggota as $anggota){
             Mail::to($anggota->peserta_didik->user->email)->send(new KirimAkun($anggota));
         }
+        $output = [
+            'icon' => 'success',
+            'title' => 'Berhasil',
+            'text' => 'Kirim akses pengguna berhasil',
+        ];
+        return response()->json($output);
     }
 }
