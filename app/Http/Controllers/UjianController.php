@@ -375,29 +375,27 @@ class UjianController extends Controller
         });
         if($all_files->count()){
             foreach($all_files as $file){
-                if(Storage::disk('public')->exists($file)){
+                try {
                     $user_question = Storage::disk('public')->get($file);
                     $user_question = json_decode($user_question);
-                    try {
-                        User_question::updateOrCreate(
-                            [
-                                'question_id' => $user_question->question_id,
-                                'anggota_rombel_id' => $user_question->anggota_rombel_id,
-                                'ptk_id' => $user_question->ptk_id,
-                            ],
-                            [
-                                'user_exam_id' => $user_question->user_exam_id,
-                                'answer_id' => $user_question->answer_id,
-                                'ragu' => $user_question->ragu,
-                                'nomor_urut' => $user_question->nomor_urut,
-                                'user_id' => $user_question->user_id,
-                            ]
-                        );
-                    } catch (\Exception $e) {
-                        //
-                    }
-                    Storage::disk('public')->delete($file);
+                    User_question::updateOrCreate(
+                        [
+                            'question_id' => $user_question->question_id,
+                            'anggota_rombel_id' => $user_question->anggota_rombel_id,
+                            'ptk_id' => $user_question->ptk_id,
+                        ],
+                        [
+                            'user_exam_id' => $user_question->user_exam_id,
+                            'answer_id' => $user_question->answer_id,
+                            'ragu' => $user_question->ragu,
+                            'nomor_urut' => $user_question->nomor_urut,
+                            'user_id' => $user_question->user_id,
+                        ]
+                    );
+                } catch (\Exception $e) {
+                    //
                 }
+                Storage::disk('public')->delete($file);
             }
         }
         $json_file_all = 'all-'.$user->user_id.'-'.$ujian_id.'.json';
