@@ -333,10 +333,10 @@ class AjaxController extends Controller
             $links = '<a href="'.route('ujian.detil_hasil', ['id' => $item->exam_id]).'" class="btn btn-sm btn-block btn-warning">Detil</a>';
             return $links;
         })
-        //->addColumn('nama', function ($item) {
-            //$links = '<input class="user_exam_id" type="hidden" name="user_exam_id[]" value="'. $item->user_exam_id .'">'.$item->user->name;
-            //return $links;
-        //})
+        ->addColumn('nama_rombel', function ($item) {
+            $links = $item->anggota_rombel->rombongan_belajar->nama;
+            return $links;
+        })
         ->addColumn('user', function (User_exam $item) {
             return ($item->user) ? $item->user->name : '-';
         })

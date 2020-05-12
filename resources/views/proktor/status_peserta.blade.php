@@ -39,6 +39,7 @@
                         <th class="text-center" width="10px"><input type="checkbox" name="select_all" value="1"
                                 id="datatable-select-all"></th>
                         <th>Nama</th>
+                        <th>Rombel</th>
                         <th>Mata Ujian</th>
                         <th>Status Ujian</th>
                         <th>Sisa Waktu</th>
@@ -76,6 +77,7 @@
             columns: [
                 { data: 'checkbox', name: 'checkbox', className: 'dt-body-center', orderable: false, searchable: false },
                 { data: 'user', name: 'user.name' },
+                { data: 'nama_rombel', name: 'nama_rombel' },
                 { data: 'mata_ujian', name: 'exam.nama' },
                 { data: 'status_ujian', name: 'status_ujian', orderable: false, searchable: false },
                 { data: 'sisa_waktu', name: 'sisa_waktu', className: 'dt-body-center' },
