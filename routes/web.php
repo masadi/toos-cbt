@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Route;
 | contains the "web" middleware group. Now create something great!
 |
 */
-
+Route::get('/reset/ujian','HomeController@reset_ujian')->name('reset_ujian');
 Auth::routes();
 Route::group(['middleware' => ['auth', 'get.route']], function () {
     Route::get('/','HomeController@index')->name('index');

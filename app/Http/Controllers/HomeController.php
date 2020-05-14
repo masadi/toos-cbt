@@ -3,20 +3,16 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\DB;
-use App\Sekolah;
-use App\Ptk;
-use App\Peserta_didik;
-use App\Bank_soal;
-use App\Rombongan_belajar;
-use App\User;
-use App\Server;
+use App\User_exam;
 use Auth;
 class HomeController extends Controller
 {
     public function index(Request $request){
         return view('home');
+    }
+    public function reset_ujian(Request $request){
+        User_exam::whereNotNull('exam_id')->delete();
+        echo 'reset_ujian';
     }
     public function logout(){
         $user = auth()->user();

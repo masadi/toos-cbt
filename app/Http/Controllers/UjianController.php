@@ -174,6 +174,7 @@ class UjianController extends Controller
             $shuffled = $collection->shuffle();
             $first = $shuffled->first();
             $all = $shuffled->all();
+            $all = collect($all);
             Storage::disk('public')->put($json_file_all, $shuffled->toJson());
         }
         //$jawaban_siswa = json_decode($jawaban_siswa);

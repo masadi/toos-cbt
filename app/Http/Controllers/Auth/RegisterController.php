@@ -88,7 +88,6 @@ class RegisterController extends Controller
         // fetch it from FreeGeoIp
         try {
             $response = Http::get('https://freegeoip.app/json/');
-            dd($response);
             return $response->time_zone;
         } catch (\Exception $e) {}
     }
