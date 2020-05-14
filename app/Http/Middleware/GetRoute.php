@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Event;
 use JeroenNoten\LaravelAdminLte\Events\BuildingMenu;
 use Illuminate\Support\Facades\Auth;
+use MobileDetect;
 class GetRoute
 {
     /**
@@ -33,6 +34,20 @@ class GetRoute
         }
         if (Auth::check()){
             config(['app.timezone' => Auth::user()->timezone]);
+            foreach(MobileDetect::getProperties() as $name => $match){
+                $check = MobileDetect::version($name);
+                if($check!==false){
+                    if($name == 'Firefox'){
+                        if(version_compare($check, '76.0', '<')){
+                            return redirect()->route('update_browser', ['name' => $name]);
+                        }
+                    } elseif($name == 'Chrome'){
+                        if(version_compare($check, '81.0', '<')){
+                            return redirect()->route('update_browser', ['name' => $name]);
+                        }
+                    }
+                }
+            }
         }
         Event::listen(BuildingMenu::class, function (BuildingMenu $event) use ($name){
             if($name[0] == 'ujian'){

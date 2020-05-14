@@ -13,6 +13,9 @@ use Illuminate\Support\Facades\Route;
 |
 */
 Route::get('/reset/ujian','HomeController@reset_ujian')->name('reset_ujian');
+Route::get('/browser-tidak-support/{name}', function($name){
+    return view('update_browser', compact('name'));
+})->name('update_browser');
 Auth::routes();
 Route::group(['middleware' => ['auth', 'get.route']], function () {
     Route::get('/','HomeController@index')->name('index');
