@@ -137,126 +137,130 @@ class UjianController extends Controller
     }
     public function get_soal(Request $request){
         //dump($request->all());
-        $reader = new JsonReader();
-        $user = auth()->user();
-        
-        if(!$request->ujian_id){
-            $output = [
-                'icon' => 'error',
-                'title' => 'Gagal',
-                'text' => 'Permintaan tidak sah'
-            ];
-            return response()->json($output);
-        }
-        
-        $json_file_utama = 'all-'.$user->user_id.'-'.$request->ujian_id.'.json';
-        //$all = Storage::disk('public')->get($json_file_utama);
-        //$all = json_decode($all);
-        if(Storage::disk('public')->exists($json_file_utama)){
-            $reader->open('storage/'.$json_file_utama);
-            if ($reader->read()) {
-                $all = collect($reader->value());
-                //$all = $all->toJson();
+        if($request->ajax()){
+            $reader = new JsonReader();
+            $user = auth()->user();
+            
+            if(!$request->ujian_id){
+                $output = [
+                    'icon' => 'error',
+                    'title' => 'Gagal',
+                    'text' => 'Permintaan tidak sah'
+                ];
+                return response()->json($output);
             }
-        } else {
-            $json_file_ujian = 'ujian-'.$user->user_id.'-'.$request->ujian_id.'.json';
-            $json_file_all = 'all-'.$user->user_id.'-'.$request->ujian_id.'.json';
-            $ujian = Exam::withCount(['question', 'user_question' => function($query) use ($user){
-                $query->where('user_questions.user_id', $user->user_id);
-            }])->with(['question' => function($query){
-                $query->with('answers');
-                $query->orderBy('soal_ke');
-            }, 'user_exam' => function($query) use ($user){
-                $query->where('user_exams.user_id', $user->user_id);
-            }])->find($request->ujian_id);
-            Storage::disk('public')->put($json_file_ujian, $ujian->toJson());
-            $collection = collect($ujian->question);
-            $shuffled = $collection->shuffle();
-            $first = $shuffled->first();
-            $all = $shuffled->all();
-            $all = collect($all);
-            Storage::disk('public')->put($json_file_all, $shuffled->toJson());
-        }
-        //$jawaban_siswa = json_decode($jawaban_siswa);
-        //$all = collect($all);
-        $first = $all->where('question_id', $request->soal_id)->first();
-        $first = collect($first);
-        $first = $first->toJson();
-        $first = json_decode($first);
-        /*$first = Question::with(['answers', 'user_question' => function($query) use ($user){
-            if($user->peserta_didik_id){
-                $query->where('anggota_rombel_id', $user->peserta_didik->anggota_rombel->anggota_rombel_id);
+            
+            $json_file_utama = 'all-'.$user->user_id.'-'.$request->ujian_id.'.json';
+            //$all = Storage::disk('public')->get($json_file_utama);
+            //$all = json_decode($all);
+            if(Storage::disk('public')->exists($json_file_utama)){
+                $reader->open('storage/'.$json_file_utama);
+                if ($reader->read()) {
+                    $all = collect($reader->value());
+                    //$all = $all->toJson();
+                }
             } else {
-                $query->where('ptk_id', $user->ptk_id);
+                $json_file_ujian = 'ujian-'.$user->user_id.'-'.$request->ujian_id.'.json';
+                $json_file_all = 'all-'.$user->user_id.'-'.$request->ujian_id.'.json';
+                $ujian = Exam::withCount(['question', 'user_question' => function($query) use ($user){
+                    $query->where('user_questions.user_id', $user->user_id);
+                }])->with(['question' => function($query){
+                    $query->with('answers');
+                    $query->orderBy('soal_ke');
+                }, 'user_exam' => function($query) use ($user){
+                    $query->where('user_exams.user_id', $user->user_id);
+                }])->find($request->ujian_id);
+                Storage::disk('public')->put($json_file_ujian, $ujian->toJson());
+                $collection = collect($ujian->question);
+                $shuffled = $collection->shuffle();
+                $first = $shuffled->first();
+                $all = $shuffled->all();
+                $all = collect($all);
+                Storage::disk('public')->put($json_file_all, $shuffled->toJson());
             }
-        }])->find($request->soal_id);*/
-        $questions = [$first];
-        $current_id = $first->question_id;
-        $user_exam = User_exam::updateOrCreate(
-            [
-                'exam_id'   => $first->exam_id,
-                'anggota_rombel_id' => ($user->peserta_didik) ? $user->peserta_didik->anggota_rombel->anggota_rombel_id : NULL,
-                'ptk_id' => $user->ptk_id,
-                'user_id' => $user->user_id,
-            ],
-            [
-                'status_ujian' => 1
-            ]
-        );
-        if($request->sisa_waktu){
-            $user_exam->sisa_waktu = date('H:i:s', strtotime($request->sisa_waktu));
-            $user_exam->save();
-        }
-        $json_file_user_question = 'user_question-'.$user->user_id.'-'.$request->question_id.'.json';
-        if($request->has('answer_id')){
-            $isUuid = Uuid::isValid($request->answer_id);
-            if($isUuid){
-                $collect_user_question = collect([
-                    'question_id' => $request->question_id,
+            //$jawaban_siswa = json_decode($jawaban_siswa);
+            //$all = collect($all);
+            $first = $all->where('question_id', $request->soal_id)->first();
+            $first = collect($first);
+            $first = $first->toJson();
+            $first = json_decode($first);
+            /*$first = Question::with(['answers', 'user_question' => function($query) use ($user){
+                if($user->peserta_didik_id){
+                    $query->where('anggota_rombel_id', $user->peserta_didik->anggota_rombel->anggota_rombel_id);
+                } else {
+                    $query->where('ptk_id', $user->ptk_id);
+                }
+            }])->find($request->soal_id);*/
+            $questions = [$first];
+            $current_id = $first->question_id;
+            $user_exam = User_exam::updateOrCreate(
+                [
+                    'exam_id'   => $first->exam_id,
                     'anggota_rombel_id' => ($user->peserta_didik) ? $user->peserta_didik->anggota_rombel->anggota_rombel_id : NULL,
                     'ptk_id' => $user->ptk_id,
                     'user_id' => $user->user_id,
-                    'user_exam_id' => $user_exam->user_exam_id,
-                    'answer_id' => $request->answer_id,
-                    'ragu' => $request->ragu,
-                    'nomor_urut' => $request->page + 1,
-                ]);
-                Storage::disk('public')->put($json_file_user_question, $collect_user_question->toJson());
-            }
-            /*User_question::updateOrCreate(
-                [
-                    'question_id' => $request->question_id,
-                    'anggota_rombel_id' => ($user->peserta_didik) ? $user->peserta_didik->anggota_rombel->anggota_rombel_id : NULL,
-                    'ptk_id' => $user->ptk_id,
                 ],
                 [
-                    'user_exam_id' => $user_exam->user_exam_id,
-                    'answer_id' => ($isUuid) ? $request->answer_id : NULL,
-                    'ragu' => $request->ragu
+                    'status_ujian' => 1
                 ]
-            );*/
-        }
-        /*$all_files = Storage::disk('public')->files();
-        $all_files = collect($all_files)->filter(function ($item) use ($user) {
-            // replace stristr with your choice of matching function
-            return false !== stristr($item, 'user_question-'.$user->user_id);
-        });*/
-        $json_file_jawaban = 'user_question-'.$user->user_id.'-'.$request->soal_id.'.json';
-        $jawaban_siswa = NULL;
-        if(Storage::disk('public')->exists($json_file_jawaban)){
-            $jawaban_siswa = Storage::disk('public')->get($json_file_jawaban);
-            $jawaban_siswa = json_decode($jawaban_siswa);
-        }
-        $jumlah_jawaban_siswa = $this->jumlah_jawaban_siswa($user->user_id);
-        /*$jumlah_jawaban_siswa = User_question::where(function($query) use($user){
-            $query->whereNotNull('answer_id');
-            if($user->peserta_didik_id){
-                $query->where('anggota_rombel_id', $user->peserta_didik->anggota_rombel->anggota_rombel_id);
-            } else {
-                $query->where('ptk_id', $user->ptk_id);
+            );
+            if($request->sisa_waktu){
+                $user_exam->sisa_waktu = date('H:i:s', strtotime($request->sisa_waktu));
+                $user_exam->save();
             }
-        })->count();*/
-        return view('ujian.load_soal', ['questions' => $questions, 'user' => $user, 'page' => $request->page, 'current_id' => $current_id, 'keys' => $request->keys, 'jumlah_jawaban_siswa' => $jumlah_jawaban_siswa, 'jawaban_siswa' => $jawaban_siswa])->render();
+            $json_file_user_question = 'user_question-'.$user->user_id.'-'.$request->question_id.'.json';
+            if($request->has('answer_id')){
+                $isUuid = Uuid::isValid($request->answer_id);
+                if($isUuid){
+                    $collect_user_question = collect([
+                        'question_id' => $request->question_id,
+                        'anggota_rombel_id' => ($user->peserta_didik) ? $user->peserta_didik->anggota_rombel->anggota_rombel_id : NULL,
+                        'ptk_id' => $user->ptk_id,
+                        'user_id' => $user->user_id,
+                        'user_exam_id' => $user_exam->user_exam_id,
+                        'answer_id' => $request->answer_id,
+                        'ragu' => $request->ragu,
+                        'nomor_urut' => $request->page + 1,
+                    ]);
+                    Storage::disk('public')->put($json_file_user_question, $collect_user_question->toJson());
+                }
+                /*User_question::updateOrCreate(
+                    [
+                        'question_id' => $request->question_id,
+                        'anggota_rombel_id' => ($user->peserta_didik) ? $user->peserta_didik->anggota_rombel->anggota_rombel_id : NULL,
+                        'ptk_id' => $user->ptk_id,
+                    ],
+                    [
+                        'user_exam_id' => $user_exam->user_exam_id,
+                        'answer_id' => ($isUuid) ? $request->answer_id : NULL,
+                        'ragu' => $request->ragu
+                    ]
+                );*/
+            }
+            /*$all_files = Storage::disk('public')->files();
+            $all_files = collect($all_files)->filter(function ($item) use ($user) {
+                // replace stristr with your choice of matching function
+                return false !== stristr($item, 'user_question-'.$user->user_id);
+            });*/
+            $json_file_jawaban = 'user_question-'.$user->user_id.'-'.$request->soal_id.'.json';
+            $jawaban_siswa = NULL;
+            if(Storage::disk('public')->exists($json_file_jawaban)){
+                $jawaban_siswa = Storage::disk('public')->get($json_file_jawaban);
+                $jawaban_siswa = json_decode($jawaban_siswa);
+            }
+            $jumlah_jawaban_siswa = $this->jumlah_jawaban_siswa($user->user_id);
+            /*$jumlah_jawaban_siswa = User_question::where(function($query) use($user){
+                $query->whereNotNull('answer_id');
+                if($user->peserta_didik_id){
+                    $query->where('anggota_rombel_id', $user->peserta_didik->anggota_rombel->anggota_rombel_id);
+                } else {
+                    $query->where('ptk_id', $user->ptk_id);
+                }
+            })->count();*/
+            return view('ujian.load_soal', ['questions' => $questions, 'user' => $user, 'page' => $request->page, 'current_id' => $current_id, 'keys' => $request->keys, 'jumlah_jawaban_siswa' => $jumlah_jawaban_siswa, 'jawaban_siswa' => $jawaban_siswa])->render();
+        } else {
+            return view('ujian.tolak');
+        }
     }
     public function token(){
         /*

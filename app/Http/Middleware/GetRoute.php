@@ -34,16 +34,16 @@ class GetRoute
         }
         if (Auth::check()){
             config(['app.timezone' => Auth::user()->timezone]);
-            foreach(MobileDetect::getProperties() as $name => $match){
-                $check = MobileDetect::version($name);
+            foreach(MobileDetect::getProperties() as $browser => $match){
+                $check = MobileDetect::version($browser);
                 if($check!==false){
-                    if($name == 'Firefox'){
+                    if($browser == 'Firefox'){
                         if(version_compare($check, '76.0', '<')){
-                            return redirect()->route('update_browser', ['name' => $name]);
+                            return redirect()->route('update_browser', ['name' => $browser]);
                         }
-                    } elseif($name == 'Chrome'){
+                    } elseif($browser == 'Chrome'){
                         if(version_compare($check, '81.0', '<')){
-                            return redirect()->route('update_browser', ['name' => $name]);
+                            return redirect()->route('update_browser', ['name' => $browser]);
                         }
                     }
                 }
