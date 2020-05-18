@@ -14,10 +14,10 @@ $user = Auth::user();
         <div class="card">
             <div class="card-body">
                 @if(session('login-success'))
-                            <div class="alert alert-success" role="alert">
-                                {{ session('login-success') }}
-                            </div>
-                        @endif
+                <div class="alert alert-success" role="alert">
+                    {{ session('login-success') }}
+                </div>
+                @endif
                 @role('proktor')
                 <h2 class="text-success"><strong>AKTIF</strong></h2>
                 <div class="alert alert-success" role="alert">Aplikasi siap digunakan</div>
@@ -61,7 +61,9 @@ $user = Auth::user();
                             </tr>
                             <tr>
                                 <td>No WA Aktif</td>
-                                <td class="wa_aktif">: {!!($user->phone_number) ? $user->phone_number : '<a href="'.route('ujian.update_pengguna').'" class="btn btn-sm btn-danger no_wa">Update No WhatsApp</a>'!!}
+                                <td class="wa_aktif">: {!!($user->phone_number) ? $user->phone_number : '<a
+                                        href="'.route('ujian.update_pengguna').'"
+                                        class="btn btn-sm btn-danger no_wa">Update No WhatsApp</a>'!!}
                                 </td>
                             </tr>
                             @else

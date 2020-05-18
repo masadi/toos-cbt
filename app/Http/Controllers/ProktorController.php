@@ -51,10 +51,12 @@ class ProktorController extends Controller
         $this->menit = 15;
     }
     public function kirim_wa(Request $request){
-        $user = User::whereNotNull('phone_number')->first();
+        $users = User::whereNotNull('phone_number')->get();
         //$request->user()->notify(new KirimAkun($user));
-        $user->notify(new KirimAkun($user));
-        return redirect()->route('home')->with('status', 'Order Placed!');
+        foreach($users as $user){
+            $user->notify(new KirimAkun($user));
+        }
+        return redirect()->route('home')->with('login-success', 'WA berhasil dikirim');
         $account_sid = config('services.twilio.sid');
         $auth_token = config('services.twilio.token');
         // In production, these should be environment variables. E.g.:
