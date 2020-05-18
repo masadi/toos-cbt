@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Hash;
 //use App\Traits\HasLocalDates;
 use Str;
 use Laratrust\Traits\LaratrustUserTrait;
+use Helper;
 class User extends Authenticatable
 {
     use LaratrustUserTrait;
@@ -97,6 +98,6 @@ class User extends Authenticatable
     }
     public function routeNotificationForWhatsApp()
     {
-        return $this->phone_number;
+        return Helper::hp($this->phone_number);
     }
 }
