@@ -141,6 +141,6 @@ class Helper
                 $hp = '+62'.substr(trim($nohp), 1);
             }
         }
-        print $hp;
+        return $hp;
     }
 }
