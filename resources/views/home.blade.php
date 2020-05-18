@@ -61,7 +61,9 @@ $user = Auth::user();
                             </tr>
                             <tr>
                                 <td>No WA Aktif</td>
-                                <td class="wa_aktif">: {!!($user->phone_number) ? $user->phone_number : '<a
+                                <td class="wa_aktif">: {!!($user->phone_number) ? $user->routeNotificationForWhatsApp().' <a title="Perbaharui Nomor WhatsApp"
+                                    href="'.route('ujian.update_pengguna').'"
+                                    class="btn btn-sm btn-danger no_wa"><i class="fas fa-pencil-alt"></i></a>' : '<a
                                         href="'.route('ujian.update_pengguna').'"
                                         class="btn btn-sm btn-danger no_wa">Update No WhatsApp</a>'!!}
                                 </td>
