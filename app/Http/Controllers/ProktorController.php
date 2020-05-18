@@ -581,7 +581,10 @@ class ProktorController extends Controller
         } elseif($query == 'kirim-akun'){
             $all_anggota = Anggota_rombel::where('rombongan_belajar_id', $request->rombongan_belajar_id)->get();
             foreach($all_anggota as $anggota){
-                Mail::to($anggota->peserta_didik->user->email)->send(new KirimAkun($anggota));
+                //Mail::to($anggota->peserta_didik->user->email)->send(new KirimAkun($anggota));
+                if($anggota->peserta_didik->user->phone_number){
+                    $anggota->peserta_didik->user->notify(new KirimAkun($anggota->peserta_didik->user));
+                }
             }
             $output = [
                 'icon' => 'success',
