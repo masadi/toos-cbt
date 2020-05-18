@@ -716,6 +716,10 @@ class AjaxController extends Controller
             return $links;
 
         })
+        ->addColumn('nama', function ($item) {
+            $phone = ($item->user->phone_number) ? ' <span class="text-success"><i class="fas fa-check"></i></span>' : ' <span class="text-danger"><i class="fas fa-times"></i></span>';
+            return $item->nama.$phone;
+        })
         ->addColumn('rombongan_belajar', function ($item) use ($request, $event){
             if($request->tingkat_pendidikan_id){
                 $all_data = Rombongan_belajar::with('sekolah')->where(function($query) use ($request, $event){
@@ -780,7 +784,7 @@ class AjaxController extends Controller
             return $links;
 
         })
-        ->rawColumns(['password', 'actions'])
+        ->rawColumns(['nama', 'password', 'actions'])
         ->make(true);
     }
     public function get_all_rombongan_belajar($request){
