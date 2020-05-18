@@ -41,13 +41,37 @@ save($filename): Save the PDF to a file
 download($filename): Make the PDF downloadable by the user.
 stream($filename): Return a response with the PDF to show in the browser.
 */
-use App\Mail\KirimAkun;
+//use App\Mail\KirimAkun;
 use Illuminate\Support\Facades\Mail;
+use App\Notifications\KirimAkun;
 class ProktorController extends Controller
 {
     public function __construct()
     {
         $this->menit = 15;
+    }
+    public function kirim_wa(Request $request){
+        $user = User::whereNotNull('phone_number')->first();
+        //$request->user()->notify(new KirimAkun($user));
+        $user->notify(new KirimAkun($user));
+        return redirect()->route('home')->with('status', 'Order Placed!');
+        $account_sid = config('services.twilio.sid');
+        $auth_token = config('services.twilio.token');
+        // In production, these should be environment variables. E.g.:
+        // $auth_token = $_ENV["TWILIO_AUTH_TOKEN"]
+
+        // A Twilio number you own with SMS capabilities
+        $twilio_number = config('services.twilio.whatsapp_from');
+
+        $client = new Twilio($account_sid, $auth_token);
+        $client->messages->create(
+            // Where to send a text message (your cell phone?)
+            '+6285232298529',
+            array(
+                'from' => $twilio_number,
+                'body' => 'I sent this message in under 10 minutes!'
+            )
+        );
     }
     public function cetak_kartu($id) 
 	{

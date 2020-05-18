@@ -22,6 +22,7 @@ Route::group(['middleware' => ['auth', 'get.route']], function () {
     Route::get('/home','HomeController@index')->name('home');
     Route::get('/logout', 'HomeController@logout');
     Route::group(['middleware' => ['role:proktor']], function () {
+        Route::get('/kirim-wa','ProktorController@kirim_wa')->name('proktor.kirim_wa');
         Route::get('/{query}','ProktorController@index')->name('proktor.index');
         Route::get('/reset-login/{user_id}','ProktorController@reset_login')->name('proktor.reset_login');
         Route::get('/cetak-kartu/{id}','ProktorController@cetak_kartu')->name('proktor.cetak_kartu');
@@ -52,6 +53,7 @@ Route::group(['middleware' => ['auth', 'get.route']], function () {
             Route::get('/hasil','UjianController@hasil')->name('ujian.hasil');
             Route::get('/detil-hasil/{id}','UjianController@detil_hasil')->name('ujian.detil_hasil');
             Route::get('/selesai','UjianController@selesai')->name('ujian.selesai');
+            Route::post('/update-pengguna','AjaxController@update_pengguna')->name('ujian.update_pengguna');
         });
     });
 });

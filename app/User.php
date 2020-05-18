@@ -95,4 +95,8 @@ class User extends Authenticatable
             }
         });
     }
+    public function routeNotificationForWhatsApp()
+    {
+        return $this->phone_number;
+    }
 }

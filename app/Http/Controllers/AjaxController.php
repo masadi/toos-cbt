@@ -29,6 +29,7 @@ use App\Jadwal;
 use DataTables;
 use Str;
 use Helper;
+use Validator;
 use Carbon\Carbon;
 class AjaxController extends Controller
 {
@@ -953,6 +954,34 @@ class AjaxController extends Controller
             $record['id'] 	= '';
 			$record['text'] 	= 'Ketik nama Mata Pelajaran';
             $output['results'][] = $record;
+        }
+        return response()->json($output);
+    }
+    public function update_pengguna(Request $request){
+        $messages = [
+            'user_id.required' => 'Pengguna tidak boleh kosong',
+            'phone_number.required' => 'Nomor WhatsApp tidak boleh kosong',
+            'phone_number.regex' => 'Nomor WhatsApp tidak valid',
+            'phone_number.min' => 'Nomor WhatsApp minimal 10 digit',
+        ];
+        $validator = Validator::make(request()->all(), [
+            'user_id' => 'required',
+            'phone_number' => 'required|regex:/(0)[0-9]/|not_regex:/[a-z]/|min:10',
+         ],
+        $messages
+        )->validate();
+        $user = User::find($request->user_id);
+        $user->phone_number = $request->phone_number;
+        if($user->save()){
+            $output['title'] = 'Berhasil';
+            $output['text'] = 'Nomor WhatsApp berhasil disimpan';
+            $output['icon'] = 'success';
+            $output['phone_number'] = $request->phone_number;
+        } else {
+            $output['title'] = 'Gagal';
+            $output['text'] = 'Nomor WhatsApp gagal disimpan. Silahkan coba beberapa saat lagi';
+            $output['icon'] = 'error';
+            $output['phone_number'] = '';
         }
         return response()->json($output);
     }
