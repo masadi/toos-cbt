@@ -17,10 +17,10 @@ Route::get('/browser-tidak-support/{name}', function($name){
     return view('update_browser', compact('name'));
 })->name('update_browser');
 Auth::routes();
+Route::get('/logout', 'FrontController@logout');
 Route::group(['middleware' => ['auth', 'get.route']], function () {
     Route::get('/','HomeController@index')->name('index');
     Route::get('/home','HomeController@index')->name('home');
-    Route::get('/logout', 'HomeController@logout');
     Route::group(['middleware' => ['role:proktor']], function () {
         Route::get('/kirim-wa','ProktorController@kirim_wa')->name('proktor.kirim_wa');
         Route::get('/{query}','ProktorController@index')->name('proktor.index');
