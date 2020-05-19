@@ -754,6 +754,9 @@ class ProktorController extends Controller
         $user_exam->status_ujian = 0;
         if($user_exam->save()){
             $all_files = Storage::disk('public')->files();
+            $path = public_path('storage');
+            $all_files = File::allfiles($path);
+            dd($all_files);
             $all_files = collect($all_files)->filter(function ($item) use ($user_exam) {
                 // replace stristr with your choice of matching function
                 return false !== stristr($item, 'user_question-'.$user_exam->user_id);
@@ -762,7 +765,6 @@ class ProktorController extends Controller
                 foreach($all_files as $file){
                     $user_question = Storage::disk('public')->get($file);
                     $user_question = json_decode($user_question);
-                    dd($user_question);
                     try {
                         User_question::updateOrCreate(
                             [
