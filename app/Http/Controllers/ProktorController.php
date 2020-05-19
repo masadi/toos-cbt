@@ -757,6 +757,7 @@ class ProktorController extends Controller
             $path = public_path('storage');
             $all_files = File::allfiles($path);
             $all_files = collect($all_files)->filter(function ($item) use ($user_exam) {
+                dd($item->files()->name('user_question-'.$user_exam->user_id));
                 dd($item);
                 // replace stristr with your choice of matching function
                 return false !== stristr($item, 'user_question-'.$user_exam->user_id);
