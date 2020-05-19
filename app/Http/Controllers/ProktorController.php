@@ -753,7 +753,7 @@ class ProktorController extends Controller
         $user_exam = User_exam::find($request->route('id'));
         $user_exam->status_ujian = 0;
         if($user_exam->save()){
-            $all_files = Storage::disk('public')->files();
+            //$all_files = Storage::disk('public')->files();
             $path = public_path('storage');
             $all_files = File::allfiles($path);
             $all_files = collect($all_files)->filter(function ($item) use ($user_exam) {
@@ -765,10 +765,6 @@ class ProktorController extends Controller
                 foreach($all_files as $file){
                     $contents = $file->getContents();
                     $user_question = json_decode($contents);
-                    dd($user_question);
-                    dd($file);
-                    $user_question = Storage::disk('public')->get($file);
-                    $user_question = json_decode($user_question);
                     try {
                         User_question::updateOrCreate(
                             [
