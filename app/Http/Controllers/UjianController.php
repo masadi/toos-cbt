@@ -376,13 +376,13 @@ class UjianController extends Controller
         $all_files = File::allfiles($path);
         $all_files = collect($all_files)->filter(function ($item) use ($user) {
             // replace stristr with your choice of matching function
-            return false !== stristr($item, 'user_question-'.$user->user_id);
+            return false !== stristr($item->getRelativePathname(), 'user_question-'.$user->user_id);
         });
         if($all_files->count()){
             foreach($all_files as $file){
                 try {
-                    $user_question = Storage::disk('public')->get($file);
-                    $user_question = json_decode($user_question);
+                    $contents = $file->getContents();
+                    $user_question = json_decode($contents);
                     User_question::updateOrCreate(
                         [
                             'question_id' => $user_question->question_id,
@@ -397,10 +397,10 @@ class UjianController extends Controller
                             'user_id' => $user_question->user_id,
                         ]
                     );
+                    Storage::disk('public')->delete($file);
                 } catch (\Exception $e) {
                     //
                 }
-                Storage::disk('public')->delete($file);
             }
         }
         $json_file_all = 'all-'.$user->user_id.'-'.$ujian_id.'.json';

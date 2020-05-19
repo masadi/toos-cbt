@@ -781,10 +781,10 @@ class ProktorController extends Controller
                             ]
                         );
                         $insert++;
+                        Storage::disk('public')->delete($file);
                     } catch (\Exception $e) {
                         //
                     }
-                    Storage::disk('public')->delete($file);
                 }
             }
             $json_file_all = 'all-'.$user_exam->user_id.'-'.$ujian_id.'.json';

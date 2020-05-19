@@ -343,7 +343,7 @@ class AjaxController extends Controller
             } elseif(!$item->status_ujian && $item->user_question->count() != $item->exam->question->count()){
                 $links = '<a href="'.route('proktor.force_selesai', ['id' => $item->user_exam_id]).'" class="btn btn-sm btn-block btn-danger force_selesai">Force Selesai</a>';
             } else {
-                $links = $item->user_question->count();
+                $links = '-';
             }
             //$links = $item->updated_at.'=>'.Carbon::now();
             return $links;
