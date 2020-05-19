@@ -305,26 +305,11 @@ class AjaxController extends Controller
         })
         ->addColumn('checkbox', function ($item) {
             if($item->status_ujian){
-                /*if($item->anggota_rombel_id){
-                    $links = '<input type="checkbox" name="anggota_rombel_id[]" value="'. $item->anggota_rombel_id .'" disabled>';
-                } else {
-                    $links = '<input type="checkbox" name="ptk_id[]" value="'. $item->ptk_id .'" disabled>';
-                }*/
                 $links = '<input type="checkbox" name="user_exam_id[]" value="'. $item->user_exam_id .'" disabled>';
             } else {
                 if($item->status_upload){
-                    /*if($item->anggota_rombel_id){
-                        $links = '<input type="checkbox" name="anggota_rombel_id[]" value="'. $item->anggota_rombel_id .'" disabled>';
-                    } else {
-                        $links = '<input type="checkbox" name="ptk_id[]" value="'. $item->ptk_id .'" disabled>';
-                    }*/
                     $links = '<input type="checkbox" name="user_exam_id[]" value="'. $item->user_exam_id .'" disabled>';
                 } else {
-                    /*if($item->anggota_rombel_id){
-                        $links = '<input type="checkbox" class="anggota_rombel_id" name="anggota_rombel_id['. $item->user_exam_id .'][]" value="'. $item->anggota_rombel_id .'">';
-                    } else {
-                        $links = '<input type="checkbox" class="ptk_id" name="ptk_id['. $item->user_exam_id .'][]" value="'. $item->ptk_id .'">';
-                    }*/
                     $links = '<input type="checkbox" name="user_exam_id[]" value="'. $item->user_exam_id .'">';
                 }
             }
@@ -341,21 +326,6 @@ class AjaxController extends Controller
         ->addColumn('user', function (User_exam $item) {
             return ($item->user) ? $item->user->name : '-';
         })
-        /*->addColumn('filter_nama', function ($item) {
-            if($item->anggota_rombel){
-                $links = $item->anggota_rombel->peserta_didik->nama;
-            } else {
-                $links = $item->ptk->nama;
-            }
-            return $links;
-        })
-        ->addColumn('filter_nama', function (User_exam $User_exam) {
-            if($User_exam->ptk){
-                return $User_exam->ptk->nama;
-            } else {
-                return $User_exam->peserta_didik->nama;
-            }
-        })*/
         ->addColumn('mata_ujian', function ($item) {
             return $item->exam->nama;
         })
@@ -370,10 +340,10 @@ class AjaxController extends Controller
         ->addColumn('force_selesai', function ($item) use ($user){
             if ($item->status_ujian && $item->updated_at->diffInHours(Carbon::now($user->timezone)) > 2) {
                 $links = '<a href="'.route('proktor.force_selesai', ['id' => $item->user_exam_id]).'" class="btn btn-sm btn-block btn-danger force_selesai">Force Selesai</a>';
-            } elseif(!$item->status_ujian && !$item->user_question->count()){
+            } elseif(!$item->status_ujian && $item->user_question->count() != $item->exam->question->count()){
                 $links = '<a href="'.route('proktor.force_selesai', ['id' => $item->user_exam_id]).'" class="btn btn-sm btn-block btn-danger force_selesai">Force Selesai</a>';
             } else {
-                $links = '-';
+                $links = $item->user_question->count();
             }
             //$links = $item->updated_at.'=>'.Carbon::now();
             return $links;

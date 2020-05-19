@@ -416,7 +416,7 @@ class UjianController extends Controller
     public function detil_hasil(Request $request){
         $user = auth()->user();
         $ujian = Exam::with(['user_exam' => function($query) use ($user){
-            $query->where('anggota_rombel_id', $user->peserta_didik->anggota_rombel->anggota_rombel_id);
+            $query->where('user_id', $user->user_id);
         }])->find($request->route('id'));
         return view('ujian.detil-hasil', compact('ujian', 'user'));
     }
