@@ -758,11 +758,11 @@ class ProktorController extends Controller
                 // replace stristr with your choice of matching function
                 return false !== stristr($item, 'user_question-'.$user_exam->user_id);
             });
-            dd($all_files);
             if($all_files->count()){
                 foreach($all_files as $file){
                     $user_question = Storage::disk('public')->get($file);
                     $user_question = json_decode($user_question);
+                    dd($user_question);
                     try {
                         User_question::updateOrCreate(
                             [
