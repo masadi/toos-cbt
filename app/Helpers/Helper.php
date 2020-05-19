@@ -129,7 +129,7 @@ class Helper
         $nohp = str_replace(")","",$nohp);
         // kadang ada penulisan no hp 0811.239.345
         $nohp = str_replace(".","",$nohp);
-    
+        $hp = '';
         // cek apakah no hp mengandung karakter + dan 0-9
         if(!preg_match('/[^+0-9]/',trim($nohp))){
             // cek apakah no hp karakter 1-3 adalah +62
