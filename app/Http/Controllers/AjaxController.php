@@ -255,7 +255,10 @@ class AjaxController extends Controller
                 });
             }
             $query->whereAktif(1);
-        })->with(['exam.pembelajaran.rombongan_belajar', 'user'])->orderBy('status_ujian', 'DESC')->orderBy('status_upload', 'DESC');
+        })->with(['exam' => function($query){
+            $query->with('pembelajaran.rombongan_belajar');
+            $query->withCount('question');
+        }, 'user'])->withCount('user_question')->orderBy('status_ujian', 'DESC')->orderBy('status_upload', 'DESC');
         return DataTables::eloquent($query)
         ->startsWithSearch()
         ->filter(function ($query) use ($request) {
@@ -340,7 +343,7 @@ class AjaxController extends Controller
         ->addColumn('force_selesai', function ($item) use ($user){
             if ($item->status_ujian && $item->updated_at->diffInHours(Carbon::now($user->timezone)) > 2) {
                 $links = '<a href="'.route('proktor.force_selesai', ['id' => $item->user_exam_id]).'" class="btn btn-sm btn-block btn-danger force_selesai">Force Selesai</a>';
-            } elseif(!$item->status_ujian && $item->user_question->count() != $item->exam->question->count()){
+            } elseif(!$item->status_ujian && $item->user_question_count != $item->question_count){
                 $links = '<a href="'.route('proktor.force_selesai', ['id' => $item->user_exam_id]).'" class="btn btn-sm btn-block btn-danger force_selesai">Force Selesai</a>';
             } else {
                 $links = '-';
