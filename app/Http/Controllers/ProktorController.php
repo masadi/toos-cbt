@@ -763,6 +763,9 @@ class ProktorController extends Controller
             });
             if($all_files->count()){
                 foreach($all_files as $file){
+                    $contents = $file->getContents();
+                    dd($contents);
+                    $user_question = json_decode($user_question);
                     dd($file);
                     $user_question = Storage::disk('public')->get($file);
                     $user_question = json_decode($user_question);
