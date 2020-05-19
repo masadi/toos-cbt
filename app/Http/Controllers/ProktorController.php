@@ -753,6 +753,7 @@ class ProktorController extends Controller
         $user_exam = User_exam::find($request->route('id'));
         $user_exam->status_upload = 0;
         $user_exam->status_ujian = 0;
+        $user_exam->force_selesai = 1;
         if($user_exam->save()){
             //$all_files = Storage::disk('public')->files();
             $path = public_path('storage');
