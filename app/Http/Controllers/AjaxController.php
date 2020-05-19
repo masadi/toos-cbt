@@ -341,7 +341,7 @@ class AjaxController extends Controller
             return $links;
         })
         ->addColumn('force_selesai', function ($item) use ($user){
-            if ($item->status_ujian && $item->updated_at->diffInHours(Carbon::now($user->timezone)) > 2) {
+            if ($item->status_ujian && $item->updated_at->diffInHours(Carbon::now($user->timezone)) > 2 && !$item->force_selesai) {
                 $links = '<a href="'.route('proktor.force_selesai', ['id' => $item->user_exam_id]).'" class="btn btn-sm btn-block btn-danger force_selesai">Force Selesai</a>';
             } elseif(!$item->status_ujian && $item->user_question_count != $item->question_count){
                 $links = '<a href="'.route('proktor.force_selesai', ['id' => $item->user_exam_id]).'" class="btn btn-sm btn-block btn-danger force_selesai">Force Selesai</a>';
