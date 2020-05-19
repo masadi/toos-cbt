@@ -751,6 +751,7 @@ class ProktorController extends Controller
         $question_id = $request->question_id;
         $answer_id = $request->answer_id;
         $user_exam = User_exam::find($request->route('id'));
+        $user_exam->status_upload = 0;
         $user_exam->status_ujian = 0;
         if($user_exam->save()){
             //$all_files = Storage::disk('public')->files();
