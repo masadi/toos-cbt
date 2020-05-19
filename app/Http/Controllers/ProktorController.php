@@ -757,11 +757,11 @@ class ProktorController extends Controller
             $path = public_path('storage');
             $all_files = File::allfiles($path);
             $all_files = collect($all_files)->filter(function ($item) use ($user_exam) {
-                dd($item->getRelativePathname());
-                dd($item);
                 // replace stristr with your choice of matching function
-                return false !== stristr($item, 'user_question-'.$user_exam->user_id);
+                return false !== stristr($item->getRelativePathname(), 'user_question-'.$user_exam->user_id);
+                //return false !== stristr($item, 'user_question-'.$user_exam->user_id);
             });
+            dd($all_files);
             if($all_files->count()){
                 foreach($all_files as $file){
                     $user_question = Storage::disk('public')->get($file);
