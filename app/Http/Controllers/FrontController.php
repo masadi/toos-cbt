@@ -8,9 +8,11 @@ class FrontController extends Controller
 {
     public function logout(){
         $user = auth()->user();
-        $user->logout = TRUE;
-        $user->save();
-        Auth::logout();
+        if($user){
+            $user->logout = TRUE;
+            $user->save();
+            Auth::logout();
+        }
         return redirect('login')->with('success', 'Logout berhasil. Terima kasih');
     }
 }
