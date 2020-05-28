@@ -304,9 +304,9 @@ class ProsesSync extends Command
                     'photo' => $item->photo,
                 ]
             );
-            $find = User::where('ptk_id', $item->user->ptk_id)->first();
-            if(!$find){
-                if(isset($item->user)){
+            if(isset($item->user)){
+                $find = User::where('ptk_id', $item->user->ptk_id)->first();
+                if(!$find){
                     $user = User::updateOrCreate(
                         [
                             'ptk_id' => $item->user->ptk_id, 
