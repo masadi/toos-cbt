@@ -74,7 +74,7 @@ class AmbilData extends Command
                     $sekolah_id[] = $peserta->sekolah->sekolah_id;
                 }
                 if($data == 'ptk'){
-                    Ptk::on('pgsql')->with('user')->whereIn('sekolah_id', $sekolah_id)->chunk(200, function ($result) use ($data, $get_tz){
+                    Ptk::on('pgsql')->with(['user', 'sekolah'])->whereIn('sekolah_id', $sekolah_id)->chunk(200, function ($result) use ($data, $get_tz){
                         foreach($result as $re){
                             $item = json_decode(json_encode($re));
                             $this->insert_sekolah($item->sekolah);
@@ -200,7 +200,7 @@ class AmbilData extends Command
             $server = Server::where('id_server', $username)->first();
             if($cbt_server){
                 if($data == 'ptk'){
-                    Ptk::on('pgsql')->where('sekolah_id', $server->sekolah_id)->chunk(200, function ($result) use ($data, $get_tz){
+                    Ptk::on('pgsql')->with(['user', 'sekolah'])->where('sekolah_id', $server->sekolah_id)->chunk(200, function ($result) use ($data, $get_tz){
                         foreach($result as $re){
                             $item = json_decode(json_encode($re));
                             $this->insert_sekolah($item->sekolah);
@@ -240,7 +240,7 @@ class AmbilData extends Command
                     $this->info('Start again => ambil:data '.$username.' anggota_rombel 0');
                     $this->call('ambil:data', ['username' => $username, 'data' => 'anggota_rombel','offset' => 0]);
                 } elseif($data == 'anggota_rombel'){
-                    Anggota_rombel::on('pgsql')->whereHas('rombongan_belajar', function($query) use ($server){
+                    Anggota_rombel::on('pgsql')->with('peserta_didik.user')->whereHas('rombongan_belajar', function($query) use ($server){
                         $query->where('server_id', $server->server_id);
                     })->chunk(200, function ($result) use ($data, $get_tz){
                         foreach($result as $re){
@@ -375,10 +375,12 @@ class AmbilData extends Command
             ]
         );
         $event = Event::first();
-        Peserta_event::updateOrCreate([
-            'event_id' => $event->id,
-            'sekolah_id' => $item->sekolah_id,
-        ]);
+        if($event){
+            Peserta_event::updateOrCreate([
+                'event_id' => $event->id,
+                'sekolah_id' => $item->sekolah_id,
+            ]);
+        }
     }
     private function insert_ujian($item){
         Ujian::updateOrCreate(
