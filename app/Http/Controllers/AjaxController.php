@@ -874,13 +874,15 @@ class AjaxController extends Controller
                 $output['results'][] = $record;
             }
         } elseif($query == 'mata-ujian'){
-            $mata_ujian = Exam::where('pembelajaran_id', $request->pembelajaran_id)->whereAktif(0)->get();
+            $mata_ujian = Exam::withCount('question')->where('pembelajaran_id', $request->pembelajaran_id)->whereAktif(0)->get();
             if($mata_ujian->count()){
                 foreach($mata_ujian as $exam){
-                    $record= array();
-                    $record['id'] 	= $exam->exam_id;
-                    $record['text'] 	= $exam->nama;
-                    $output['results'][] = $record;
+                    if($exam->question_count == $exam->jumlah_soal){
+                        $record= array();
+                        $record['id'] 	= $exam->exam_id;
+                        $record['text'] 	= $exam->nama;
+                        $output['results'][] = $record;
+                    }
                 }
             } else {
                 $record['id'] 	= '';

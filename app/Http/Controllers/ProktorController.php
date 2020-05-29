@@ -423,7 +423,7 @@ class ProktorController extends Controller
             if($all_user->count()){
                 foreach($all_user as $user){
                     $json_file_ujian = 'ujian-'.$user->user_id.'-'.$exam->exam_id.'.json';
-                    if(!Storage::disk('public')->exists($json_file_ujian)){
+                    //if(!Storage::disk('public')->exists($json_file_ujian)){
                         $get_ujian = Exam::withCount(['question', 'user_question' => function($query) use ($user){
                             $query->where('user_questions.user_id', $user->user_id);
                         }])->with(['question' => function($query){
@@ -433,7 +433,7 @@ class ProktorController extends Controller
                             $query->where('user_exams.user_id', $user->user_id);
                         }])->find($exam->exam_id);
                         Storage::disk('public')->put($json_file_ujian, $get_ujian->toJson());
-                    }
+                    //}
                 }
             }
             if($exam){
