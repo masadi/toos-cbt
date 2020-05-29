@@ -81,6 +81,8 @@ class AmbilData extends Command
                             $this->insert_ptk($item, $get_tz->timezone);
                         }
                     });
+                    $this->info('Start again => ambil:data '.$username.' rombongan_belajar 0');
+                    $this->call('ambil:data', ['username' => $username, 'data' => 'rombongan_belajar','offset' => 0]);
                 } elseif($data == 'rombongan_belajar'){
                     Rombongan_belajar::on('pgsql')->with(['sekolah', 'ptk','jurusan_sp'])->where(function($query) use ($sekolah_id){
                         $query->whereIn('sekolah_id', $sekolah_id);
@@ -91,6 +93,8 @@ class AmbilData extends Command
                             $this->insert_ptk($item, $get_tz->timezone);
                         }
                     });
+                    $this->info('Start again => ambil:data '.$username.' ujian 0');
+                    $this->call('ambil:data', ['username' => $username, 'data' => 'ujian','offset' => 0]);
                 } elseif($data == 'ujian'){
                     Ujian::on('pgsql')->with('mata_pelajaran')->where('event_id', $event->id)->chunk(200, function ($result) use ($data, $get_tz){
                         foreach($result as $re){
@@ -99,6 +103,8 @@ class AmbilData extends Command
                             $this->insert_mata_pelajaran($item->mata_pelajaran);
                         }
                     });
+                    $this->info('Start again => ambil:data '.$username.' anggota_rombel 0');
+                    $this->call('ambil:data', ['username' => $username, 'data' => 'anggota_rombel','offset' => 0]);
                 } elseif($data == 'anggota_rombel'){
                     Anggota_rombel::on('pgsql')->whereHas('rombongan_belajar', function($query) use ($sekolah_id){
                         $query->whereIn('sekolah_id', $sekolah_id);
@@ -109,6 +115,8 @@ class AmbilData extends Command
                             $this->insert_ptk($item, $get_tz->timezone);
                         }
                     });
+                    $this->info('Start again => ambil:data '.$username.' exams 0');
+                    $this->call('ambil:data', ['username' => $username, 'data' => 'exams','offset' => 0]);
                 } elseif($data == 'exams'){
                     Exam::on('pgsql')->where(function($query) use ($event){
                         $query->whereHas('event', function($query) use ($event){
@@ -124,6 +132,8 @@ class AmbilData extends Command
                             $this->insert_ptk($item, $get_tz->timezone);
                         }
                     });
+                    $this->info('Start again => ambil:data '.$username.' questions 0');
+                    $this->call('ambil:data', ['username' => $username, 'data' => 'questions','offset' => 0]);
                 } elseif($data == 'questions'){
                     Question::on('pgsql')->whereHas('exam', function($query) use ($event){
                         $query->whereHas('event', function($query) use ($event){
@@ -139,6 +149,8 @@ class AmbilData extends Command
                             $this->insert_ptk($item, $get_tz->timezone);
                         }
                     });
+                    $this->info('Start again => ambil:data '.$username.' answers 0');
+                    $this->call('ambil:data', ['username' => $username, 'data' => 'answers','offset' => 0]);
                 } elseif($data == 'answers'){
                     Answer::on('pgsql')->whereHas('question', function($query) use ($event){
                         $query->whereHas('exam', function($sq) use ($event){
@@ -195,6 +207,8 @@ class AmbilData extends Command
                             $this->insert_ptk($item, $get_tz->timezone);
                         }
                     });
+                    $this->info('Start again => ambil:data '.$username.' rombongan_belajar 0');
+                    $this->call('ambil:data', ['username' => $username, 'data' => 'rombongan_belajar','offset' => 0]);
                 } elseif($data == 'rombongan_belajar'){
                     Rombongan_belajar::on('pgsql')->with(['ptk','jurusan_sp'])->where(function($query) use ($server){
                         $query->where('server_id', $server->server_id);
@@ -209,6 +223,8 @@ class AmbilData extends Command
                             $this->insert_rombel($item);
                         }
                     });
+                    $this->info('Start again => ambil:data '.$username.' pembelajaran 0');
+                    $this->call('ambil:data', ['username' => $username, 'data' => 'pembelajaran','offset' => 0]);
                 } elseif($data == 'pembelajaran'){
                     Pembelajaran::on('pgsql')->with(['ptk', 'rombongan_belajar', 'mata_pelajaran'])->whereHas('rombongan_belajar', function($query) use ($server){
                         $query->where('server_id', $server->server_id);
@@ -221,6 +237,8 @@ class AmbilData extends Command
                             $this->insert_pembelajaran($item);
                         }
                     });
+                    $this->info('Start again => ambil:data '.$username.' anggota_rombel 0');
+                    $this->call('ambil:data', ['username' => $username, 'data' => 'anggota_rombel','offset' => 0]);
                 } elseif($data == 'anggota_rombel'){
                     Anggota_rombel::on('pgsql')->whereHas('rombongan_belajar', function($query) use ($server){
                         $query->where('server_id', $server->server_id);
@@ -231,6 +249,8 @@ class AmbilData extends Command
                             $this->insert_anggota_rombel($item);
                         }
                     });
+                    $this->info('Start again => ambil:data '.$username.' exams 0');
+                    $this->call('ambil:data', ['username' => $username, 'data' => 'exams','offset' => 0]);
                 } elseif($data == 'exams'){
                     Exam::on('pgsql')->where(function($query) use ($server){
                         $query->whereHas('pembelajaran', function($sq) use ($server){
@@ -247,6 +267,8 @@ class AmbilData extends Command
                             $this->insert_exam($item);
                         }
                     });
+                    $this->info('Start again => ambil:data '.$username.' questions 0');
+                    $this->call('ambil:data', ['username' => $username, 'data' => 'questions','offset' => 0]);
                 } elseif($data == 'questions'){
                     Question::on('pgsql')->whereHas('exam', function($query) use ($server){
                         $query->whereHas('pembelajaran', function($sq) use ($server){
@@ -263,6 +285,8 @@ class AmbilData extends Command
                             $this->insert_question($item);
                         }
                     });
+                    $this->info('Start again => ambil:data '.$username.' answers 0');
+                    $this->call('ambil:data', ['username' => $username, 'data' => 'answers','offset' => 0]);
                 } elseif($data == 'answers'){
                     Answer::on('pgsql')->whereHas('question', function($query) use ($server){
                         $query->whereHas('exam', function($sq) use ($server){
