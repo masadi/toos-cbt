@@ -116,6 +116,12 @@ class GetRoute
                     'icon' => 'fas fa-fw fa-sync-alt',
                 ]);
                 $event->menu->add([
+                    'text' => 'Hapus Data',
+                    'url'  => 'hapus-data',
+                    'permission'  => 'proktor-salah',
+                    'icon' => 'fas fa-fw fa-trash',
+                ]);
+                $event->menu->add([
                     'text' => 'Proses Ujian',
                     'url'  => 'ujian/token',
                     'permission'  => 'peserta_didik',

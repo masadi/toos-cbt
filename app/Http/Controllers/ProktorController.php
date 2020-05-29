@@ -127,6 +127,8 @@ class ProktorController extends Controller
             return $this->tambah_jadwal($request);
         } elseif($query == 'test'){
             return $this->test($request);
+        } elseif($query == 'hapus-data'){
+            return $this->hapus_data($request);
         } else {
             echo $query;
         }
@@ -1163,5 +1165,8 @@ class ProktorController extends Controller
             ];
         }
         return response()->json($output);
+    }
+    public function hapus_data($request){
+        return view('proktor.hapus_data');
     }
 }
