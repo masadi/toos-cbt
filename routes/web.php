@@ -12,6 +12,9 @@ use Illuminate\Support\Facades\Route;
 | contains the "web" middleware group. Now create something great!
 |
 */
+Route::get('/config', function(){
+    dd(config());
+});
 Route::get('/reset/ujian','HomeController@reset_ujian')->name('reset_ujian');
 Route::get('/browser-tidak-support/{name}', function($name){
     return view('update_browser', compact('name'));

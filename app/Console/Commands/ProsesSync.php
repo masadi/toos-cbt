@@ -87,6 +87,7 @@ class ProsesSync extends Command
                 }
             } elseif($data->query == 'rombongan_belajar'){
                 $data->response = (array) $data->response;
+                dd($data->response);
                 if($data->response['data'] && is_array($data->response['data'])){
                     //DB::table('rombongan_belajar')->delete();
                     foreach($data->response['data'] as $item){
