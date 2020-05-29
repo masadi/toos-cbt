@@ -48,6 +48,10 @@ class GetRoute
                     }
                 }
             }
+            if(Auth::user()->hasRole('peserta_didik') && Auth::user()->logout){
+                Auth::logout();
+                return redirect('login')->with('success', 'Sesi login anda di reset oleh proktor. Silahkan login kembali');
+            }
         }
         Event::listen(BuildingMenu::class, function (BuildingMenu $event) use ($name){
             if($name[0] == 'ujian'){
