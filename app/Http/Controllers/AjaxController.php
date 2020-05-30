@@ -882,6 +882,10 @@ class AjaxController extends Controller
                         $record['id'] 	= $exam->exam_id;
                         $record['text'] 	= $exam->nama;
                         $output['results'][] = $record;
+                    } else {
+                        $record['id'] 	= '';
+                        $record['text'] 	= 'Jumlah soal tidak lengkap';
+                        $output['results'][] = $record;
                     }
                 }
             } else {
