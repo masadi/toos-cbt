@@ -877,16 +877,16 @@ class AjaxController extends Controller
             $mata_ujian = Exam::withCount('question')->where('pembelajaran_id', $request->pembelajaran_id)->whereAktif(0)->get();
             if($mata_ujian->count()){
                 foreach($mata_ujian as $exam){
-                    if($exam->question_count == $exam->jumlah_soal){
+                    //if($exam->question_count == $exam->jumlah_soal){
                         $record= array();
                         $record['id'] 	= $exam->exam_id;
                         $record['text'] 	= $exam->nama;
                         $output['results'][] = $record;
-                    } else {
-                        $record['id'] 	= '';
-                        $record['text'] 	= 'Jumlah soal tidak lengkap';
-                        $output['results'][] = $record;
-                    }
+                    //} else {
+                        //$record['id'] 	= '';
+                        //$record['text'] 	= 'Jumlah soal tidak lengkap';
+                        //$output['results'][] = $record;
+                    //}
                 }
             } else {
                 $record['id'] 	= '';
