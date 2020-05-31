@@ -422,6 +422,7 @@ class ProktorController extends Controller
                     $query->where('rombongan_belajar_id', $exam->pembelajaran->rombongan_belajar_id);
                 });
             })->get();
+            //DB::enableQueryLog();
             if($all_user->count()){
                 foreach($all_user as $user){
                     $json_file_ujian = 'ujian-'.$user->user_id.'-'.$exam->exam_id.'.json';

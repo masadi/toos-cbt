@@ -76,6 +76,8 @@ $ php artisan key:generate
 # run database migration and seed
 $ php artisan migrate:refresh --seed
 
+# symlink storage folder
+$ php artisan storage:link
 ```
 
 ## Usage

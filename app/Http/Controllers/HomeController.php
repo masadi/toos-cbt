@@ -12,6 +12,7 @@ class HomeController extends Controller
     }
     public function reset_ujian(Request $request){
         User_exam::whereNotNull('exam_id')->delete();
+        Exam::whereAktif(1)->update(['aktif' => 0]);
         echo 'reset_ujian';
     }
     public function logout(){
