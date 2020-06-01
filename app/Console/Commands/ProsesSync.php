@@ -87,7 +87,6 @@ class ProsesSync extends Command
                 }
             } elseif($data->query == 'rombongan_belajar'){
                 $data->response = (array) $data->response;
-                dd($data->response);
                 if($data->response['data'] && is_array($data->response['data'])){
                     //DB::table('rombongan_belajar')->delete();
                     foreach($data->response['data'] as $item){
@@ -165,11 +164,6 @@ class ProsesSync extends Command
                 }
             }
         } elseif($query == 'upload'){
-            //$asd = json_decode(json_encode($data));
-            //dd($data);
-            //foreach($data['anggota_rombel_id'] as $key => $value){
-                //echo $key.'=>'.$value;
-            //}
             $host_server = config('global.url_server').'upload-ujian';
             /*$arguments = [
                 'ptk_id' => $data['ptk_id'],
