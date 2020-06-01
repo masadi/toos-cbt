@@ -198,6 +198,7 @@ class AmbilData extends Command
             }
         } else {
             $server = Server::where('id_server', $username)->first();
+            echo $username;
             dd($server);
             if($cbt_server && $server){
                 if($data == 'ptk'){
