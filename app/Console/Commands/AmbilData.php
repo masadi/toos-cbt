@@ -198,6 +198,9 @@ class AmbilData extends Command
             }
         } else {
             $server = Server::where('id_server', $username)->first();
+            if(!$server){
+                $server = User::where('name', $username)->first();
+            }
             echo $username;
             dd($server);
             if($cbt_server && $server){
