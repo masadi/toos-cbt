@@ -27,7 +27,8 @@ class UjianController extends Controller
         if(Storage::disk('public')->exists($json_file_ujian)){
             //$ujian = Storage::disk('public')->get($json_file_ujian);
             //$ujian = json_decode($ujian);
-            $reader->open('storage/'.$json_file_ujian);
+            $path = storage_path('app/public/'.$json_file_ujian);
+            $reader->open($path);
             $ujian = '';
             if($reader->read()) {
                 $collection = collect($reader->value());
