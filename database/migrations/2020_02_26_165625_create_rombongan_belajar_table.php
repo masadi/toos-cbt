@@ -46,7 +46,7 @@ class CreateRombonganBelajarTable extends Migration
         Schema::table('rombongan_belajar', function (Blueprint $table) {
             $table->dropForeign(['sekolah_id']);
             $table->dropForeign(['ptk_id']);
-            $table->dropForeign(['tingkat_pendidikan_id']);
+            $table->dropForeign(['tingkat']);
             $table->dropForeign(['jurusan_id']);
             $table->dropForeign(['kurikulum_id']);
             $table->dropForeign(['jurusan_sp_id']);
