@@ -63,7 +63,8 @@ class UjianController extends Controller
                 $all = collect($all);
                 $first = $all->first();
                 $all = $all->all();*/
-                $reader->open('storage/'.$json_file_all);
+                $path = storage_path('app/public/'.$json_file_all);
+                $reader->open($path);
                 if ($reader->read()) {
                     $collection = collect($reader->value());
                     $all = $collection->toJson();
@@ -113,7 +114,8 @@ class UjianController extends Controller
             $jawaban_siswa = NULL;
             if(Storage::disk('public')->exists($json_file_jawaban)){
                 //$jawaban_siswa = Storage::disk('public')->get($json_file_jawaban);
-                $reader->open('storage/'.$json_file_jawaban);
+                $path = storage_path('app/public/'.$json_file_jawaban);
+                $reader->open($path);
                 if ($reader->read()) {
                     $jawaban_siswa = collect($reader->value());
                     $jawaban_siswa = $jawaban_siswa->toJson();
@@ -155,7 +157,8 @@ class UjianController extends Controller
             //$all = Storage::disk('public')->get($json_file_utama);
             //$all = json_decode($all);
             if(Storage::disk('public')->exists($json_file_utama)){
-                $reader->open('storage/'.$json_file_utama);
+                $path = storage_path('app/public/'.$json_file_utama);
+                $reader->open($path);
                 if ($reader->read()) {
                     $all = collect($reader->value());
                     //$all = $all->toJson();
