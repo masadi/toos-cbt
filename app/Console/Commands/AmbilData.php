@@ -198,11 +198,6 @@ class AmbilData extends Command
             }
         } else {
             $server = Server::where('id_server', $username)->first();
-            if(!$server){
-                $server = User::where('name', $username)->first();
-            }
-            echo $username;
-            dd($server);
             if($cbt_server && $server){
                 if($data == 'ptk'){
                     Ptk::on('pgsql')->with(['user', 'sekolah'])->where('sekolah_id', $server->sekolah_id)->chunk(200, function ($result) use ($data, $get_tz){
