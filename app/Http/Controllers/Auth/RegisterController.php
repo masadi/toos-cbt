@@ -112,7 +112,7 @@ class RegisterController extends Controller
             return redirect()->back()->withErrors($validator)->withInput();
         } else {
             $setting = Setting::where('key', 'url_server')->first();
-            $timezone =  $this->getTimezone($request);
+            $timezone =  'Asia/Jakarta';//$this->getTimezone($request);
             $arguments = [
                 'npsn' => $request->npsn,
                 'lisensi' => $request->lisensi
