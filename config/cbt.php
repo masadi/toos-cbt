@@ -2,6 +2,6 @@
 
 return [
 
-    'server' => TRUE,
+    'server' => env('APP_SERVER', FALSE),
     
 ];
