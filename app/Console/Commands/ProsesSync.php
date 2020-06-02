@@ -67,8 +67,52 @@ class ProsesSync extends Command
         $timezone = $this->argument('timezone');
         if($query == 'proses-sync'){
             if($data->ptk){
+                $this->info('ptk');
                 foreach($data->ptk as $ptk){
                     $this->insert_ptk($ptk, $timezone);
+                }
+            }
+            if($data->jurusan_sp){
+                foreach($data->jurusan_sp as $jurusan_sp){
+                    $this->insert_jurusan_sp($jurusan_sp);
+                }
+            }
+            if($data->rombongan_belajar){
+                foreach($data->rombongan_belajar as $rombongan_belajar){
+                    $this->info('rombongan_belajar');
+                    $this->insert_rombel($rombongan_belajar);
+                    if($rombongan_belajar->pembelajaran){
+                        foreach($rombongan_belajar->pembelajaran as $pembelajaran){
+                            $this->info('pembelajaran');
+                            $this->insert_mata_pelajaran($pembelajaran->mata_pelajaran);
+                            $this->insert_pembelajaran($pembelajaran);
+                            if($pembelajaran->exams){
+                                foreach($pembelajaran->exams as $exams){
+                                    $this->info('exams');
+                                    $this->insert_exam($exams);
+                                    if($exams->question){
+                                        foreach($exams->question as $question){
+                                            $this->info('questions');
+                                            $this->insert_question($question);
+                                            if($question->answer){
+                                                foreach($question->answer as $answer){
+                                                    $this->info('answers');
+                                                    $this->insert_answer($answer);
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    if($rombongan_belajar->anggota_rombel){
+                        foreach($rombongan_belajar->anggota_rombel as $anggota_rombel){
+                            $this->info('anggota_rombel');
+                            $this->insert_peserta_didik($anggota_rombel->peserta_didik, $timezone);
+                            $this->insert_anggota_rombel($anggota_rombel);
+                        }
+                    }
                 }
             }
         } elseif($query == 'download'){

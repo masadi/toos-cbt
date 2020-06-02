@@ -432,5 +432,37 @@ return [
                 ],
             ],
         ],
+        [
+            'name' => 'bsCustomFileInput',
+            'active' => false,
+            'files' => [
+                [
+                    'type' => 'js',
+                    'asset' => true,
+                    'location' => '/vendor/bs-custom-file-input/bs-custom-file-input.min.js',
+                ],
+            ],
+        ],
+        [
+            'name' => 'FileUpload',
+            'active' => false,
+            'files' => [
+                [
+                    'type' => 'js',
+                    'asset' => true,
+                    'location' => '/vendor/jQuery-File-Upload/js/vendor/jquery.ui.widget.js',
+                ],
+                [
+                    'type' => 'js',
+                    'asset' => true,
+                    'location' => '/vendor/jQuery-File-Upload/js/jquery.iframe-transport.js',
+                ],
+                [
+                    'type' => 'js',
+                    'asset' => true,
+                    'location' => '/vendor/jQuery-File-Upload/js/jquery.fileupload.js',
+                ],
+            ],
+        ],
     ],
 ];

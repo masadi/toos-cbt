@@ -57,9 +57,73 @@
 @endsection
 @section('plugins.ButtonLoader', true)
 @section('plugins.Sweetalert2', true)
+@section('plugins.bsCustomFileInput', true)
+@section('plugins.FileUpload', true)
 @section('js')
 <script>
     $(function() {
+    bsCustomFileInput.init();
+    $('#fileupload').fileupload({
+		url: '{{route('proktor.simpan', ['query' => 'upload-sync'])}}',
+		dataType: 'json',
+		progressall: function(e, data) {
+			var progress = parseInt(data.loaded / data.total * 100, 10);
+			$('#progress .progress-bar').css('width', progress + '%');
+		},
+		done: function(e, data) {
+            /*Swal.fire({
+                icon: data.result.icon,
+                text: data.result.text,
+                title: data.result.title,
+                confirmButtonText: 'Proses'
+            }).then(function(e) {
+                if(data.result.success){
+                    $.get( "{{route('proktor.index', ['query' => 'proses-sync'])}}", { sync_file: data.result.sync_file } ).done(function( data ) {
+                        console.log(data);
+                    });
+                }
+            });*/
+            Swal.fire({
+                icon: data.result.icon,
+                text: data.result.text,
+                title: data.result.title,
+                confirmButtonText: 'Proses',
+                showLoaderOnConfirm: true,
+                preConfirm: (login) => {
+                    return fetch(`{{route('proktor.index', ['query' => 'proses-sync'])}}?sync_file=`+data.result.sync_file)
+                    .then(response => {
+                        if (!response.ok) {
+                        throw new Error(response.statusText)
+                        }
+                        return response.json()
+                    })
+                    .catch(error => {
+                        Swal.showValidationMessage(
+                        `Request failed: ${error}`
+                        )
+                    })
+                },
+                allowOutsideClick: () => !Swal.isLoading()
+                }).then((result) => {
+                    if (result.value) {
+                        Swal.fire({
+                            icon: result.value.icon,
+                            text: result.value.text,
+                            title: result.value.title,
+                        }).then(function(e) {
+                            window.location.replace(window.location.href);
+                        });
+                    }
+                })
+			$('#progress').css('width', '0%');
+		},
+		error: function(data) {
+			$.each(data.responseJSON.errors.file, function(index, message) {
+				console.log(message);
+			});
+			$('#progress .progress-bar').css('width','0%');
+		}
+	});
     $.get("{{route('proktor.index', ['query' => 'hitung-server'])}}", function(data, status){
         if(status === 'success'){
             /*var result = Object.keys(data.local).map(function (key) {

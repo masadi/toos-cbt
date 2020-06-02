@@ -151,10 +151,17 @@ class ProktorController extends Controller
         return view('proktor.tambah_jadwal', compact('rombongan_belajar'));
     }
     public function proses_sync($request){
+        $user = auth()->user();
         $sync_file = Storage::disk('local')->get('public/uploads/'.$request->sync_file);
         $data = json_decode(Helper::prepare_receive($sync_file));
-        Artisan::call('proses:sync', ['query' => 'proses-sync', 'data' => $data]);
+        Artisan::call('proses:sync', ['query' => 'proses-sync', 'data' => $data, 'timezone' => $user->timezone]);
         unlink(storage_path('app/public/uploads/'.$request->sync_file));
+        $output = [
+            'title' => 'Berhasil',
+            'text' => 'Proses sync offline selesai',
+            'icon' => 'success'
+        ];
+        return response()->json($output);
         //public_path('storage/uploads/'.$request->zip_file);
     }
     public function test($request){
@@ -484,24 +491,27 @@ class ProktorController extends Controller
                             $output = [
                                 'icon' => 'success',
                                 'success' => TRUE,
-                                'status' => 'Unggah Data Sync Berhasil',
+                                'title' => 'Berhasil',
+                                'text' => 'Unggah Data Sync Berhasil',
                                 'sync_file' => $sync_file.'.sync',
                             ];
                         } else {
                             $output = [
                                 'icon' => 'error',
                                 'success' => FALSE,
-                                'status' => 'File ZIP gagal di ekstrak. Silahkan unggah ulang!!!',
+                                'title' => 'Gagal',
+                                'text' => 'File ZIP gagal di ekstrak. Silahkan unggah ulang!!!',
                                 'sync_file' => NULL,
                             ];
                         }
-                        unlink(storage_path('app/public/uploads/'.$file->getClientOriginalName()));
+                        File::delete(storage_path('app/public/uploads/'.$file->getClientOriginalName()));
                     }
                 } else {
                     $output = [
                         'icon' => 'error',
                         'success' => FALSE,
-                        'status' => 'File ZIP gagal di unggah!',
+                        'title' => 'Gagal',
+                        'text' => 'File ZIP gagal di unggah!',
                         'sync_file' => NULL,
                     ];
                 }
@@ -509,7 +519,8 @@ class ProktorController extends Controller
                 $output = [
                     'icon' => 'error',
                     'success' => FALSE,
-                    'status' => 'File harus ekstensi ZIP',
+                    'title' => 'Gagal',
+                    'text' => 'File harus ekstensi ZIP',
                     'sync_file' => NULL,
                 ];
             }
