@@ -403,15 +403,22 @@ class UjianController extends Controller
                             'user_id' => $user_question->user_id,
                         ]
                     );
-                    Storage::disk('public')->delete($file);
+                    //Storage::disk('public')->delete($file);
+                    File::delete($file);
                 } catch (\Exception $e) {
                     //
                 }
             }
         }
-        $json_file_all = 'all-'.$user->user_id.'-'.$ujian_id.'.json';
-        $json_file_ujian = 'ujian-'.$user->user_id.'-'.$ujian_id.'.json';
-        Storage::disk('public')->delete([$json_file_all, $json_file_ujian]);
+        $json_file_all = storage_path('app/public/all-'.$user->user_id.'-'.$ujian_id.'.json');
+        $json_file_ujian = storage_path('app/public/ujian-'.$user->user_id.'-'.$ujian_id.'.json');
+        //Storage::disk('public')->delete([$json_file_all, $json_file_ujian]);
+        if(File::exists($json_file_all)){
+            File::delete($json_file_all);
+        }
+        if(File::exists($json_file_ujian)){
+            File::delete($json_file_ujian);
+        }
         $response = [
             'title' => 'Berhasil',
             'text' => 'Nilai berhasil disimpan',
