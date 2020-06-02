@@ -759,7 +759,7 @@ class ProktorController extends Controller
         $user_exam->force_selesai = 1;
         if($user_exam->save()){
             //$all_files = Storage::disk('public')->files();
-            $path = public_path('storage');
+            $path = storage_path('app/public');
             $all_files = File::allfiles($path);
             $all_files = collect($all_files)->filter(function ($item) use ($user_exam) {
                 // replace stristr with your choice of matching function
@@ -792,9 +792,18 @@ class ProktorController extends Controller
                     }
                 }
             }
-            $json_file_all = 'all-'.$user_exam->user_id.'-'.$ujian_id.'.json';
-            $json_file_ujian = 'ujian-'.$user_exam->user_id.'-'.$ujian_id.'.json';
-            Storage::disk('public')->delete([$json_file_all, $json_file_ujian]);
+            //$json_file_all = 'all-'.$user_exam->user_id.'-'.$ujian_id.'.json';
+            //$json_file_ujian = 'ujian-'.$user_exam->user_id.'-'.$ujian_id.'.json';
+            //Storage::disk('public')->delete([$json_file_all, $json_file_ujian]);
+            $json_file_all = storage_path('app/public/all-'.$user_exam->user_id.'-'.$ujian_id.'.json');
+            $json_file_all = storage_path('app/public/ujian-'.$user_exam->user_id.'-'.$ujian_id.'.json');
+            //Storage::disk('public')->delete([$json_file_all, $json_file_ujian]);
+            if(File::exists($json_file_all)){
+                File::delete($json_file_all);
+            }
+            if(File::exists($json_file_ujian)){
+                File::delete($json_file_ujian);
+            }
         }
         if($insert){
             $output = [
