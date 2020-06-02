@@ -786,7 +786,8 @@ class ProktorController extends Controller
                             ]
                         );
                         $insert++;
-                        Storage::disk('public')->delete($file);
+                        //Storage::disk('public')->delete($file);
+                        File::delete($file);
                     } catch (\Exception $e) {
                         //
                     }
