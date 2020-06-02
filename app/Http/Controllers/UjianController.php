@@ -377,7 +377,8 @@ class UjianController extends Controller
             );
         }
         //$all_files = Storage::disk('public')->files();
-        $path = public_path('storage');
+        //$path = public_path('storage');
+        $path = storage_path('app/public');
         $all_files = File::allfiles($path);
         $all_files = collect($all_files)->filter(function ($item) use ($user) {
             // replace stristr with your choice of matching function
