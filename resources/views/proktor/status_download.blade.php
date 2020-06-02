@@ -93,7 +93,7 @@
                     return fetch(`{{route('proktor.index', ['query' => 'proses-sync'])}}?sync_file=`+data.result.sync_file)
                     .then(response => {
                         if (!response.ok) {
-                        throw new Error(response.statusText)
+                            throw new Error(response.statusText)
                         }
                         return response.json()
                     })
