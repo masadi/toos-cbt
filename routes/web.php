@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Route;
 Route::get('/config', function(){
     dd(config());
 });
+Route::get('/nganu','FrontController@test');
 Route::get('/reset/ujian','HomeController@reset_ujian')->name('reset_ujian');
 Route::get('/browser-tidak-support/{name}', function($name){
     return view('update_browser', compact('name'));
