@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Auth;
 use App\Exam;
+use Storage;
 class FrontController extends Controller
 {
     public function test(){
