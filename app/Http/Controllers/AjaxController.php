@@ -880,7 +880,7 @@ class AjaxController extends Controller
                     //if($exam->question_count == $exam->jumlah_soal){
                         $record= array();
                         $record['id'] 	= $exam->exam_id;
-                        $record['text'] 	= $exam->nama;
+                        $record['text'] 	= $exam->nama. '('.$exam->question_count.')';
                         $output['results'][] = $record;
                     //} else {
                         //$record['id'] 	= '';
