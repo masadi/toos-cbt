@@ -22,6 +22,12 @@ class FrontController extends Controller
                             $query->where('user_exams.user_id', $user_id);
                         }])->find($ujian_id);
                         Storage::disk('public')->put($json_file_ujian, $get_ujian->toJson());
+                        $json_file_all = 'all-'.$user_id.'-'.$ujian_id.'.json';
+                        $collection = collect($get_ujian->question);
+                        $shuffled = $collection->shuffle();
+                        $first = $shuffled->first();
+                        $all = $shuffled->all();
+                        Storage::disk('public')->put($json_file_all, $shuffled->toJson());
     }
     public function logout(){
         $user = auth()->user();
