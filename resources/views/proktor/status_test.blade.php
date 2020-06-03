@@ -99,6 +99,7 @@
                 <tr>
                     <th class="text-center" width="10px">No</th>
                     <th>Nama Mata Ujian</th>
+                    <th class="text-center">Jumlah Soal</th>
                     <th>Rombel</th>
                     <th>Mata Pelajaran</th>
                     <th class="text-center">Status</th>
@@ -134,6 +135,7 @@ $(function() {
         columns: [
             { data: 'DT_RowIndex', name: 'DT_RowIndex', className: 'dt-body-center', orderable: false, searchable: false },
             { data: 'nama', name: 'nama' },
+            { data: 'question_count', name: 'question_count' },
             { data: 'pembelajaran.rombongan_belajar.nama', name: 'pembelajaran.rombongan_belajar.nama' },
             { data: 'pembelajaran.nama_mata_pelajaran', name: 'pembelajaran.nama_mata_pelajaran' },
             { data: 'status', name: 'status', className: 'dt-body-center', orderable: false, searchable: false },

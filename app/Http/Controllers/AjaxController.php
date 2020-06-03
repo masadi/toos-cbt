@@ -175,11 +175,11 @@ class AjaxController extends Controller
         $user = auth()->user();
         $event = Event::where('kode', $user->username)->with('peserta.sekolah')->first();
         if($event){
-            $query = Exam::whereAktif(1)->whereHas('event', function($query) use ($event){
+            $query = Exam::withCount('question')->whereAktif(1)->whereHas('event', function($query) use ($event){
                 $query->where('event_id', $event->id);
             })->with(['pembelajaran.rombongan_belajar']);
         } else {
-            $query = Exam::whereAktif(1)->whereHas('pembelajaran', function($query) use ($user){
+            $query = Exam::withCount('question')->whereAktif(1)->whereHas('pembelajaran', function($query) use ($user){
                 $query->where('sekolah_id', $user->sekolah_id);
             })->with(['pembelajaran.rombongan_belajar']);
         }
