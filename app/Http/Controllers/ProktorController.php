@@ -152,7 +152,7 @@ class ProktorController extends Controller
     }
     public function proses_sync($request){
         $user = auth()->user();
-        $sync_file = Storage::disk('local')->get('public/uploads/'.$request->sync_file);
+        $sync_file = public_path('storage/uploads/'.$request->sync_file);
         $data = json_decode(Helper::prepare_receive($sync_file));
         Artisan::call('proses:sync', ['query' => 'proses-sync', 'data' => $data, 'timezone' => $user->timezone]);
         unlink(storage_path('app/public/uploads/'.$request->sync_file));
