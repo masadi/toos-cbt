@@ -11,7 +11,7 @@ class FrontController extends Controller
 {
     public function test(){
         $all_ujian = Exam::with('pembelajaran')->whereAktif(1)->get();
-        foreach($all_ujian as $ujian){
+        foreach($all_ujian as $exam){
             $all_user = User::whereHas('peserta_didik', function($query) use ($exam){
                 $query->whereHas('anggota_rombel', function($query) use ($exam){
                     $query->where('rombongan_belajar_id', $exam->pembelajaran->rombongan_belajar_id);
