@@ -443,6 +443,12 @@ class ProktorController extends Controller
                             $query->where('user_exams.user_id', $user->user_id);
                         }])->find($exam->exam_id);
                         Storage::disk('public')->put($json_file_ujian, $get_ujian->toJson());
+                        $json_file_all = 'all-'.$user->user_id.'-'.$exam->exam_id.'.json';
+                        $collection = collect($get_ujian->question);
+                        $shuffled = $collection->shuffle();
+                        $first = $shuffled->first();
+                        $all = $shuffled->all();
+                        Storage::disk('public')->put($json_file_all, $shuffled->toJson());
                     //}
                 }
             }
