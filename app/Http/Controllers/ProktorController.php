@@ -157,7 +157,8 @@ class ProktorController extends Controller
         $sync_file = File::get($sync_file);
         $data = json_decode(Helper::prepare_receive($sync_file));
         Artisan::call('proses:sync', ['query' => 'proses-sync', 'data' => $data, 'timezone' => $user->timezone]);
-        unlink(storage_path('app/public/uploads/'.$request->sync_file));
+        //unlink(storage_path('app/public/uploads/'.$request->sync_file));
+        File::delete($sync_file);
         $output = [
             'title' => 'Berhasil',
             'text' => 'Proses sync offline selesai',
