@@ -9,25 +9,36 @@ use Storage;
 class FrontController extends Controller
 {
     public function test(){
-        $user_id = 'b1440af9-5157-4340-8c7d-26e7b170d735';
-        $ujian_id = 'faeea9d5-a0fc-4fe2-9053-55c19a06fdb4';
-        $json_file_ujian = 'ujian-'.$user_id.'-'.$ujian_id.'.json';
+        $all_ujian = Exam::with('pembelajaran')->whereAktif(1)->get();
+        foreach($all_ujian as $ujian){
+            $all_user = User::whereHas('peserta_didik', function($query) use ($exam){
+                $query->whereHas('anggota_rombel', function($query) use ($exam){
+                    $query->where('rombongan_belajar_id', $exam->pembelajaran->rombongan_belajar_id);
+                });
+            })->get();
+            if($all_user->count()){
+                foreach($all_user as $user){
+                    $json_file_ujian = 'ujian-'.$user->user_id.'-'.$exam->exam_id.'.json';
                     //if(!Storage::disk('public')->exists($json_file_ujian)){
-                        $get_ujian = Exam::withCount(['question', 'user_question' => function($query) use ($user_id){
-                            $query->where('user_questions.user_id', $user_id);
+                        $get_ujian = Exam::withCount(['question', 'user_question' => function($query) use ($user){
+                            $query->where('user_questions.user_id', $user->user_id);
                         }])->with(['question' => function($query){
                             $query->with('answers');
                             $query->orderBy('soal_ke');
-                        }, 'user_exam' => function($query) use ($user_id){
-                            $query->where('user_exams.user_id', $user_id);
-                        }])->find($ujian_id);
+                        }, 'user_exam' => function($query) use ($user){
+                            $query->where('user_exams.user_id', $user->user_id);
+                        }])->find($exam->exam_id);
                         Storage::disk('public')->put($json_file_ujian, $get_ujian->toJson());
-                        $json_file_all = 'all-'.$user_id.'-'.$ujian_id.'.json';
+                        $json_file_all = 'all-'.$user->user_id.'-'.$exam->exam_id.'.json';
                         $collection = collect($get_ujian->question);
                         $shuffled = $collection->shuffle();
                         $first = $shuffled->first();
                         $all = $shuffled->all();
                         Storage::disk('public')->put($json_file_all, $shuffled->toJson());
+                    //}
+                }
+            }
+        }
     }
     public function logout(){
         $user = auth()->user();
