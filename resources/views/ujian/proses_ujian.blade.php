@@ -29,10 +29,10 @@ $sisa_waktu_ujian = date('Y/m/d H:i:s', strtotime($waktu_ujian));
         })->first();*/
         //$a = asset('public/user_question-'.$user->user_id.'-'.$question_id.'.json');
         $b = '';//@file_get_contents($a);
-        if(Storage::disk('public')->exists('user_question-'.$user->user_id.'-'.$question_id.'.json')){
-            $path = storage_path('app/public/user_question-'.$user->user_id.'-'.$question_id.'.json');
+        //if(Storage::disk('public')->exists('user_question-'.$user->user_id.'-'.$question_id.'.json')){
+        $path = storage_path('app/public/user_question-'.$user->user_id.'-'.$question_id.'.json');
+        if(File::exists($path)){
             $reader->open($path);
-            //$reader->open('storage/user_question-'.$user->user_id.'-'.$question_id.'.json');
             if ($reader->read()) {
                 $b = collect($reader->value());
                 $b = $b->toJson();
@@ -40,26 +40,26 @@ $sisa_waktu_ujian = date('Y/m/d H:i:s', strtotime($waktu_ujian));
         }
         $jawaban = NULL;
         if($b){
-        $jawaban = json_decode($b);
+            $jawaban = json_decode($b);
         }
         ?>
         <div class="col-sm-3 mb-1">
             @if($jawaban)
-            @if($jawaban->ragu)
-            <button data-url="{{route('ujian.get_soal', ['page' => $loop->iteration,'soal_id' => $question_id])}}"
-                class="{{$question_id}} btn btn-block btn-navigasi btn-warning"
-                type="button">{{$loop->iteration}}</button>
-            @else
-            @if($jawaban->answer_id)
-            <button data-url="{{route('ujian.get_soal', ['page' => $loop->iteration,'soal_id' => $question_id])}}"
-                class="{{$question_id}} btn btn-block btn-navigasi btn-success"
-                type="button">{{$loop->iteration}}</button>
-            @else
-            <button data-url="{{route('ujian.get_soal', ['page' => $loop->iteration,'soal_id' => $question_id])}}"
-                class="{{$question_id}} btn btn-block btn-navigasi btn-default"
-                type="button">{{$loop->iteration}}</button>
-            @endif
-            @endif
+                @if($jawaban->ragu)
+                    <button data-url="{{route('ujian.get_soal', ['page' => $loop->iteration,'soal_id' => $question_id])}}"
+                        class="{{$question_id}} btn btn-block btn-navigasi btn-warning"
+                        type="button">{{$loop->iteration}}</button>
+                @else
+                    @if($jawaban->answer_id)
+                        <button data-url="{{route('ujian.get_soal', ['page' => $loop->iteration,'soal_id' => $question_id])}}"
+                            class="{{$question_id}} btn btn-block btn-navigasi btn-success"
+                            type="button">{{$loop->iteration}}</button>
+                    @else
+                        <button data-url="{{route('ujian.get_soal', ['page' => $loop->iteration,'soal_id' => $question_id])}}"
+                            class="{{$question_id}} btn btn-block btn-navigasi btn-default"
+                            type="button">{{$loop->iteration}}</button>
+                    @endif
+                @endif
             @else
             <button data-url="{{route('ujian.get_soal', ['page' => $loop->iteration,'soal_id' => $question_id])}}"
                 class="{{$question_id}} btn btn-block btn-navigasi btn-default"

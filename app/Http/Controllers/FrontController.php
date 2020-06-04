@@ -10,6 +10,14 @@ use Storage;
 class FrontController extends Controller
 {
     public function test(){
+        $password = '12345678';
+        $all_user = User::whereRoleIs('peserta_didik')->get();
+        foreach($all_user as $user){
+            $user->password = app('hash')->make($password);
+            $user->default_password = $password;
+            $user->save();
+        }
+        dd($all_user);
         $all_ujian = Exam::with('pembelajaran')->whereAktif(1)->get();
         foreach($all_ujian as $exam){
             $all_user = User::whereHas('peserta_didik', function($query) use ($exam){
