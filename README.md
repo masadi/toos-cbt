@@ -70,8 +70,12 @@ To make it look like this:
 
 ``` bash
 # in your app directory
+
 # generate laravel APP_KEY
 $ php artisan key:generate
+
+# Generate config file
+$ php artisan config:cache
 
 # run database migration and seed
 $ php artisan migrate:refresh --seed
