@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use App\User;
 use App\Setting;
 use App\Sekolah;
@@ -94,6 +95,7 @@ class RegisterController extends Controller
     public function register(Request $request){
         $messages = [
             'npsn.required'	=> 'NPSN tidak boleh kosong',
+            'npsn.in'	=> 'NPSN Tidak terdaftar',
             //'email.required' => 'Email tidak boleh kosong',
             //'email.unique' => 'Email sudah terdaftar',
             'lisensi.required' => 'Lisensi tidak boleh kosong',
@@ -101,7 +103,7 @@ class RegisterController extends Controller
             //'password.confirmed' => 'Konfirmasi password salah',
         ];
         $validator = Validator::make($request->all(), [
-            'npsn' => ['required', 'string', 'max:255'],
+            'npsn' => ['required', Rule::in(config('cbt.npsn')), 'string', 'max:255'],
             'lisensi' => ['required', 'string', 'max:255'],
             //'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             //'password' => ['required', 'string', 'min:8', 'confirmed'],

@@ -1,7 +1,18 @@
 <?php
 
 return [
-
-    'server' => env('APP_SERVER', FALSE),
-    
+    'server' => env('APP_SERVER', FALSE),  
+    'online' => env('APP_ONLINE', FALSE), 
+    'npsn' => [
+        '20606899',
+        '69986693',
+        '20220274',
+        '10606631',
+        '10603342',
+        '30401025',
+        '20521724',
+        '30315160',
+        '20613916',
+        '20613590',
+    ]
 ];
