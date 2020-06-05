@@ -390,36 +390,41 @@ class ProktorController extends Controller
             return response()->json($output);
         } elseif($query == 'reset-hasil'){
             $delete = User_exam::find($request->user_exam_id);
-            $user_folder = Helper::user_folder($delete->user_id);
-            $exam_folder = Helper::exam_folder($delete->user_id, $delete->exam_id);
-            if (!File::isDirectory($user_folder)) {
-                //MAKA FOLDER TERSEBUT AKAN DIBUAT
-                File::makeDirectory($user_folder);
+            $delete_success = 0;
+            foreach($delete as $del){
+                $user_folder = Helper::user_folder($del->user_id);
+                $exam_folder = Helper::exam_folder($del->user_id, $del->exam_id);
+                if (!File::isDirectory($user_folder)) {
+                    //MAKA FOLDER TERSEBUT AKAN DIBUAT
+                    File::makeDirectory($user_folder);
+                }
+                if (!File::isDirectory($exam_folder)) {
+                    //MAKA FOLDER TERSEBUT AKAN DIBUAT
+                    File::makeDirectory($exam_folder);
+                }
+                $get_ujian = Exam::withCount(['question', 'user_question' => function($query) use ($del){
+                    $query->where('user_questions.user_id', $del->user_id);
+                }])->with(['question' => function($query){
+                    $query->with('answers');
+                    $query->orderBy('soal_ke');
+                }, 'user_exam' => function($query) use ($del){
+                    $query->where('user_exams.user_id', $del->user_id);
+                }])->find($del->exam_id);
+                $collection = collect($get_ujian->question);
+                $shuffled = $collection->shuffle();
+                $questions = $shuffled->toArray();
+                unset($get_ujian->question);
+                $exam_json = [
+                    'exam' => $get_ujian->toArray(),
+                    'questions' => $questions,
+                ];
+                $gabung = collect($exam_json);
+                //Storage::disk('public')->put($json_file_all, $shuffled->toJson());
+                File::put($user_folder.'/exam.json', $gabung->toJson());
+                $delete_success++;
+                $del->delete();
             }
-            if (!File::isDirectory($exam_folder)) {
-                //MAKA FOLDER TERSEBUT AKAN DIBUAT
-                File::makeDirectory($exam_folder);
-            }
-            $get_ujian = Exam::withCount(['question', 'user_question' => function($query) use ($delete){
-                $query->where('user_questions.user_id', $delete->user_id);
-            }])->with(['question' => function($query){
-                $query->with('answers');
-                $query->orderBy('soal_ke');
-            }, 'user_exam' => function($query) use ($delete){
-                $query->where('user_exams.user_id', $delete->user_id);
-            }])->find($delete->exam_id);
-            $collection = collect($get_ujian->question);
-            $shuffled = $collection->shuffle();
-            $questions = $shuffled->toArray();
-            unset($get_ujian->question);
-            $exam_json = [
-                'exam' => $get_ujian->toArray(),
-                'questions' => $questions,
-            ];
-            $gabung = collect($exam_json);
-            //Storage::disk('public')->put($json_file_all, $shuffled->toJson());
-            File::put($user_folder.'/exam.json', $gabung->toJson());
-            if($delete->delete){
+            if($delete_success){
                 $output = [
                     'icon' => 'success',
                     'message' => 'Reset ujian berhasil!',

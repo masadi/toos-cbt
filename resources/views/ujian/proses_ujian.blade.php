@@ -33,7 +33,6 @@ $sisa_waktu_ujian = date('Y/m/d H:i:s', strtotime($waktu_ujian));
         //$path = storage_path('app/public/user_question-'.$user->user_id.'-'.$question_id.'.json');
         //$path = storage_path('app/public/user_question-'.$user->user_id.'-'.$question_id.'.json');
         $path = Helper::exam_folder($user->user_id, $ujian->exam_id);
-        dd($path);
         if(File::exists($path.'/'.$question_id.'.json')){
             $reader->open($path.'/'.$question_id.'.json');
             if ($reader->read()) {
@@ -45,7 +44,6 @@ $sisa_waktu_ujian = date('Y/m/d H:i:s', strtotime($waktu_ujian));
         if($b){
             $jawaban = json_decode($b);
         }
-        echo $path;
         ?>
         <div class="col-sm-3 mb-1">
             @if($jawaban)
