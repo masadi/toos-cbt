@@ -281,9 +281,9 @@ $sisa_waktu_ujian = date('Y/m/d H:i:s', strtotime($waktu_ujian));
             var ujian_id = $('#ujian_id').val();
             var question_id = $('#question_id').val();
             var answer_id = $("input[name='answer_id']:checked").val();
+            $('.btn-navigasi').removeClass('btn-warning').removeClass('btn-success').removeClass('btn-secondary').addClass("btn-default");
             if(!answer_id){
                 answer_id = 'kosong';
-                $('.'+question_id).removeClass('btn-warning').removeClass('btn-success').removeClass('btn-secondary').addClass("btn-default");
             } else {
                 $('.'+question_id).removeClass('btn-warning').removeClass('btn-default').removeClass('btn-secondary').addClass("btn-success");
             }
