@@ -44,6 +44,7 @@ $sisa_waktu_ujian = date('Y/m/d H:i:s', strtotime($waktu_ujian));
         if($b){
             $jawaban = json_decode($b);
         }
+        echo $path;
         ?>
         <div class="col-sm-3 mb-1">
             @if($jawaban)
