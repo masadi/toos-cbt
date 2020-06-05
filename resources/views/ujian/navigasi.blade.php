@@ -9,8 +9,8 @@ $prev = $current_index - 1;
         <a class="navigasi btn btn-lg btn-primary float-left" href="{{route('ujian.get_soal', ['page' => ($prev + 1),'soal_id' => $keys[$prev]])}}">Previous</a>
     <?php endif; ?>
     <div class="col text-center">
-        <input type="hidden" id="ragu" value="">
-        <input type="checkbox" id="ragu_button">
+        <input type="hidden" id="ragu" value="{{($jawaban_siswa) ? $jawaban_siswa->ragu : ''}}">
+        <input type="checkbox" id="ragu_button"{{($jawaban_siswa) ? ($jawaban_siswa->ragu) ? ' checked' : '' : ''}}>
     </div>
     @if ($next < $count)
         <a class="navigasi btn btn-lg btn-primary float-right" href="{{route('ujian.get_soal', ['page' => ($next + 1),'soal_id' => $keys[$next]])}}">Next</a>

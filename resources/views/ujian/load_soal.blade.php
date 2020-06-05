@@ -61,7 +61,7 @@
                     </div>
                     <div class="card-footer">
                         {{-- $questions->links('vendor.pagination.ujian', ['jumlah_jawaban_siswa' => $jumlah_jawaban_siswa]) --}}
-                        @include('ujian.navigasi')
+                        @include('ujian.navigasi', ['jawaban_siswa' => $jawaban_siswa])
                     </div>
                 </div>
             </div>
