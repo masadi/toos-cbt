@@ -24,6 +24,7 @@ use App\Event;
 use App\Ujian;
 use App\User_question;
 use App\Jadwal;
+use App\History;
 use Delight\Random\Random;
 use Codedge\Updater\UpdaterManager;
 use Carbon\Carbon;
@@ -460,15 +461,45 @@ class ProktorController extends Controller
              ],
             $messages
             )->validate();
-            $exam = Exam::with('pembelajaran')->find($request->exam_id);
+            $exam = Exam::with(['pembelajaran', 'question' => function($query){
+                //$query->with('answers');
+                $query->orderBy('soal_ke');
+            }])->find($request->exam_id);
+            $exam_file = $exam->exam_id.'.json';
+            Storage::disk('public')->put($exam_file, json_encode($exam->toArray()));
             $all_user = User::whereHas('peserta_didik', function($query) use ($exam){
                 $query->whereHas('anggota_rombel', function($query) use ($exam){
                     $query->where('rombongan_belajar_id', $exam->pembelajaran->rombongan_belajar_id);
                 });
             })->get();
+            $collection = collect($exam->question);
+            $keyed = $collection->keyBy('question_id');
+            $keyed->all();
+            $keys = $keyed->keys();
+            $collection = collect($keys);
             //DB::enableQueryLog();
             if($all_user->count()){
                 foreach($all_user as $user){
+                    $shuffled = $collection->shuffle();
+                    $questions = $shuffled->toArray();
+                    unset($exam->question);
+                    $exam_json = [
+                        'exam' => $exam->toArray(),
+                        'questions' => $questions,
+                    ];
+                    History::updateOrCreate(
+                        [
+                            'user_id' => $user->user_id,
+                            'exam_id' => $exam->exam_id,
+                        ],
+                        [
+                            'questions' => serialize($exam_json),
+                        ]
+                    );
+                    //$gabung = collect($exam_json);
+                    //Storage::disk('public')->put($json_file_all, $shuffled->toJson());
+                    //File::put($user_folder.'/exam.json', $gabung->toJson());
+                    /*
                     $user_folder = Helper::user_folder($user->user_id);
                     $exam_folder = Helper::exam_folder($user->user_id, $exam->exam_id);
                     if (!File::isDirectory($user_folder)) {
@@ -498,7 +529,7 @@ class ProktorController extends Controller
                     $gabung = collect($exam_json);
                     //Storage::disk('public')->put($json_file_all, $shuffled->toJson());
                     File::put($user_folder.'/exam.json', $gabung->toJson());
-                //}
+                    */
                 }
             }
             if($exam){
