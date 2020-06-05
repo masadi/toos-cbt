@@ -158,9 +158,35 @@ class UjianController extends Controller
             
             if(!$request->ujian_id){
                 $output = [
+                    'ujian' => 1,
                     'icon' => 'error',
                     'title' => 'Gagal',
                     'text' => 'Permintaan tidak sah'
+                ];
+                return response()->json($output);
+            }
+            /*$user_exam = User_exam::updateOrCreate(
+                [
+                    'exam_id'   => $first->exam_id,
+                    'anggota_rombel_id' => ($user->peserta_didik) ? $user->peserta_didik->anggota_rombel->anggota_rombel_id : NULL,
+                    'ptk_id' => $user->ptk_id,
+                    'user_id' => $user->user_id,
+                ],
+                [
+                    'status_ujian' => 1
+                ]
+            );*/
+            $user_exam = User_exam::where('exam_id', $request->ujian_id)->where('user_id', $user->user_id)->first();
+            if($request->sisa_waktu){
+                $user_exam->sisa_waktu = date('H:i:s', strtotime($request->sisa_waktu));
+                $user_exam->save();
+            }
+            if(!$user_exam->status_ujian){
+                $output = [
+                    'ujian' => 0,
+                    'icon' => 'error',
+                    'title' => 'Gagal',
+                    'text' => 'Ujian Selesai'
                 ];
                 return response()->json($output);
             }
@@ -220,21 +246,6 @@ class UjianController extends Controller
             }])->find($request->soal_id);*/
             $questions = [$first];
             $current_id = $first->question_id;
-            $user_exam = User_exam::updateOrCreate(
-                [
-                    'exam_id'   => $first->exam_id,
-                    'anggota_rombel_id' => ($user->peserta_didik) ? $user->peserta_didik->anggota_rombel->anggota_rombel_id : NULL,
-                    'ptk_id' => $user->ptk_id,
-                    'user_id' => $user->user_id,
-                ],
-                [
-                    'status_ujian' => 1
-                ]
-            );
-            if($request->sisa_waktu){
-                $user_exam->sisa_waktu = date('H:i:s', strtotime($request->sisa_waktu));
-                $user_exam->save();
-            }
             $json_file_user_question = 'user_question-'.$user->user_id.'-'.$request->question_id.'.json';
             if($request->has('answer_id')){
                 $isUuid = Uuid::isValid($request->answer_id);

@@ -303,15 +303,27 @@ $sisa_waktu_ujian = date('Y/m/d H:i:s', strtotime($waktu_ujian));
                 data: {ujian_id:ujian_id, question_id:question_id, answer_id:answer_id, sisa_waktu:sisa_waktu,ragu:ragu, keys:kunci}
             }).done(function (response) {
                 if(response.icon =='error'){
-                    Swal.fire({
-                        icon: response.icon,
-                        title: response.title,
-                        text: response.text,
-                        confirmButtonText: 'Refresh',
-                        allowOutsideClick: false,
-                    }).then(function(e) {
-                        window.location.replace(window.location.href);
-                    });
+                    if(response.ujian){
+                        Swal.fire({
+                            icon: response.icon,
+                            title: response.title,
+                            text: response.text,
+                            confirmButtonText: 'Refresh',
+                            allowOutsideClick: false,
+                        }).then(function(e) {
+                            window.location.replace(window.location.href);
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: response.icon,
+                            title: response.title,
+                            text: response.text,
+                            confirmButtonText: 'Kembali ke Beranda',
+                            allowOutsideClick: false,
+                        }).then(function(e) {
+                            window.location.replace('{{url('/')}}');
+                        });
+                    }
                 } else {
                     if(response ===false){
                         // the response was a string "false", parseJSON will convert it to boolean false
