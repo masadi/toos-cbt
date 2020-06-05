@@ -302,6 +302,7 @@ $sisa_waktu_ujian = date('Y/m/d H:i:s', strtotime($waktu_ujian));
             }).done(function (response) {
                 $('.name_text').html('SOAL NOMOR '+nomor_soal+' dari {{$ujian->question_count}} soal');
                 $('#nomor_soal_mini').html(nomor_soal+' dari {{$ujian->question_count}} soal');
+                $('.'+response.current_id).removeClass('btn-success').removeClass('btn-default').removeClass('btn-warning').addClass("btn-secondary");
                 if(response.icon =='error'){
                     if(response.ujian){
                         Swal.fire({
@@ -339,7 +340,6 @@ $sisa_waktu_ujian = date('Y/m/d H:i:s', strtotime($waktu_ujian));
                     } else {
                         console.log(response);
                         $('#load').html(response.html);
-                        $('.'+response.current_id).removeClass('btn-success').removeClass('btn-default').removeClass('btn-warning').addClass("btn-secondary");
                         //$('.loader').hide();
                         checkPilihan();
                     }
