@@ -348,6 +348,7 @@ class AjaxController extends Controller
             } else {
                 $links = '-';
             }
+            $links = '<a href="'.route('proktor.force_selesai', ['id' => $item->user_exam_id]).'" class="btn btn-sm btn-block btn-danger force_selesai">Force Selesai</a>';
             //$links = $item->updated_at.'=>'.Carbon::now();
             return $links;
         })
