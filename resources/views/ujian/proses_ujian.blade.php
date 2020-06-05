@@ -30,8 +30,10 @@ $sisa_waktu_ujian = date('Y/m/d H:i:s', strtotime($waktu_ujian));
         //$a = asset('public/user_question-'.$user->user_id.'-'.$question_id.'.json');
         $b = '';//@file_get_contents($a);
         //if(Storage::disk('public')->exists('user_question-'.$user->user_id.'-'.$question_id.'.json')){
-        $path = storage_path('app/public/user_question-'.$user->user_id.'-'.$question_id.'.json');
-        if(File::exists($path)){
+        //$path = storage_path('app/public/user_question-'.$user->user_id.'-'.$question_id.'.json');
+        //$path = storage_path('app/public/user_question-'.$user->user_id.'-'.$question_id.'.json');
+        $path = Helper::exam_folder($user->user_id, $ujian->exam_id);
+        if(File::exists($path.'/'.$question_id.'.json')){
             $reader->open($path);
             if ($reader->read()) {
                 $b = collect($reader->value());
