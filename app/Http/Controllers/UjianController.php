@@ -294,7 +294,11 @@ class UjianController extends Controller
                     $query->where('ptk_id', $user->ptk_id);
                 }
             })->count();*/
-            return view('ujian.load_soal', ['questions' => $questions, 'user' => $user, 'page' => $request->page, 'current_id' => $current_id, 'keys' => $request->keys, 'jumlah_jawaban_siswa' => $jumlah_jawaban_siswa, 'jawaban_siswa' => $jawaban_siswa])->render();
+            $output = [
+                'html' => view('ujian.load_soal', ['questions' => $questions, 'user' => $user, 'page' => $request->page, 'current_id' => $current_id, 'keys' => $request->keys, 'jumlah_jawaban_siswa' => $jumlah_jawaban_siswa, 'jawaban_siswa' => $jawaban_siswa])->render(),
+                'current_id' => $current_id,
+            ];
+            return response()->json($output);
         } else {
             return view('ujian.tolak');
         }

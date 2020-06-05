@@ -44,12 +44,32 @@ $sisa_waktu_ujian = date('Y/m/d H:i:s', strtotime($waktu_ujian));
         if($b){
             $jawaban = json_decode($b);
         }
+        $soal = ($questions) ? $questions[0] : NULL;
+        $soal_id = ($soal) ? $soal->question_id : NULL;
+        $btn = 'btn-default';
+        if($jawaban){
+            if($jawaban->ragu){
+                $btn = 'btn-warning';
+            } else {
+                if($jawaban->answer_id){
+                    $btn = 'btn-success';
+                }
+            }
+        }
+        if($soal_id == $question_id){
+            $btn = 'btn-secondary';
+        }
         ?>
         <div class="col-sm-3 mb-1">
+            <button data-url="{{route('ujian.get_soal', ['page' => $loop->iteration,'soal_id' => $question_id])}}"
+                class="{{$question_id}} btn btn-block btn-navigasi {{$btn}}"
+                type="button">{{$loop->iteration}}</button>
+            <?php
+            /*
             @if($jawaban)
                 @if($jawaban->ragu)
                     <button data-url="{{route('ujian.get_soal', ['page' => $loop->iteration,'soal_id' => $question_id])}}"
-                        class="{{$question_id}} btn btn-block btn-navigasi btn-warning"
+                        class="{{$question_id}} btn btn-block btn-navigasi "
                         type="button">{{$loop->iteration}}</button>
                 @else
                     @if($jawaban->answer_id)
@@ -67,6 +87,8 @@ $sisa_waktu_ujian = date('Y/m/d H:i:s', strtotime($waktu_ujian));
                 class="{{$question_id}} btn btn-block btn-navigasi btn-default"
                 type="button">{{$loop->iteration}}</button>
             @endif
+            */
+            ?>
         </div>
         <!--/loop-->
         @endforeach
@@ -257,13 +279,14 @@ $sisa_waktu_ujian = date('Y/m/d H:i:s', strtotime($waktu_ujian));
             var answer_id = $("input[name='answer_id']:checked").val();
             if(!answer_id){
                 answer_id = 'kosong';
+                $('.'+question_id).removeClass('btn-warning').removeClass('btn-success').removeClass('btn-secondary').addClass("btn-default");
             } else {
-                $('.'+question_id).removeClass('btn-warning').removeClass('btn-default').addClass("btn-success");
+                $('.'+question_id).removeClass('btn-warning').removeClass('btn-default').removeClass('btn-secondary').addClass("btn-success");
             }
             var sisa_waktu = $('#sisa_waktu').val();
             var ragu = $('#ragu').val();
             if(ragu){
-                $('.'+question_id).removeClass('btn-success').removeClass('btn-default').addClass("btn-warning");
+                $('.'+question_id).removeClass('btn-success').removeClass('btn-default').removeClass('btn-secondary').addClass("btn-warning");
             }
             var kunci = [];
             $('input[name=kunci]').each(function(k,v){
@@ -273,7 +296,7 @@ $sisa_waktu_ujian = date('Y/m/d H:i:s', strtotime($waktu_ujian));
                 url : url,
                 data: {ujian_id:ujian_id, question_id:question_id, answer_id:answer_id, sisa_waktu:sisa_waktu,ragu:ragu, keys:kunci}
             }).done(function (response) {
-                if(typeof response =='object'){
+                if(response.icon =='error'){
                     Swal.fire({
                         icon: response.icon,
                         title: response.title,
@@ -296,8 +319,10 @@ $sisa_waktu_ujian = date('Y/m/d H:i:s', strtotime($waktu_ujian));
                             getExams(url);
                         });
                     } else {
-                        $('#load').html(response);
-                        $('.loader').hide();
+                        console.log(response);
+                        $('#load').html(response.html);
+                        $('.'+response.current_id).removeClass('btn-success').removeClass('btn-default').removeClass('btn-warning').addClass("btn-secondary");
+                        //$('.loader').hide();
                         checkPilihan();
                     }
                 }
