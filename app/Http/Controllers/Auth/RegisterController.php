@@ -125,7 +125,9 @@ class RegisterController extends Controller
             } else {
                 $host_server = $setting->value.'validasi';
             }
-            $response = Http::asForm()->post($host_server, $arguments);
+            $response = Http::withOptions([
+                'verify' => false,
+            ])->asForm()->post($host_server, $arguments);
             if($response->status() == 200){
                 $body = $response->json();
                 if($body['success']){
