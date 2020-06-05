@@ -274,6 +274,7 @@ $sisa_waktu_ujian = date('Y/m/d H:i:s', strtotime($waktu_ujian));
             }
         }
         function getExams(url) {
+            $('body').css('opacity', '0.3');
             var nomor_soal = getUrlParameter(url);
             if(nomor_soal == 0){
                 nomor_soal = parseInt(nomor_soal) + 1;
@@ -300,6 +301,7 @@ $sisa_waktu_ujian = date('Y/m/d H:i:s', strtotime($waktu_ujian));
                 url : url,
                 data: {ujian_id:ujian_id, question_id:question_id, answer_id:answer_id, sisa_waktu:sisa_waktu,ragu:ragu, keys:kunci}
             }).done(function (response) {
+                $('body').css('opacity', '1');
                 $('.name_text').html('SOAL NOMOR '+nomor_soal+' dari {{$ujian->question_count}} soal');
                 $('#nomor_soal_mini').html(nomor_soal+' dari {{$ujian->question_count}} soal');
                 $('.'+response.current_id).removeClass('btn-success').removeClass('btn-default').removeClass('btn-warning').addClass("btn-secondary");
