@@ -825,12 +825,11 @@ class ProktorController extends Controller
         $user_exam->force_selesai = 1;
         if($user_exam->save()){
             $exam_folder = Helper::exam_folder($user_exam->user_id, $ujian_id);
-            File::deleteDirectory($exam_folder);
-            if (!File::isDirectory($exam_folder)) {
-                //MAKA FOLDER TERSEBUT AKAN DIBUAT
-                File::makeDirectory($exam_folder);
+            $all_files = File::allfiles($exam_folder);
+            foreach($all_files as $file){
+                File::delete($file);
+                $insert++;
             }
-            $insert = 1;
         }
         if($insert){
             $output = [
