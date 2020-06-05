@@ -435,24 +435,48 @@ class ProktorController extends Controller
             //DB::enableQueryLog();
             if($all_user->count()){
                 foreach($all_user as $user){
+                    //$user_folder = storage_path('app/public/'.$user->user_id);
+                    //$exam_folder = storage_path('app/public/'.$user->user_id.'/'.$exam->exam_id);
+                    $user_folder = Helper::user_folder($user->user_id);
+                    $exam_folder = Helper::exam_folder($user->user_id, $exam->exam_id);
+                    if (!File::isDirectory($user_folder)) {
+                        //MAKA FOLDER TERSEBUT AKAN DIBUAT
+                        File::makeDirectory($user_folder);
+                    }
+                    if (!File::isDirectory($exam_folder)) {
+                        //MAKA FOLDER TERSEBUT AKAN DIBUAT
+                        File::makeDirectory($exam_folder);
+                    }
+                    $get_ujian = Exam::withCount(['question', 'user_question' => function($query) use ($user){
+                        $query->where('user_questions.user_id', $user->user_id);
+                    }])->with(['question' => function($query){
+                        $query->with('answers');
+                        $query->orderBy('soal_ke');
+                    }, 'user_exam' => function($query) use ($user){
+                        $query->where('user_exams.user_id', $user->user_id);
+                    }])->find($exam->exam_id);
+                    /*
                     $json_file_ujian = 'ujian-'.$user->user_id.'-'.$exam->exam_id.'.json';
-                    //if(!Storage::disk('public')->exists($json_file_ujian)){
-                        $get_ujian = Exam::withCount(['question', 'user_question' => function($query) use ($user){
-                            $query->where('user_questions.user_id', $user->user_id);
-                        }])->with(['question' => function($query){
-                            $query->with('answers');
-                            $query->orderBy('soal_ke');
-                        }, 'user_exam' => function($query) use ($user){
-                            $query->where('user_exams.user_id', $user->user_id);
-                        }])->find($exam->exam_id);
-                        Storage::disk('public')->put($json_file_ujian, $get_ujian->toJson());
-                        $json_file_all = 'all-'.$user->user_id.'-'.$exam->exam_id.'.json';
-                        $collection = collect($get_ujian->question);
-                        $shuffled = $collection->shuffle();
-                        $first = $shuffled->first();
-                        $all = $shuffled->all();
-                        Storage::disk('public')->put($json_file_all, $shuffled->toJson());
-                    //}
+                    Storage::disk('public')->put($json_file_ujian, $get_ujian->toJson());
+                    $json_file_all = 'all-'.$user->user_id.'-'.$exam->exam_id.'.json';
+                    $collection = collect($get_ujian->question);
+                    $shuffled = $collection->shuffle();
+                    $first = $shuffled->first();
+                    $all = $shuffled->all();
+                    Storage::disk('public')->put($json_file_all, $shuffled->toJson());
+                    */
+                    $collection = collect($get_ujian->question);
+                    $shuffled = $collection->shuffle();
+                    $questions = $shuffled->toArray();
+                    unset($get_ujian->question);
+                    $exam_json = [
+                        'exam' => $get_ujian->toArray(),
+                        'questions' => $questions,
+                    ];
+                    $gabung = collect($exam_json);
+                    //Storage::disk('public')->put($json_file_all, $shuffled->toJson());
+                    File::put($user_folder.'/exam.json', $gabung->toJson());
+                //}
                 }
             }
             if($exam){

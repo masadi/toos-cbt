@@ -143,4 +143,11 @@ class Helper
         }
         return $hp;
     }
+    public static function user_folder($user_id){
+        return storage_path('app/public/'.$user_id);
+        $exam_folder = storage_path('app/public/'.$user->user_id.'/'.$exam->exam_id);
+    }
+    public static function exam_folder($user_id, $exam_id){
+        return storage_path('app/public/'.$user_id.'/'.$exam_id);
+    }
 }

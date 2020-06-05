@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Ramsey\Uuid\Uuid;
 use App\Ptk;
 use App\Exam;
@@ -13,6 +14,7 @@ use App\User_exam;
 use App\User_question;
 use App\Event;
 use File;
+use Helper;
 use Illuminate\Support\Facades\Storage;
 use pcrov\JsonReader\JsonReader;
 use Carbon\Carbon;
@@ -22,7 +24,7 @@ class UjianController extends Controller
         $user = auth()->user();
         $now = Carbon::now($user->timezone)->toDateTimeString();
         $reader = new JsonReader();
-        $ujian_id = $request->ujian_id;
+        /*
         $json_file_ujian = 'ujian-'.$user->user_id.'-'.$ujian_id.'.json';
         if(Storage::disk('public')->exists($json_file_ujian)){
             //$ujian = Storage::disk('public')->get($json_file_ujian);
@@ -45,35 +47,57 @@ class UjianController extends Controller
                 $query->where('user_exams.user_id', $user->user_id);
             }])->find($ujian_id);
             Storage::disk('public')->put($json_file_ujian, $ujian->toJson());
+        }*/
+        $ujian_id = $request->ujian_id;
+        $user_folder = Helper::user_folder($user->user_id);
+        $exam_folder = Helper::exam_folder($user->user_id, $ujian_id);
+        if(File::exists($user_folder.'/exam.json')){
+            $reader->open($user_folder.'/exam.json');
+            $get_ujian = '';
+            if($reader->read()) {
+                $collection = collect($reader->value());
+                $get_ujian = $collection->toJson();
+                $get_ujian = json_decode($get_ujian);
+            }
+        } else {
+            $get_ujian = Exam::withCount(['question', 'user_question' => function($query) use ($user){
+                $query->where('user_questions.user_id', $user->user_id);
+            }])->with(['question' => function($query){
+                $query->with('answers');
+                $query->orderBy('soal_ke');
+            }, 'user_exam' => function($query) use ($user){
+                $query->where('user_exams.user_id', $user->user_id);
+            }])->find($ujian_id);
+            $collection = collect($get_ujian->question);
+            $shuffled = $collection->shuffle();
+            $questions = $shuffled->toArray();
+            //File::put($user_folder.'/exam.json', $shuffled->toJson());
+            unset($get_ujian->question);
+            $exam_json = [
+                'exam' => $get_ujian->toArray(),
+                'questions' => $questions,
+            ];
+            $gabung = collect($exam_json);
+            //Storage::disk('public')->put($json_file_all, $shuffled->toJson());
+            File::put($user_folder.'/exam.json', $gabung->toJson());
         }
-        $jumlah_jawaban_siswa = $ujian->user_question_count;
+        $jumlah_jawaban_siswa = $this->jumlah_jawaban_siswa($user->user_id, $ujian_id);
+        $ujian = $get_ujian->exam;
         $waktu_ujian = time() + ($ujian->durasi * 60);
         if($ujian->question_count){
             $json_file_all = 'all-'.$user->user_id.'-'.$ujian_id.'.json';
-            if(!Storage::disk('public')->exists($json_file_all)){
+            /*if(!Storage::disk('public')->exists($json_file_all)){
                 $collection = collect($ujian->question);
                 $shuffled = $collection->shuffle();
                 $first = $shuffled->first();
                 $all = $shuffled->all();
                 Storage::disk('public')->put($json_file_all, $shuffled->toJson());
             } else {
-                /*
-                $all = Storage::disk('public')->get($json_file_all);
-                $all = json_decode($all);
-                $all = collect($all);
-                $first = $all->first();
-                $all = $all->all();*/
-                $path = storage_path('app/public/'.$json_file_all);
-                $reader->open($path);
-                if ($reader->read()) {
-                    $collection = collect($reader->value());
-                    $all = $collection->toJson();
-                    $all = json_decode($all);
-                    $all = collect($all);
-                    $first = $all->first();
-                    $all = $all->all();
-                }
-            }
+                
+            }*/
+            $all = collect($get_ujian->questions);
+            $first = $all->first();
+            $all = $all->all();
             $questions = [$first];
             $current_id = $first->question_id;
             $page = 0;
@@ -88,34 +112,26 @@ class UjianController extends Controller
                     'status_ujian' => 1
                 ]
             );
-            /*if($this->jumlah_jawaban_siswa($user->user_id)){
-                $json_file_utama = 'all-'.$user->user_id.'-'.$ujian_id.'.json';
-                $all = Storage::disk('public')->get($json_file_utama);
-                $all = json_decode($all);
-                foreach($all as $s){
-                    $keys[] = $s->question_id;
-                }
-                $questions = [$all[0]];
-                $current_id = $all[0]->question_id;
-            } else {
-                $keys = [];
-                $i=1;
-                foreach($all as $s){
-                    $keys[] = $s->question_id;
-                    $i++;
-                }
-            }*/
             $i=1;
             foreach($all as $s){
                 $keys[] = $s->question_id;
                 $i++;
             }
-            $json_file_jawaban = 'user_question-'.$user->user_id.'-'.$current_id.'.json';
+            /*$json_file_jawaban = 'user_question-'.$user->user_id.'-'.$current_id.'.json';
             $jawaban_siswa = NULL;
             if(Storage::disk('public')->exists($json_file_jawaban)){
                 //$jawaban_siswa = Storage::disk('public')->get($json_file_jawaban);
                 $path = storage_path('app/public/'.$json_file_jawaban);
                 $reader->open($path);
+                if ($reader->read()) {
+                    $jawaban_siswa = collect($reader->value());
+                    $jawaban_siswa = $jawaban_siswa->toJson();
+                }
+                $jawaban_siswa = json_decode($jawaban_siswa);
+            }*/
+            $jawaban_siswa = NULL;
+            if(File::exists($exam_folder.'/'.$current_id.'.json')){
+                $reader->open($exam_folder.'/'.$current_id.'.json');
                 if ($reader->read()) {
                     $jawaban_siswa = collect($reader->value());
                     $jawaban_siswa = $jawaban_siswa->toJson();
@@ -128,15 +144,10 @@ class UjianController extends Controller
             return view('ujian.soal_tidak_lengkap', compact('ujian', 'now'));
         }
     }
-    private function jumlah_jawaban_siswa($user_id){
-        //$path = public_path('storage');
-        $path = storage_path('app/public');
-        $all_files = File::allfiles($path);
-        //$all_files = Storage::disk('public')->files();
-        $all_files = collect($all_files)->filter(function ($item) use ($user_id) {
-            // replace stristr with your choice of matching function
-            return false !== stristr($item, 'user_question-'.$user_id);
-        });
+    private function jumlah_jawaban_siswa($user_id, $exam_id){
+        $exam_folder = Helper::exam_folder($user_id, $exam_id);
+        $all_files = File::allfiles($exam_folder);
+        $all_files = collect($all_files);
         return $all_files->count();
     }
     public function get_soal(Request $request){
@@ -153,8 +164,19 @@ class UjianController extends Controller
                 ];
                 return response()->json($output);
             }
-            
-            $json_file_utama = 'all-'.$user->user_id.'-'.$request->ujian_id.'.json';
+            $user_folder = Helper::user_folder($user->user_id);
+            $exam_folder = Helper::exam_folder($user->user_id, $request->ujian_id);
+            $path = $user_folder.'/exam.json';
+            $reader->open($path);
+            if ($reader->read()) {
+                $collection = collect($reader->value());
+                $all = $collection->toJson();
+                $all = json_decode($all);
+                $all = collect($all->questions);
+                $first = $all->first();
+                //$all = $all->all();
+            }
+            /*$json_file_utama = 'all-'.$user->user_id.'-'.$request->ujian_id.'.json';
             //$all = Storage::disk('public')->get($json_file_utama);
             //$all = json_decode($all);
             if(Storage::disk('public')->exists($json_file_utama)){
@@ -182,7 +204,7 @@ class UjianController extends Controller
                 $all = $shuffled->all();
                 $all = collect($all);
                 Storage::disk('public')->put($json_file_all, $shuffled->toJson());
-            }
+            }*/
             //$jawaban_siswa = json_decode($jawaban_siswa);
             //$all = collect($all);
             $first = $all->where('question_id', $request->soal_id)->first();
@@ -227,7 +249,8 @@ class UjianController extends Controller
                         'ragu' => $request->ragu,
                         'nomor_urut' => $request->page + 1,
                     ]);
-                    Storage::disk('public')->put($json_file_user_question, $collect_user_question->toJson());
+                    //Storage::disk('public')->put($json_file_user_question, $collect_user_question->toJson());
+                    File::put($exam_folder.'/'.$request->question_id.'.json', $collect_user_question->toJson());
                 }
                 /*User_question::updateOrCreate(
                     [
@@ -247,13 +270,22 @@ class UjianController extends Controller
                 // replace stristr with your choice of matching function
                 return false !== stristr($item, 'user_question-'.$user->user_id);
             });*/
-            $json_file_jawaban = 'user_question-'.$user->user_id.'-'.$request->soal_id.'.json';
+            /*$json_file_jawaban = 'user_question-'.$user->user_id.'-'.$request->soal_id.'.json';
             $jawaban_siswa = NULL;
             if(Storage::disk('public')->exists($json_file_jawaban)){
                 $jawaban_siswa = Storage::disk('public')->get($json_file_jawaban);
                 $jawaban_siswa = json_decode($jawaban_siswa);
+            }*/
+            $jumlah_jawaban_siswa = $this->jumlah_jawaban_siswa($user->user_id, $request->ujian_id);
+            $jawaban_siswa = NULL;
+            if(File::exists($exam_folder.'/'.$request->soal_id.'.json')){
+                $reader->open($exam_folder.'/'.$request->soal_id.'.json');
+                if ($reader->read()) {
+                    $jawaban_siswa = collect($reader->value());
+                    $jawaban_siswa = $jawaban_siswa->toJson();
+                }
+                $jawaban_siswa = json_decode($jawaban_siswa);
             }
-            $jumlah_jawaban_siswa = $this->jumlah_jawaban_siswa($user->user_id);
             /*$jumlah_jawaban_siswa = User_question::where(function($query) use($user){
                 $query->whereNotNull('answer_id');
                 if($user->peserta_didik_id){
@@ -378,12 +410,11 @@ class UjianController extends Controller
         }
         //$all_files = Storage::disk('public')->files();
         //$path = public_path('storage');
-        $path = storage_path('app/public');
-        $all_files = File::allfiles($path);
-        $all_files = collect($all_files)->filter(function ($item) use ($user) {
-            // replace stristr with your choice of matching function
-            return false !== stristr($item->getRelativePathname(), 'user_question-'.$user->user_id);
-        });
+        $user_folder = Helper::user_folder($user->user_id);
+        $exam_folder = Helper::exam_folder($user->user_id, $ujian_id);
+        //$path = storage_path('app/public');
+        $all_files = File::allfiles($exam_folder);
+        $all_files = collect($all_files);
         if($all_files->count()){
             foreach($all_files as $file){
                 try {
@@ -404,21 +435,16 @@ class UjianController extends Controller
                         ]
                     );
                     //Storage::disk('public')->delete($file);
-                    File::delete($file);
+                    //File::delete($file);
                 } catch (\Exception $e) {
                     //
                 }
             }
         }
-        $json_file_all = storage_path('app/public/all-'.$user->user_id.'-'.$ujian_id.'.json');
-        $json_file_ujian = storage_path('app/public/ujian-'.$user->user_id.'-'.$ujian_id.'.json');
+        //$json_file_all = storage_path('app/public/all-'.$user->user_id.'-'.$ujian_id.'.json');
+        //$json_file_ujian = storage_path('app/public/ujian-'.$user->user_id.'-'.$ujian_id.'.json');
         //Storage::disk('public')->delete([$json_file_all, $json_file_ujian]);
-        if(File::exists($json_file_all)){
-            File::delete($json_file_all);
-        }
-        if(File::exists($json_file_ujian)){
-            File::delete($json_file_ujian);
-        }
+        File::deleteDirectory($user_folder);
         $response = [
             'title' => 'Berhasil',
             'text' => 'Nilai berhasil disimpan',

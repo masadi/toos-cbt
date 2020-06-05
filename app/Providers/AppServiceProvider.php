@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+//use Illuminate\Support\Facades\DB;
+//use Illuminate\Support\Facades\File;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Schema;
 use App\Setting;
@@ -25,6 +27,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        /*DB::listen(function ($query) {
+            File::append(
+                storage_path('/logs/query.log'),
+                $query->sql . ' [' . implode(', ', $query->bindings) . ']' . PHP_EOL
+           );
+        });*/
         if (Schema::hasTable('settings')) {
             config([
                 'global' => Setting::all([
