@@ -824,53 +824,13 @@ class ProktorController extends Controller
         $user_exam->status_ujian = 0;
         $user_exam->force_selesai = 1;
         if($user_exam->save()){
-            //$all_files = Storage::disk('public')->files();
-            $path = storage_path('app/public');
-            $all_files = File::allfiles($path);
-            $all_files = collect($all_files)->filter(function ($item) use ($user_exam) {
-                // replace stristr with your choice of matching function
-                return false !== stristr($item->getRelativePathname(), 'user_question-'.$user_exam->user_id);
-                //return false !== stristr($item, 'user_question-'.$user_exam->user_id);
-            });
-            if($all_files->count()){
-                foreach($all_files as $file){
-                    $contents = $file->getContents();
-                    $user_question = json_decode($contents);
-                    try {
-                        User_question::updateOrCreate(
-                            [
-                                'question_id' => $user_question->question_id,
-                                'anggota_rombel_id' => $user_question->anggota_rombel_id,
-                                'ptk_id' => $user_question->ptk_id,
-                            ],
-                            [
-                                'user_exam_id' => $user_question->user_exam_id,
-                                'answer_id' => $user_question->answer_id,
-                                'ragu' => $user_question->ragu,
-                                'nomor_urut' => $user_question->nomor_urut,
-                                'user_id' => $user_question->user_id,
-                            ]
-                        );
-                        $insert++;
-                        //Storage::disk('public')->delete($file);
-                        File::delete($file);
-                    } catch (\Exception $e) {
-                        //
-                    }
-                }
+            $exam_folder = Helper::exam_folder($user_exam->user_id, $ujian_id);
+            File::deleteDirectory($exam_folder);
+            if (!File::isDirectory($exam_folder)) {
+                //MAKA FOLDER TERSEBUT AKAN DIBUAT
+                File::makeDirectory($exam_folder);
             }
-            //$json_file_all = 'all-'.$user_exam->user_id.'-'.$ujian_id.'.json';
-            //$json_file_ujian = 'ujian-'.$user_exam->user_id.'-'.$ujian_id.'.json';
-            //Storage::disk('public')->delete([$json_file_all, $json_file_ujian]);
-            $json_file_all = storage_path('app/public/all-'.$user_exam->user_id.'-'.$ujian_id.'.json');
-            $json_file_ujian = storage_path('app/public/ujian-'.$user_exam->user_id.'-'.$ujian_id.'.json');
-            //Storage::disk('public')->delete([$json_file_all, $json_file_ujian]);
-            if(File::exists($json_file_all)){
-                File::delete($json_file_all);
-            }
-            if(File::exists($json_file_ujian)){
-                File::delete($json_file_ujian);
-            }
+            $insert = 1;
         }
         if($insert){
             $output = [
