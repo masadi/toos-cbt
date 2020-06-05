@@ -2,7 +2,7 @@
 @section('content')
 <style>
     @media only screen and (max-width: 600px) {
-        .control-sidebar{width: 100px;}
+        .control-sidebar{width: 100px;top: calc(6.5rem + 1px);}
         .control-sidebar-slide-open.control-sidebar-push .content-wrapper{margin-right: 100px;}
     }
 </style>
@@ -278,8 +278,6 @@ $sisa_waktu_ujian = date('Y/m/d H:i:s', strtotime($waktu_ujian));
             if(nomor_soal == 0){
                 nomor_soal = parseInt(nomor_soal) + 1;
             }
-            $('.name_text').html('SOAL NOMOR '+nomor_soal+' dari {{$ujian->question_count}} soal');
-            $('#nomor_soal_mini').html(nomor_soal+' dari {{$ujian->question_count}} soal');
             var ujian_id = $('#ujian_id').val();
             var question_id = $('#question_id').val();
             var answer_id = $("input[name='answer_id']:checked").val();
@@ -302,6 +300,8 @@ $sisa_waktu_ujian = date('Y/m/d H:i:s', strtotime($waktu_ujian));
                 url : url,
                 data: {ujian_id:ujian_id, question_id:question_id, answer_id:answer_id, sisa_waktu:sisa_waktu,ragu:ragu, keys:kunci}
             }).done(function (response) {
+                $('.name_text').html('SOAL NOMOR '+nomor_soal+' dari {{$ujian->question_count}} soal');
+                $('#nomor_soal_mini').html(nomor_soal+' dari {{$ujian->question_count}} soal');
                 if(response.icon =='error'){
                     if(response.ujian){
                         Swal.fire({
