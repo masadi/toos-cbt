@@ -1,5 +1,11 @@
 @extends('adminlte::page')
 @section('content')
+<style>
+    @media only screen and (max-width: 600px) {
+        .control-sidebar{width: 100px;}
+        .control-sidebar-slide-open.control-sidebar-push .content-wrapper{margin-right: 100px;}
+    }
+</style>
 <?php 
 $waktu_ujian = date('Y-m-d H:i:s', strtotime($now) + ($ujian->durasi * 60));
 if($user_exam->sisa_waktu){
@@ -13,7 +19,7 @@ $sisa_waktu_ujian = date('Y/m/d H:i:s', strtotime($waktu_ujian));
 ?>
 <input type="hidden" id="ujian_id" value="{{$ujian->exam_id}}">
 @section('right-sidebar')
-<div class="col-md-12 row" style="margin-top: 40px;">
+<div class="col-md-12 row col-12" style="margin-top: 40px;">
     
         @if($keys)
         @foreach($keys as $question_id)
@@ -109,7 +115,7 @@ $sisa_waktu_ujian = date('Y/m/d H:i:s', strtotime($waktu_ujian));
 <script>
     $(function() {
         $(document).bind("contextmenu",function(e){
-            return false;
+            //return false;
         });
         $('.navbar-brand').attr('href', 'javascript:void');
         var idleTime = 60000 * 10;
