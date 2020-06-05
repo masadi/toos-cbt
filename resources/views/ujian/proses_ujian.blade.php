@@ -284,7 +284,7 @@ $sisa_waktu_ujian = date('Y/m/d H:i:s', strtotime($waktu_ujian));
             var answer_id = $("input[name='answer_id']:checked").val();
             if(!answer_id){
                 answer_id = 'kosong';
-                $('.btn-navigasi').removeClass('btn-warning').removeClass('btn-success').removeClass('btn-secondary').addClass("btn-default");
+                $('.btn-navigasi').removeClass('btn-secondary');
             } else {
                 $('.'+question_id).removeClass('btn-warning').removeClass('btn-default').removeClass('btn-secondary').addClass("btn-success");
             }
