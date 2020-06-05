@@ -472,14 +472,15 @@ class ProktorController extends Controller
                     $query->where('rombongan_belajar_id', $exam->pembelajaran->rombongan_belajar_id);
                 });
             })->get();
-            $collection = collect($exam->question);
-            $keyed = $collection->keyBy('question_id');
-            $keyed->all();
-            $keys = $keyed->keys();
-            $collection = collect($keys);
+            //$collection = collect($exam->question);
+            //$keyed = $collection->keyBy('question_id');
+            //$keyed->all();
+            //$keys = $keyed->keys();
+            //$collection = collect($keys);
             //DB::enableQueryLog();
             if($all_user->count()){
                 foreach($all_user as $user){
+                    $collection = collect($exam->question);
                     $shuffled = $collection->shuffle();
                     $questions = $shuffled->toArray();
                     unset($exam->question);
@@ -487,7 +488,7 @@ class ProktorController extends Controller
                         'exam' => $exam->toArray(),
                         'questions' => $questions,
                     ];
-                    History::updateOrCreate(
+                    /*History::updateOrCreate(
                         [
                             'user_id' => $user->user_id,
                             'exam_id' => $exam->exam_id,
@@ -495,10 +496,10 @@ class ProktorController extends Controller
                         [
                             'questions' => serialize($exam_json),
                         ]
-                    );
-                    //$gabung = collect($exam_json);
+                    );*/
+                    $gabung = collect($exam_json);
                     //Storage::disk('public')->put($json_file_all, $shuffled->toJson());
-                    //File::put($user_folder.'/exam.json', $gabung->toJson());
+                    File::put($user_folder.'/exam.json', $gabung->toJson());
                     /*
                     $user_folder = Helper::user_folder($user->user_id);
                     $exam_folder = Helper::exam_folder($user->user_id, $exam->exam_id);
