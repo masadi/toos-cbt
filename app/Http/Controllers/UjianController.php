@@ -51,6 +51,10 @@ class UjianController extends Controller
         $ujian_id = $request->ujian_id;
         $user_folder = Helper::user_folder($user->user_id);
         $exam_folder = Helper::exam_folder($user->user_id, $ujian_id);
+        if (!File::isDirectory($exam_folder)) {
+            //MAKA FOLDER TERSEBUT AKAN DIBUAT
+            File::makeDirectory($exam_folder);
+        }
         if(File::exists($user_folder.'/exam.json')){
             $reader->open($user_folder.'/exam.json');
             $get_ujian = '';
