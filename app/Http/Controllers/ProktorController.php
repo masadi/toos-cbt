@@ -461,8 +461,12 @@ class ProktorController extends Controller
              ],
             $messages
             )->validate();
-            $exam = Exam::with(['pembelajaran', 'question' => function($query){
+            /*$exam = Exam::with(['pembelajaran', 'question' => function($query){
                 //$query->with('answers');
+                $query->orderBy('soal_ke');
+            }])->find($request->exam_id);*/
+            $exam = Exam::withCount(['question'])->with(['question' => function($query){
+                $query->with('answers');
                 $query->orderBy('soal_ke');
             }])->find($request->exam_id);
             $exam_file = $exam->exam_id.'.json';
@@ -480,7 +484,6 @@ class ProktorController extends Controller
             //DB::enableQueryLog();
             if($all_user->count()){
                 foreach($all_user as $user){
-
                     $collection = collect($exam->question);
                     $shuffled = $collection->shuffle();
                     $questions = $shuffled->toArray();
