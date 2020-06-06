@@ -500,6 +500,10 @@ class ProktorController extends Controller
                     );*/
                     $gabung = collect($exam_json);
                     $user_folder = Helper::user_folder($user->user_id);
+                    if (!File::isDirectory($user_folder)) {
+                        //MAKA FOLDER TERSEBUT AKAN DIBUAT
+                        File::makeDirectory($user_folder);
+                    }
                     //Storage::disk('public')->put($json_file_all, $shuffled->toJson());
                     File::put($user_folder.'/exam.json', $gabung->toJson());
                     /*
