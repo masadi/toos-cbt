@@ -513,14 +513,6 @@ class ProktorController extends Controller
                         File::makeDirectory($exam_folder);
                     }
                     //Storage::disk('public')->put($json_file_all, $shuffled->toJson());
-                    File::put($user_folder.'/exam.json', $gabung->toJson());
-                    /*
-                    
-                    if (!File::isDirectory($user_folder)) {
-                        //MAKA FOLDER TERSEBUT AKAN DIBUAT
-                        File::makeDirectory($user_folder);
-                    }
-                    
                     $get_ujian = Exam::withCount(['question', 'user_question' => function($query) use ($user){
                         $query->where('user_questions.user_id', $user->user_id);
                     }])->with(['question' => function($query){
@@ -540,7 +532,6 @@ class ProktorController extends Controller
                     $gabung = collect($exam_json);
                     //Storage::disk('public')->put($json_file_all, $shuffled->toJson());
                     File::put($user_folder.'/exam.json', $gabung->toJson());
-                    */
                 }
             }
             if($exam){
