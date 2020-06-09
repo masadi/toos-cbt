@@ -421,7 +421,8 @@ class ProktorController extends Controller
                 ];
                 $gabung = collect($exam_json);
                 //Storage::disk('public')->put($json_file_all, $shuffled->toJson());
-                File::put($user_folder.'/exam.json', $gabung->toJson());
+                //File::put($user_folder.'/exam.json', $gabung->toJson());
+                File::put($user_folder.'/'.$del->exam_id.'.json', $gabung->toJson());
                 $delete_success++;
                 $del->delete();
             }
@@ -531,7 +532,8 @@ class ProktorController extends Controller
                     ];
                     $gabung = collect($exam_json);
                     //Storage::disk('public')->put($json_file_all, $shuffled->toJson());
-                    File::put($user_folder.'/exam.json', $gabung->toJson());
+                    //File::put($user_folder.'/exam.json', $gabung->toJson());
+                    File::put($user_folder.'/'.$exam->exam_id.'.json', $gabung->toJson());
                 }
             }
             if($exam){

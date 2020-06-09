@@ -25,19 +25,7 @@ $sisa_waktu_ujian = date('Y/m/d H:i:s', strtotime($waktu_ujian));
         @foreach($keys as $question_id)
         <input type="hidden" name="kunci" value="{{$question_id}}">
         <?php
-        /*$jawaban = \App\User_question::where(function($query) use ($question_id, $user){
-            $query->where('question_id', $question_id);
-            if($user->peserta_didik_id){
-                $query->where('anggota_rombel_id', $user->peserta_didik->anggota_rombel->anggota_rombel_id);
-            } else {
-                $query->where('ptk_id', $user->ptk_id);
-            }
-        })->first();*/
-        //$a = asset('public/user_question-'.$user->user_id.'-'.$question_id.'.json');
-        $b = '';//@file_get_contents($a);
-        //if(Storage::disk('public')->exists('user_question-'.$user->user_id.'-'.$question_id.'.json')){
-        //$path = storage_path('app/public/user_question-'.$user->user_id.'-'.$question_id.'.json');
-        //$path = storage_path('app/public/user_question-'.$user->user_id.'-'.$question_id.'.json');
+        $b = '';
         $path = Helper::exam_folder($user->user_id, $ujian->exam_id);
         if(File::exists($path.'/'.$question_id.'.json')){
             $reader->open($path.'/'.$question_id.'.json');
@@ -128,7 +116,6 @@ $sisa_waktu_ujian = date('Y/m/d H:i:s', strtotime($waktu_ujian));
         initPlayers(jQuery('#player-container').length);  
         checkPilihan();
         var nomor_soal = getUrlParameter(window.location);
-        //nomor_soal = parseInt(nomor_soal) + 1;
         $('.name_text').html('SOAL NOMOR '+nomor_soal+' dari {{$ujian->question_count}} soal');
         $('#nomor_soal_mini').html(nomor_soal+' dari {{$ujian->question_count}} soal');
         $('.timer').show();
@@ -150,38 +137,17 @@ $sisa_waktu_ujian = date('Y/m/d H:i:s', strtotime($waktu_ujian));
                 answer_id = 'kosong';
             }
             var sisa_waktu = $('#sisa_waktu').val();
-            /*Swal.fire({
-                icon: 'error',
-                text: 'Waktu Habis!',
-                allowOutsideClick: false,
-            }).then(function(e) {
-                //window.location.replace("{{url('/')}}");
-                $.ajax({
-                    url : '{{route('ujian.selesai')}}',
-                    data: {ujian_id:ujian_id, question_id:question_id, answer_id:answer_id, sisa_waktu:sisa_waktu}
-                }).done(function (data) {
-                    window.location.replace("{{url('/')}}");
-                });
-            });*/
             selesaiUjian(1, ujian_id, question_id, answer_id, sisa_waktu);
         });
         $('body').on('click', 'a.navigasi', function(e) {
             e.preventDefault();
-            //$('#load a').css('color', '#dfecf6');
-            //$('#load').append('<img style="position: fixed; left: 0; top: 0; z-index: 9999;" src="/assets/img/ajax-loader.gif" />');
-            //$('.loader').show();
             var url = $(this).attr('href');  
             getExams(url);
-            //window.history.pushState("", "", url);
         });
         $('body').on('click', 'button.btn-navigasi', function(e) {
             e.preventDefault();
             var url = $(this).data('url');
-            //$('#load a').css('color', '#dfecf6');
-            //$('#load').append('<img style="position: fixed; left: 0; top: 0; z-index: 9999;" src="/assets/img/ajax-loader.gif" />');
-            //$('.loader').show();
             getExams(url);
-            //window.history.pushState("", "", url);
         });
         function selesaiUjian(type, ujian_id, question_id, answer_id, sisa_waktu){
             if(type == 1){
@@ -257,19 +223,6 @@ $sisa_waktu_ujian = date('Y/m/d H:i:s', strtotime($waktu_ujian));
                     }).then(function(e) {
                         window.location.replace("{{url('/')}}");
                     });
-                    /*$.ajax({
-                        url : '{{route('ujian.selesai')}}',
-                        data: {ujian_id:ujian_id, question_id:question_id, answer_id:answer_id, sisa_waktu:sisa_waktu}
-                    }).done(function (data) {
-                        Swal.fire({
-                            icon: 'success',
-                            text: 'Ujian Selesai',
-                            allowOutsideClick: false,
-                        }).then(function(e) {
-                            window.location.replace("{{url('/')}}");
-                        });
-                    });*/
-                    
                 });
             }
         }
@@ -284,7 +237,11 @@ $sisa_waktu_ujian = date('Y/m/d H:i:s', strtotime($waktu_ujian));
             var answer_id = $("input[name='answer_id']:checked").val();
             if(!answer_id){
                 answer_id = 'kosong';
-                $('.btn-navigasi').removeClass('btn-secondary');
+                if($('.btn-navigasi').hasClass("btn-success")){
+                    $('.btn-navigasi').removeClass('btn-secondary').addClass('btn-success');
+                } else if($('.btn-navigasi').hasClass("btn-warning")){
+                    $('.btn-navigasi').removeClass('btn-secondary').addClass('btn-warning');
+                }
             } else {
                 $('.'+question_id).removeClass('btn-warning').removeClass('btn-default').removeClass('btn-secondary').addClass("btn-success");
             }
@@ -301,6 +258,7 @@ $sisa_waktu_ujian = date('Y/m/d H:i:s', strtotime($waktu_ujian));
                 url : url,
                 data: {ujian_id:ujian_id, question_id:question_id, answer_id:answer_id, sisa_waktu:sisa_waktu,ragu:ragu, keys:kunci}
             }).done(function (response) {
+                console.log(response.test);
                 $('body').css('opacity', '1');
                 $('.name_text').html('SOAL NOMOR '+nomor_soal+' dari {{$ujian->question_count}} soal');
                 $('#nomor_soal_mini').html(nomor_soal+' dari {{$ujian->question_count}} soal');
@@ -329,32 +287,26 @@ $sisa_waktu_ujian = date('Y/m/d H:i:s', strtotime($waktu_ujian));
                     }
                 } else {
                     if(response ===false){
-                        // the response was a string "false", parseJSON will convert it to boolean false
                         Swal.fire({
                             icon: 'error',
                             text: 'Server tidak merespon. Silahkan refresh halaman ini!',
                             confirmButtonText: 'Refresh',
                             allowOutsideClick: false,
                         }).then(function(e) {
-                            //window.location.replace(window.location.href);
                             getExams(url);
                         });
                     } else {
-                        console.log(response);
                         $('#load').html(response.html);
-                        //$('.loader').hide();
                         checkPilihan();
                     }
                 }
             }).fail(function () {
-                //alert('Articles could not be loaded.');
                 Swal.fire({
                     icon: 'error',
                     text: 'Server tidak merespon. Silahkan refresh halaman ini!',
                     confirmButtonText: 'Refresh',
                     allowOutsideClick: false,
                 }).then(function(e) {
-                    //window.location.replace(window.location.href);
                     getExams(url);
                 });
             });
