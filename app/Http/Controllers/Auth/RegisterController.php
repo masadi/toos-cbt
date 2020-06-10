@@ -102,8 +102,12 @@ class RegisterController extends Controller
             //'password.required' => 'Password tidak boleh kosong',
             //'password.confirmed' => 'Konfirmasi password salah',
         ];
+        if(env('APP_ONLINE')){
+            $npsn = ['npsn' => ['required', Rule::in(config('cbt.npsn')), 'string', 'max:255']];
+        } else {
+            $npsn = ['npsn' => ['required', 'string', 'max:255']];
+        }
         $validator = Validator::make($request->all(), [
-            'npsn' => ['required', Rule::in(config('cbt.npsn')), 'string', 'max:255'],
             'lisensi' => ['required', 'string', 'max:255'],
             //'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             //'password' => ['required', 'string', 'min:8', 'confirmed'],
