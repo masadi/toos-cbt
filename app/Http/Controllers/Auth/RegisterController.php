@@ -158,12 +158,14 @@ class RegisterController extends Controller
                                 'menuroles' => 'proktor'
                             ]
                         );
-                        $user->attachRole('proktor');
+                        if(!$create_user->hasRole('proktor')){
+                            $create_user->attachRole('proktor');
+                        }
                     } else {
                         $sekolah = $body['data'];
                         $servers = $sekolah['server'];
                         unset($sekolah['server']);
-                        $create_sekolah = Sekolah::create($sekolah);
+                        $create_sekolah = Sekolah::updateOrCreate($sekolah);
                         $user = User::firstOrCreate(
                             [ 
                                 'name' => $create_sekolah->nama,
@@ -178,7 +180,9 @@ class RegisterController extends Controller
                                 'password' => app('hash')->make($create_sekolah->npsn),
                             ]
                         );
-                        $user->attachRole('sekolah');
+                        if(!$user->hasRole('sekolah')){
+                            $user->attachRole('sekolah');
+                        }
                         if($servers){
                             foreach($servers as $server){
                                 $create_server = Server::firstOrCreate($server);
@@ -196,7 +200,9 @@ class RegisterController extends Controller
                                         'menuroles' => 'proktor',
                                     ]
                                 );
-                                $user_proktor->attachRole('proktor');
+                                if(!$user_proktor->hasRole('proktor')){
+                                    $user_proktor->attachRole('proktor');
+                                }
                             }
                         }
                     }
