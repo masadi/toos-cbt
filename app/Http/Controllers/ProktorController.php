@@ -671,9 +671,7 @@ class ProktorController extends Controller
             $messages
             )->validate();
             $jadwal = Jadwal::find($request->jadwal_id);
-            $jadwal->pembelajaran_id = $request->pembelajaran_id;
             $jadwal->tanggal = $request->date;
-            $jadwal->rombongan_belajar_id = $request->rombongan_belajar_id;
             $jadwal->from = $request->from;
             $jadwal->to = $request->to;
             if($jadwal->save()){

@@ -4,8 +4,6 @@ $count = ($keys) ? count($keys) : 0;
 $next = $current_index + 1;
 $prev = $current_index - 1;
 ?>
-{{$jumlah_jawaban_siswa}}
-{{$count}}
 <div class="row clearfix">
     <?php if ($prev >= 0): ?>
         <a class="navigasi btn btn-lg btn-primary float-left" href="{{route('ujian.get_soal', ['page' => ($prev + 1),'soal_id' => $keys[$prev]])}}">Previous</a>

@@ -19,6 +19,10 @@ $sisa_waktu_ujian = date('Y/m/d H:i:s', strtotime($waktu_ujian));
 ?>
 <input type="hidden" id="ujian_id" value="{{$ujian->exam_id}}">
 <input type="hidden" id="user_id" value="{{$user->user_id}}">
+@section('content_top_nav_center')
+<div class="timer text-white text-center" style="display: none; margin-left:calc(25%);"><b>Sisa Waktu : <span id="clock"></span></b></div>
+<input type="hidden" id="sisa_waktu">    
+@endsection
 @section('right-sidebar')
 <div class="col-md-12 row col-12" style="margin-top: 40px;">
     

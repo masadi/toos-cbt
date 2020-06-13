@@ -57,12 +57,7 @@ class GetRoute
         }
         Event::listen(BuildingMenu::class, function (BuildingMenu $event) use ($name){
             if($name[0] == 'ujian'){
-                $event->menu->add([
-                    'text' => 'timer',
-                    'search' => false,
-                    'topnav' => true,
-                    'active' => ['/*']
-                ]);
+                $event->menu->add([]);
             } else {
                 $event->menu->add([
                     'text' => 'sekolah',

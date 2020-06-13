@@ -1,22 +1,12 @@
 @extends('layouts.modal')
 @section('title')
-Tambah Jadwal Ujian di Kelas {{$rombongan_belajar->nama}}
+Edit Jadwal Ujian {{$jadwal->exam->nama}} Mata Pelajaran {{$jadwal->exam->pembelajaran->nama_mata_pelajaran}}
 @endsection
 @section('content')
 <form id="insert_jadwal" class="form-horizontal">
     <input type="hidden" name="rombongan_belajar_id" value="{{$rombongan_belajar->rombongan_belajar_id}}">
     <input type="hidden" name="jadwal_id" value="{{$jadwal->id}}">
-    <div class="form-group row">
-        <label for="pembelajaran_id" class="col-sm-2 col-form-label">Mata Pelajaran</label>
-        <div class="col-sm-10">
-            <select name="pembelajaran_id" id="pembelajaran_id" class="form-control select2">
-                <option value="">== Pilih Pembelajaran ==</option>
-                @foreach ($rombongan_belajar->pembelajaran as $pembelajaran)
-                <option value="{{$pembelajaran->pembelajaran_id}}"{{($jadwal->pembelajaran_id == $pembelajaran->pembelajaran_id) ? ' selected' : ''}}>{{$pembelajaran->nama_mata_pelajaran}}</option>
-                @endforeach
-            </select>
-        </div>
-    </div>
+    <input type="hidden" name="pembelajaran_id" value="{{$jadwal->pembelajaran_id}}">
     <div class="form-group row">
         <label for="date" class="col-sm-2 col-form-label">Tanggal</label>
         <div class="col-sm-10">
