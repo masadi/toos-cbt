@@ -4,6 +4,7 @@ Tambah Jadwal Ujian di Kelas {{$rombongan_belajar->nama}}
 @endsection
 @section('content')
 <form id="insert_jadwal" class="form-horizontal">
+    <input type="hidden" name="aksi" value="jadwal">
     <input type="hidden" name="rombongan_belajar_id" value="{{$rombongan_belajar->rombongan_belajar_id}}">
     <div class="form-group row">
         <label for="pembelajaran_id" class="col-sm-2 col-form-label">Mata Pelajaran</label>
@@ -13,6 +14,14 @@ Tambah Jadwal Ujian di Kelas {{$rombongan_belajar->nama}}
                 @foreach ($rombongan_belajar->pembelajaran as $pembelajaran)
                 <option value="{{$pembelajaran->pembelajaran_id}}">{{$pembelajaran->nama_mata_pelajaran}}</option>
                 @endforeach
+            </select>
+        </div>
+    </div>
+    <div class="form-group row">
+        <label for="exam_id" class="col-sm-2 col-form-label">Mata Ujian</label>
+        <div class="col-sm-10">
+            <select name="exam_id" id="exam_id" class="form-control select2">
+                <option value="">== Pilih Mata Ujian ==</option>
             </select>
         </div>
     </div>
@@ -45,6 +54,38 @@ Tambah Jadwal Ujian di Kelas {{$rombongan_belajar->nama}}
 @section('plugins.Datepair', true)
 @section('js')
 <script>
+$('#pembelajaran_id').change(function(){
+    var ini = $(this).val();
+    if(ini){
+        $.ajax({
+            url: '{{route('ajax.get_data', ['query' => 'mata-ujian'])}}',
+            type: 'post',
+            data: $('#insert_jadwal').serialize(),
+        }).done(function( response ) {
+            $("#exam_id").html('<option value="">== Pilih Mata Ujian ==</option>');
+            if(!$.isEmptyObject(response.results)){
+				$.each(response.results, function (i, item) {
+					$('#exam_id').append($('<option>', { 
+						value: item.id,
+						text : item.text
+					}));
+				});
+			}
+        }).fail(function(data) {
+            console.log(data.responseJSON.errors);
+            var errors = [];
+            $.each(data.responseJSON.errors, function (i, item) {
+                errors.push(item[0]);
+            })
+            console.log(errors)
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                html: errors.join('<br>'),
+            });
+        });
+    }
+})
 $('.simpan_jadwal').click(function(){
     $.ajax({
         url: '{{route('proktor.simpan', ['query' => 'jadwal-ujian'])}}',

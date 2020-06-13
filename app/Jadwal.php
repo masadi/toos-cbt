@@ -13,4 +13,7 @@ class Jadwal extends Model
     public function pembelajaran(){
         return $this->hasOne('App\Pembelajaran', 'pembelajaran_id', 'pembelajaran_id');
   }
+  public function exam(){
+    return $this->hasOne('App\Exam', 'exam_id', 'exam_id');
+  }
 }

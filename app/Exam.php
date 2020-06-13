@@ -50,4 +50,7 @@ class Exam extends Model
             'user_exam_id' // Local key on users table...
         )->whereNotNull('answer_id');
     }
+    public function jadwal(){
+      return $this->hasOne('App\Jadwal', 'exam_id', 'exam_id');
+    }
 }

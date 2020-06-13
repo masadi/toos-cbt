@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
 use Ramsey\Uuid\Uuid;
+use App\Support\Collection;
 use App\Ptk;
 use App\Exam;
 use App\Question;
@@ -16,14 +17,211 @@ use App\User_question;
 use App\Event;
 use File;
 use Helper;
+use Validator;
 use Illuminate\Support\Facades\Storage;
-use pcrov\JsonReader\JsonReader;
 use Carbon\Carbon;
 class UjianController extends Controller
 {
     public function index(Request $request){
-        $ujian = '';//Cache::store('file')->get('ujian');
-        $get_ujian = '';//Cache::store('file')->get('get_ujian');
+        $user = auth()->user();
+        $ujian_id = $request->ujian_id;
+        $find = User_exam::with('exam')->where('exam_id', $ujian_id)->where('user_id', $user->user_id)->first();
+        $path = storage_path('app/public/'.$ujian_id.'.json');
+        $path_jawaban_siswa = storage_path('app/public/'.$user->user_id.'.json');
+        if(!File::exists($path_jawaban_siswa)){
+            File::put($path_jawaban_siswa, json_encode([]));
+        }
+        if($find){
+            $user_exam = $find;
+            $daftar_soal = unserialize($find->daftar_soal);
+            $collection_daftar_soal = collect($daftar_soal); 
+        } else {
+            $ujian = Helper::soal_reader($ujian_id);
+            if($ujian){
+                $make_shuffle = collect($ujian->question);
+                $shuffled = $make_shuffle->shuffle();
+                $shuffled_question = $shuffled->toArray();
+                $make_keyed = collect($shuffled_question);
+                $keyed = $make_keyed->keyBy('question_id');
+                $collection = collect($keyed->all());
+                $keys = $collection->keys();
+                $daftar_soal = $keys->all();
+                $user_exam = User_exam::create([
+                    'exam_id'   => $ujian_id,
+                    'user_id' => $user->user_id,
+                    'status_ujian' => 1,
+                    'daftar_soal' => serialize($daftar_soal),
+                ]);
+                $collection_daftar_soal = collect($daftar_soal); 
+            } else {
+                return redirect()->route('home')->with(['error' => 'File ujian tidak ditemukan, silahkan hubungi proktor']);
+            }
+        }
+        $json_reader = Helper::json_reader($path, $collection_daftar_soal->first());
+        $ujian = $json_reader->ujian;
+        $all = $json_reader->all;
+        $first = $json_reader->first;
+        $questions = [$first];
+        $current_id = $first->question_id;
+        $keys = $daftar_soal;
+        $path_jawaban_siswa = storage_path('app/public/'.$user->user_id.'.json');
+        $jawaban_reader = Helper::jawaban_reader($user->user_id);
+        $collect_jawaban = collect($jawaban_reader);
+        $jawaban_siswa = $collect_jawaban->where('question_id', $current_id)->first();
+        $jawaban_siswa = ($jawaban_siswa) ? (object) $jawaban_siswa : NULL;
+        $jumlah_jawaban_siswa = $collect_jawaban->whereNull('ragu')->count();
+        $now = Carbon::now($user->timezone)->toDateTimeString();
+        return view('ujian.proses_ujian', compact('ujian', 'questions', 'user_exam', 'user', 'jumlah_jawaban_siswa', 'jawaban_siswa', 'all', 'page', 'keys', 'current_id', 'reader', 'now', 'collect_jawaban'));
+    }
+    public function get_soal(Request $request){
+        if($request->ajax()){
+            $user_id = $request->user_id;
+            
+            if(!$request->ujian_id){
+                $output = [
+                    'ujian' => 1,
+                    'icon' => 'error',
+                    'title' => 'Gagal',
+                    'text' => 'Permintaan tidak sah'
+                ];
+                return response()->json($output);
+            }
+            $user_exam = User_exam::where('exam_id', $request->ujian_id)->where('user_id', $user_id)->first();
+            if($request->sisa_waktu){
+                $user_exam->sisa_waktu = date('H:i:s', strtotime($request->sisa_waktu));
+                $user_exam->save();
+            }
+            if(!$user_exam->status_ujian){
+                $output = [
+                    'ujian' => 0,
+                    'icon' => 'error',
+                    'title' => 'Gagal',
+                    'text' => 'Ujian Selesai'
+                ];
+                return response()->json($output);
+            }
+            $path_jawaban_siswa = storage_path('app/public/'.$user_id.'.json');
+            if($request->has('answer_id')){
+                $jawaban_reader = Helper::jawaban_reader($user_id);
+                //dd($jawaban_reader);
+                $isi_jawaban = [];
+                if($jawaban_reader){
+                    foreach($jawaban_reader as $key => $array){
+                        $isi_jawaban[$array['question_id']] = $array;
+                    }
+                }
+                $isUuid = Uuid::isValid($request->answer_id);
+                if($isUuid){
+                    $collect_user_question = collect([
+                        'question_id' => $request->question_id,
+                        'user_id' => $user_id,
+                        'user_exam_id' => $user_exam->user_exam_id,
+                        'answer_id' => $request->answer_id,
+                        'ragu' => $request->ragu,
+                        'nomor_urut' => $request->page + 1,
+                    ]);
+                    $isi_jawaban[$request->question_id] = $collect_user_question->toArray();
+                    File::put($path_jawaban_siswa, json_encode($isi_jawaban));
+                }
+            }
+            $path = storage_path('app/public/'.$request->ujian_id.'.json');
+            $json_reader = Helper::json_reader($path, $request->soal_id);
+            $ujian = $json_reader->ujian;
+            $all = $json_reader->all;
+            $first = $json_reader->first;
+            $questions = [$first];
+            $current_id = $first->question_id;
+            $keys = unserialize($user_exam->daftar_soal);
+            $jawaban_reader = Helper::jawaban_reader($user_id);
+            $collect_jawaban = collect($jawaban_reader);
+            $jawaban_siswa = $collect_jawaban->where('question_id', $current_id)->first();
+            $jawaban_siswa = ($jawaban_siswa) ? (object) $jawaban_siswa : NULL;
+            $jumlah_jawaban_siswa = $collect_jawaban->whereNull('ragu')->count();
+            $output = [
+                'html' => view('ujian.load_soal', ['questions' => $questions, 'page' => $request->page, 'current_id' => $current_id, 'keys' => $request->keys, 'jumlah_jawaban_siswa' => $jumlah_jawaban_siswa, 'jawaban_siswa' => $jawaban_siswa])->render(),
+                'current_id' => $current_id,
+            ];
+            return response()->json($output);
+        } else {
+            return view('ujian.tolak');
+        }
+    }
+    public function selesai(Request $request){
+        $messages = [
+            'ujian_id.required' => 'ID Mata Ujian tidak boleh kosong',
+            'question_id.required' => 'ID Soal tidak boleh kosong',
+            'answer_id.uuid' => 'Jawaban tidak boleh kosong',
+        ];
+        $validator = Validator::make($request->all(), [
+            'ujian_id' => 'required',
+            'question_id' => 'required',
+            'answer_id' => 'uuid',
+         ],
+        $messages
+        );
+        if ($validator->fails()) {
+            $errors = $validator->errors();
+            $response = [
+                'title' => 'Gagal',
+                'text' => $errors->first('answer_id'),
+                'icon' => 'error',
+            ];
+            return response()->json($response);
+        }
+        $ujian_id = $request->ujian_id;
+        $question_id = $request->question_id;
+        $answer_id = $request->answer_id;
+        $user_exam = User_exam::where('exam_id', $request->ujian_id)->where('user_id', $request->user_id)->first();
+        if($request->sisa_waktu){
+            $user_exam->sisa_waktu = date('H:i:s', strtotime($request->sisa_waktu));
+            $user_exam->status_ujian = 0;
+            $user_exam->save();
+        }
+        if($request->has('answer_id')){
+            $isUuid = Uuid::isValid($request->answer_id);
+            User_question::updateOrCreate(
+                [
+                    'question_id' => $question_id,
+                    'user_id' => $request->user_id,
+                ],
+                [
+                    'user_exam_id' => $user_exam->user_exam_id,
+                    'answer_id' => ($isUuid) ? $request->answer_id : NULL,
+                ]
+            );
+        }
+        $jawaban_reader = Helper::jawaban_reader($request->user_id);
+        $collect_jawaban = collect($jawaban_reader);
+        if($collect_jawaban->count()){
+            foreach($collect_jawaban as $jawaban){
+                $user_question = collect($jawaban);
+                $user_question = json_decode($user_question->toJson());
+                User_question::updateOrCreate(
+                     [
+                        'question_id' => $user_question->question_id,
+                        'user_id' => $user_question->user_id,
+                    ],
+                    [
+                        'user_exam_id' => $user_question->user_exam_id,
+                        'answer_id' => $user_question->answer_id,
+                        'ragu' => $user_question->ragu,
+                        'nomor_urut' => $user_question->nomor_urut,
+                    ]
+                );
+            }
+            $path = storage_path('app/public/'.$request->user_id.'.json');
+            File::delete($path);
+        }
+        $response = [
+            'title' => 'Berhasil',
+            'text' => 'Nilai berhasil disimpan',
+            'icon' => 'success',
+        ];
+        return response()->json($response);
+    }
+    public function indexOld(Request $request){
+        $ujian = Cache::store('file')->get('ujian');
+        $get_ujian = Cache::store('file')->get('get_ujian');
         $user = auth()->user();
         $now = Carbon::now($user->timezone)->toDateTimeString();
         $reader = new JsonReader();
@@ -64,8 +262,8 @@ class UjianController extends Controller
                     'questions' => $questions,
                 ];
                 $gabung = collect($exam_json);
-                //Cache::store('file')->put('ujian', $get_ujian);
-                //Cache::store('file')->put('get_ujian', $gabung);
+                Cache::store('file')->put('ujian', $get_ujian);
+                Cache::store('file')->put('get_ujian', $gabung);
                 File::put($user_folder.'/'.$ujian_id.'.json', $gabung->toJson());
             }
         }
@@ -117,7 +315,7 @@ class UjianController extends Controller
         $all_files = collect($all_files);
         return $all_files->count();
     }
-    public function get_soal(Request $request){
+    public function get_soalOld(Request $request){
         if($request->ajax()){
             $reader = new JsonReader();
             $user = auth()->user();
@@ -145,7 +343,7 @@ class UjianController extends Controller
                 ];
                 return response()->json($output);
             }
-            $all = '';//Cache::store('file')->get('get_soal');
+            $all = Cache::store('file')->get('get_soal');
             $user_folder = Helper::user_folder($user->user_id);
             $exam_folder = Helper::exam_folder($user->user_id, $request->ujian_id);
             $path = $user_folder.'/'.$request->ujian_id.'.json';
@@ -158,7 +356,7 @@ class UjianController extends Controller
                     $all = $collection->toJson();
                     $all = json_decode($all);
                     $all = collect($all->questions);
-                    //Cache::store('file')->put('get_soal', $all);
+                    Cache::store('file')->put('get_soal', $all);
                     $first = $all->first();
                 }
             }
@@ -205,19 +403,11 @@ class UjianController extends Controller
             return view('ujian.tolak');
         }
     }
-    public function token(){
-        $ujian = '';
-        $user = auth()->user();
-        $all_ujian = Exam::with('pembelajaran.rombongan_belajar')->whereAktif(1)->whereHas('pembelajaran', function($query) use ($user){
-            if($user->peserta_didik_id){
-                $query->where('rombongan_belajar_id', $user->peserta_didik->anggota_rombel->rombongan_belajar_id);
-            }
-        })->get();
-        if(!$all_ujian->count()){
-            $all_ujian = Exam::with('event')->whereAktif(1)->whereHas('event')->get();
-        }        
-        $mata_ujian = Exam::find(config('global.exam_id'));
-        return view('ujian.token', compact('user', 'ujian', 'mata_ujian', 'all_ujian'));
+    public function token(Request $request){
+        $exam_id = $request->route('ujian_id');
+        $exam = Exam::find($exam_id);
+        $modal_s = 'modal-standart';
+        return view('ujian.token', compact('exam', 'modal_s'));
     }
     public function konfirmasi(Request $request){
         $user = auth()->user();
@@ -261,74 +451,6 @@ class UjianController extends Controller
                 'success' => FALSE
             ];
         }
-        return response()->json($response);
-    }
-    public function selesai(Request $request){
-        $user = auth()->user();
-        $ujian_id = $request->ujian_id;
-        $question_id = $request->question_id;
-        $answer_id = $request->answer_id;
-        $user_exam = User_exam::firstOrCreate(
-            [
-                'exam_id'   => $ujian_id,
-                'anggota_rombel_id' => ($user->peserta_didik) ? $user->peserta_didik->anggota_rombel->anggota_rombel_id : NULL,
-                'ptk_id' => $user->ptk_id
-            ]
-        );
-        if($request->sisa_waktu){
-            $user_exam->sisa_waktu = date('H:i:s', strtotime($request->sisa_waktu));
-            $user_exam->status_ujian = 0;
-            $user_exam->save();
-        }
-        if($request->has('answer_id')){
-            $isUuid = Uuid::isValid($request->answer_id);
-            User_question::updateOrCreate(
-                [
-                    'question_id' => $question_id,
-                    'anggota_rombel_id' => ($user->peserta_didik) ? $user->peserta_didik->anggota_rombel->anggota_rombel_id : NULL,
-                    'ptk_id' => $user->ptk_id
-                ],
-                [
-                    'user_exam_id' => $user_exam->user_exam_id,
-                    'answer_id' => ($isUuid) ? $request->answer_id : NULL,
-                    'user_id' => $user->user_id,
-                ]
-            );
-        }
-        $user_folder = Helper::user_folder($user->user_id);
-        $exam_folder = Helper::exam_folder($user->user_id, $ujian_id);
-        $all_files = File::allfiles($exam_folder);
-        $all_files = collect($all_files);
-        if($all_files->count()){
-            foreach($all_files as $file){
-                try {
-                    $contents = $file->getContents();
-                    $user_question = json_decode($contents);
-                    User_question::updateOrCreate(
-                        [
-                            'question_id' => $user_question->question_id,
-                            'anggota_rombel_id' => $user_question->anggota_rombel_id,
-                            'ptk_id' => $user_question->ptk_id,
-                        ],
-                        [
-                            'user_exam_id' => $user_question->user_exam_id,
-                            'answer_id' => $user_question->answer_id,
-                            'ragu' => $user_question->ragu,
-                            'nomor_urut' => $user_question->nomor_urut,
-                            'user_id' => $user_question->user_id,
-                        ]
-                    );
-                } catch (\Exception $e) {
-                    //
-                }
-            }
-        }
-        File::deleteDirectory($user_folder);
-        $response = [
-            'title' => 'Berhasil',
-            'text' => 'Nilai berhasil disimpan',
-            'icon' => 'success',
-        ];
         return response()->json($response);
     }
     public function detil_hasil(Request $request){
@@ -424,5 +546,8 @@ class UjianController extends Controller
     public function all_ujian(){
         $user = auth()->user();
         return view('materi.ujian.index', compact('user'));
+    }
+    public function simpan_ujian(Request $request){
+        dd($request->all());
     }
 }

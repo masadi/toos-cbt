@@ -57,6 +57,9 @@ class User extends Authenticatable
     public function sekolah(){
 		return $this->hasOne('App\Sekolah', 'sekolah_id', 'sekolah_id');
     }
+    public function anggota_rombel(){
+		return $this->hasOne('App\Anggota_rombel', 'peserta_didik_id', 'peserta_didik_id');
+    }
     public function peserta_didik(){
 		return $this->hasOne('App\Peserta_didik', 'peserta_didik_id', 'peserta_didik_id');
     }

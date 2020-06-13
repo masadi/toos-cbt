@@ -48,7 +48,7 @@ Route::group(['middleware' => ['auth', 'get.route']], function () {
     });
     Route::group(['middleware' => ['role:peserta_didik|ptk']], function () {
         Route::prefix('ujian')->group(function () {
-            Route::get('/token','UjianController@token')->name('ujian.token');
+            Route::get('/token/{ujian_id}','UjianController@token')->name('ujian.token');
             Route::get('/get-soal','UjianController@get_soal')->name('ujian.get_soal');
             Route::post('/konfirmasi','UjianController@konfirmasi')->name('ujian.konfirmasi');
             Route::get('/list','UjianController@all_ujian')->name('ujian.all_ujian');
@@ -57,6 +57,7 @@ Route::group(['middleware' => ['auth', 'get.route']], function () {
             Route::get('/detil-hasil/{id}','UjianController@detil_hasil')->name('ujian.detil_hasil');
             Route::get('/selesai','UjianController@selesai')->name('ujian.selesai');
             Route::post('/update-pengguna','AjaxController@update_pengguna')->name('ujian.update_pengguna');
+            Route::post('/simpan-ujian','UjianController@simpan_ujian')->name('ujian.simpan_ujian');
         });
     });
 });

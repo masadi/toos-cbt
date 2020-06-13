@@ -73,8 +73,9 @@ class AjaxController extends Controller
     public function get_rombel(Request $request){
         $user = auth()->user();
 		$all_rombel = Rombongan_belajar::where(function($query) use ($user){
-			$query->where('sekolah_id', $user->sekolah_id);
-		})->get();
+            $query->where('sekolah_id', $user->sekolah_id);
+            $query->where('semester_id', config('global.semester_id'));
+		})->orderBy('tingkat')->get();
 		if($all_rombel->count()){
             foreach($all_rombel as $rombel){
                 $record[$rombel->rombongan_belajar_id] 	= $rombel->nama;
@@ -90,7 +91,7 @@ class AjaxController extends Controller
         return response()->json($response);
 	}
     public function jadwal_ujian($request){
-        $query = Jadwal::query()->with(['rombongan_belajar', 'pembelajaran'])->where(function($query) use ($request){
+        $query = Jadwal::query()->with(['rombongan_belajar', 'pembelajaran', 'exam'])->where(function($query) use ($request){
             if($request->sekolah_id){
                 $query->whereHas('rombongan_belajar', function($query) use ($request){
                     $query->where('sekolah_id', $request->sekolah_id);
@@ -149,6 +150,9 @@ class AjaxController extends Controller
         })
         ->addColumn('tanggal', function ($item) {
             return Helper::TanggalIndo($item->tanggal);
+        })
+        ->addColumn('jam_ujian', function ($item) {
+            return $item->from.' s/d '.$item->to;
         })
         ->rawColumns(['action'])
         ->make(true);
@@ -875,7 +879,12 @@ class AjaxController extends Controller
                 $output['results'][] = $record;
             }
         } elseif($query == 'mata-ujian'){
-            $mata_ujian = Exam::withCount('question')->where('pembelajaran_id', $request->pembelajaran_id)->whereAktif(0)->get();
+            $mata_ujian = Exam::withCount('question')->where(function($query) use ($request){
+                $query->where('pembelajaran_id', $request->pembelajaran_id);
+                if($request->aksi){
+                    $query->doesntHave('jadwal');
+                }
+            })->whereAktif(0)->get();
             if($mata_ujian->count()){
                 foreach($mata_ujian as $exam){
                     //if($exam->question_count == $exam->jumlah_soal){

@@ -619,12 +619,14 @@ class ProktorController extends Controller
             $messages = [
                 'rombongan_belajar_id.required' => 'Rombongan Belajar tidak boleh kosong',
                 'pembelajaran_id.required' => 'Mata Pelajaran tidak boleh kosong',
+                'exam_id.required' => 'Mata Ujian tidak boleh kosong',
                 'from.required' => 'Jam Mulai tidak boleh kosong',
                 'to.required' => 'Jam Berakhir tidak boleh kosong',
             ];
             $validator = Validator::make(request()->all(), [
                 'rombongan_belajar_id' => 'required',
                 'pembelajaran_id' => 'required',
+                'exam_id' => 'required',
                 'from' => 'required',
                 'to' => 'required',
              ],
@@ -633,6 +635,7 @@ class ProktorController extends Controller
             Jadwal::updateOrCreate(
                 [
                     'pembelajaran_id' => $request->pembelajaran_id,
+                    'exam_id' => $request->exam_id,
                 ],
                 [
                     'tanggal' => $request->date,
@@ -641,6 +644,11 @@ class ProktorController extends Controller
                     'to' => $request->to,
                 ]
             );
+            $get_ujian = Exam::withCount('question')->with(['question' => function($query){
+                $query->with('answers');
+                $query->orderBy('soal_ke');
+            }])->find($request->exam_id);
+            Storage::disk('public')->put($request->exam_id.'.json', $get_ujian->toJson());
             $output = [
                 'icon' => 'success',
                 'text' => 'Jadwal berhasil disimpan',

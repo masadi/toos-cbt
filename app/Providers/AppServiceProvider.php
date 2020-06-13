@@ -3,11 +3,12 @@
 namespace App\Providers;
 
 use Illuminate\Support\Facades\DB;
-//use Illuminate\Support\Facades\File;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Validator;
 use App\Setting;
 use Carbon\Carbon;
+use Ramsey\Uuid\Uuid;
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -48,5 +49,8 @@ class AppServiceProvider extends ServiceProvider
         }
         setlocale(LC_TIME, 'id_ID.utf8');
         Carbon::setLocale(LC_TIME, 'id_ID.utf8');
+        Validator::extend('uuid', function ($attribute, $value, $parameters, $validator) {
+            return Uuid::isValid($value);
+        });
     }
 }

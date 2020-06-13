@@ -2,6 +2,7 @@
 
 namespace App\Helpers;
 use App\Semester;
+use pcrov\JsonReader\JsonReader;
 class Helper
 {
     public static function prepare_send($str){
@@ -149,5 +150,55 @@ class Helper
     }
     public static function exam_folder($user_id, $exam_id){
         return storage_path('app/public/'.$user_id.'/'.$exam_id);
+    }
+    public static function soal_reader($exam_id){
+        $path = storage_path('app/public/'.$exam_id.'.json');
+        $reader = new JsonReader();
+        $reader->open($path);
+        $collection = [];
+        if ($reader->read()) {
+            $collection = collect($reader->value());
+            return json_decode($collection->toJson());
+        }
+        return $collection;
+    }
+    public static function json_reader($path, $question_id){
+        $reader = new JsonReader();
+        $reader->open($path);
+        $ujian = NULL;
+        $all = [];
+        $first = NULL;
+        $questions = [];
+        $current_id = NULL;
+        if ($reader->read()) {
+            $collection = collect($reader->value());
+            $ujian = $collection->toJson();
+            $ujian = json_decode($ujian);
+            $all = collect($ujian->question);
+            $first = $all->where('question_id', $question_id)->first();
+            $first = collect($first);
+            $first = $first->toJson();
+            $first = json_decode($first);
+            $questions = [$first];
+            $current_id = $first->question_id;
+        }
+        $return = collect([
+            'ujian' => $ujian,
+            'all' => $all,
+            'first' => $first,
+            'questions' => $questions,
+            'current_id' => $current_id,
+        ]);
+        return json_decode($return->toJson());
+    }
+    public static function jawaban_reader($user_id){
+        $path = storage_path('app/public/'.$user_id.'.json');
+        $reader = new JsonReader();
+        $reader->open($path);
+        $collection = [];
+        if ($reader->read()) {
+            $collection = collect($reader->value())->toArray();
+        }
+        return $collection;
     }
 }

@@ -38,11 +38,11 @@
                 <thead class="thead-light">
                     <tr>
                         <th>Rombel</th>
-                        <th>Mapel</th>
+                        <th>Mata Pelajaran</th>
+                        <th>Mata Ujian</th>
                         <th>Tanggal</th>
-                        <th>Jam Mulai</th>
-                        <th>Jam Berakhir</th>
-                        <th>Aksi</th>
+                        <th>Jam Aktif Ujian</th>
+                        <th class="text-center">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -117,10 +117,10 @@
             columns: [
                 { data: 'rombongan_belajar.nama', name: 'rombongan_belajar.nama' },
                 { data: 'pembelajaran.nama_mata_pelajaran', name: 'pembelajaran.nama_mata_pelajaran' },
+                { data: 'exam.nama', name: 'exam.nama'},
                 { data: 'tanggal', name: 'tanggal' },
-                { data: 'from', name: 'from', className:'text-center' },
-                { data: 'to', name: 'to', className:'text-center' },
-                { data: 'action', name: 'action', className: 'dt-body-center', searchable: false },
+                { data: 'jam_ujian', name: 'jam_ujian', className:'text-center', searchable: false, orderable: false },
+                { data: 'action', name: 'action', className: 'dt-body-center', searchable: false, orderable: false },
             ],
             fnDrawCallback: function(oSettings) {
                 turn_on_icheck();

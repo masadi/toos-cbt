@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Event;
 use JeroenNoten\LaravelAdminLte\Events\BuildingMenu;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\View;
 use MobileDetect;
 class GetRoute
 {
@@ -52,6 +53,7 @@ class GetRoute
                 Auth::logout();
                 return redirect('login')->with('success', 'Sesi login anda di reset oleh proktor. Silahkan login kembali');
             }
+            View::share('user', Auth::user());
         }
         Event::listen(BuildingMenu::class, function (BuildingMenu $event) use ($name){
             if($name[0] == 'ujian'){
@@ -91,7 +93,7 @@ class GetRoute
                     'permission'  => 'proktor',
                     'icon' => 'fas fa-fw fa-users',
                 ]);
-                $event->menu->add([
+                /*$event->menu->add([
                     'text' => 'Daftar PTK',
                     'url'  => 'daftar-ptk',
                     'permission'  => 'proktor',
@@ -102,7 +104,7 @@ class GetRoute
                     'url'  => 'status-test',
                     'permission'  => 'proktor',
                     'icon' => 'fas fa-fw fa-pencil-ruler',
-                ]);
+                ]);*/
                 $event->menu->add([
                     'text' => 'Status Peserta',
                     'url'  => 'status-peserta',
@@ -124,13 +126,13 @@ class GetRoute
                 $event->menu->add([
                     'text' => 'Proses Ujian',
                     'url'  => 'ujian/token',
-                    'permission'  => 'peserta_didik',
+                    'permission'  => 'peserta_didik-salah',
                     'icon' => 'fas fa-fw fa-sync-alt',
                 ]);
                 $event->menu->add([
                     'text' => 'Hasil Ujian',
                     'url'  => 'ujian/hasil',
-                    'permission'  => 'peserta_didik',
+                    'permission'  => 'peserta_didik-salah',
                     'icon' => 'fas fa-fw fa-sync-alt',
                 ]);
                 $event->menu->add([
