@@ -129,19 +129,27 @@ $user = Auth::user();
                             Jam Sekarang <span class="float-right badge bg-danger">{{date('H:i:s')}}</span>
                         </a>
                     </li>
+                    @if($exam->user_exam)
+                    <li class="nav-item">
+                        <a href="#" class="nav-link">
+                            Check Ujian <span class="float-right badge bg-danger">{{$exam->user_exam->status_ujian}}</span>
+                        </a>
+                    </li>
+                    @endif
                     <li class="nav-item">
                         @if($tanggal == $today)
-                        @if ($current_time > $from && $current_time < $to) @if($exam->user_exam)
-                            @if($exam->user_exam->status_ujian)
-                            <a href="{{route('ujian.proses', ['ujian_id' => $exam->exam_id])}}"
-                                class="nav-link btn btn-success btn-block btn-flat">
-                                Lanjutkan Ujian
-                            </a>
-                            @else
-                            <a href="javascript:void(0)" class="btn btn-success btn-block btn-flat disabled">
-                                Ujian Selesai
-                            </a>
-                            @endif
+                        @if ($current_time > $from && $current_time < $to) 
+                            @if($exam->user_exam)
+                                @if($exam->user_exam->status_ujian)
+                                <a href="{{route('ujian.proses', ['ujian_id' => $exam->exam_id])}}"
+                                    class="nav-link btn btn-success btn-block btn-flat">
+                                    Lanjutkan Ujian
+                                </a>
+                                @else
+                                <a href="javascript:void(0)" class="btn btn-success btn-block btn-flat disabled">
+                                    Ujian Selesai
+                                </a>
+                                @endif
                             @else
                             <a href="{{route('ujian.proses', ['ujian_id' => $exam->exam_id])}}"
                                 class="nav-link btn btn-success btn-block btn-flat">
