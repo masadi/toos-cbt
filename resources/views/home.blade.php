@@ -83,6 +83,7 @@ $user = Auth::user();
         </div>
     </div>
 </div>
+@role('peserta_didik')
 <div class="row">
     @forelse ($exams as $exam)
     <div class="col-md-4">
@@ -94,6 +95,13 @@ $user = Auth::user();
                 <h5 class="widget-user-desc" style="margin-left: 0px;">{{$exam->pembelajaran->nama_mata_pelajaran}}</h5>
             </div>
             <div class="card-footer p-0">
+                <?php
+                $today = strtotime(date('Y-m-d'));
+                $tanggal = strtotime($exam->jadwal->tanggal);
+                $current_time = strtotime(date('H:i:s'));
+                $from = strtotime($exam->jadwal->from);
+                $to = strtotime($exam->jadwal->to);
+                ?>
                 <ul class="nav flex-column">
                     <li class="nav-item">
                         <a href="#" class="nav-link">
@@ -102,7 +110,8 @@ $user = Auth::user();
                     </li>
                     <li class="nav-item">
                         <a href="#" class="nav-link">
-                            Tanggal <span class="float-right badge bg-info">{{Helper::tanggalIndo($exam->jadwal->tanggal)}}</span>
+                            Tanggal <span
+                                class="float-right badge bg-info">{{Helper::tanggalIndo($exam->jadwal->tanggal)}}</span>
                         </a>
                     </li>
                     <li class="nav-item">
@@ -116,48 +125,47 @@ $user = Auth::user();
                         </a>
                     </li>
                     <li class="nav-item">
-                        <?php
-                        $today = strtotime(date('Y-m-d'));
-                        $tanggal = strtotime($exam->jadwal->tanggal);
-                        $current_time = strtotime(date('H:i:s'));
-                        $from = strtotime($exam->jadwal->from);
-                        $to = strtotime($exam->jadwal->to);
-                        ?>
+                        <a href="#" class="nav-link">
+                            Jam Sekarang <span class="float-right badge bg-danger">{{date('H:i:s')}}</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
                         @if($tanggal == $today)
-                            @if ($current_time > $from && $current_time < $to)
-                                @if($exam->user_exam)
-                                    @if($exam->user_exam->status_ujian)
-                                    <a href="{{route('ujian.proses', ['ujian_id' => $exam->exam_id])}}" class="nav-link btn btn-success btn-block btn-flat">
-                                        Lanjutkan Ujian
-                                    </a>
-                                    @else
-                                    <a href="javascript:void(0)" class="btn btn-success btn-block btn-flat disabled">
-                                        Ujian Selesai
-                                    </a>
-                                    @endif
-                                @else
-                                <a href="{{route('ujian.proses', ['ujian_id' => $exam->exam_id])}}" class="nav-link btn btn-success btn-block btn-flat">
-                                    Mulai Ujian
-                                </a>
-                                @endif
-                            @elseif($current_time < $to)
-                            <a href="javascript:void(0)" class="btn btn-success btn-block btn-flat disabled">
-                                Belum Mulai
+                        @if ($current_time > $from && $current_time < $to) @if($exam->user_exam)
+                            @if($exam->user_exam->status_ujian)
+                            <a href="{{route('ujian.proses', ['ujian_id' => $exam->exam_id])}}"
+                                class="nav-link btn btn-success btn-block btn-flat">
+                                Lanjutkan Ujian
                             </a>
                             @else
                             <a href="javascript:void(0)" class="btn btn-success btn-block btn-flat disabled">
-                                Waktu Habis
+                                Ujian Selesai
                             </a>
                             @endif
-                        @elseif($tanggal > $today)
-                        <a href="javascript:void(0)" class="btn btn-success btn-block btn-flat disabled">
-                            Belum Mulai
-                        </a>
-                        @else
-                        <a href="javascript:void(0)" class="btn btn-success btn-block btn-flat disabled">
-                            Waktu Habis
-                        </a>
-                        @endif
+                            @else
+                            <a href="{{route('ujian.proses', ['ujian_id' => $exam->exam_id])}}"
+                                class="nav-link btn btn-success btn-block btn-flat">
+                                Mulai Ujian
+                            </a>
+                            @endif
+                            @elseif($current_time < $to) <a href="javascript:void(0)"
+                                class="btn btn-success btn-block btn-flat disabled">
+                                Belum Mulai
+                                </a>
+                                @else
+                                <a href="javascript:void(0)" class="btn btn-success btn-block btn-flat disabled">
+                                    Waktu Habis
+                                </a>
+                                @endif
+                                @elseif($tanggal > $today)
+                                <a href="javascript:void(0)" class="btn btn-success btn-block btn-flat disabled">
+                                    Belum Mulai
+                                </a>
+                                @else
+                                <a href="javascript:void(0)" class="btn btn-success btn-block btn-flat disabled">
+                                    Waktu Habis
+                                </a>
+                                @endif
                     </li>
                 </ul>
             </div>
@@ -167,6 +175,7 @@ $user = Auth::user();
     @empty
     @endforelse
 </div>
+@endrole
 @stop
 @section('plugins.Sweetalert2', true)
 @section('js')

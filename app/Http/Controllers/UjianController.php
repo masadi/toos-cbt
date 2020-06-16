@@ -33,8 +33,27 @@ class UjianController extends Controller
         }
         if($find){
             $user_exam = $find;
-            $daftar_soal = unserialize($find->daftar_soal);
-            $collection_daftar_soal = collect($daftar_soal); 
+            if($find->daftar_soal){
+                $daftar_soal = unserialize($find->daftar_soal);
+                $collection_daftar_soal = collect($daftar_soal);
+            } else {
+                $ujian = Helper::soal_reader($ujian_id);
+                if($ujian){
+                    $make_shuffle = collect($ujian->question);
+                    $shuffled = $make_shuffle->shuffle();
+                    $shuffled_question = $shuffled->toArray();
+                    $make_keyed = collect($shuffled_question);
+                    $keyed = $make_keyed->keyBy('question_id');
+                    $collection = collect($keyed->all());
+                    $keys = $collection->keys();
+                    $daftar_soal = $keys->all();
+                    $find->daftar_soal = serialize($daftar_soal);
+                    $find->save();
+                    $collection_daftar_soal = collect($daftar_soal); 
+                } else {
+                    return redirect()->route('home')->with(['error' => 'File ujian tidak ditemukan, silahkan hubungi proktor']);
+                }
+            }
         } else {
             $ujian = Helper::soal_reader($ujian_id);
             if($ujian){
