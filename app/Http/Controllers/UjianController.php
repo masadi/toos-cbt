@@ -28,6 +28,10 @@ class UjianController extends Controller
         $find = User_exam::with('exam')->where('exam_id', $ujian_id)->where('user_id', $user->user_id)->first();
         $path = storage_path('app/public/'.$ujian_id.'.json');
         $path_jawaban_siswa = storage_path('app/public/'.$user->user_id.'.json');
+        /*$cache_ujian = Cache::store('file')->get('ujian');
+        if(!$cache_ujian){
+            Cache::store('file')->put('ujian', $get_ujian);
+        }*/
         if(!File::exists($path_jawaban_siswa)){
             File::put($path_jawaban_siswa, json_encode([]));
         }
@@ -240,6 +244,7 @@ class UjianController extends Controller
     }
     public function indexOld(Request $request){
         $ujian = Cache::store('file')->get('ujian');
+        Cache::store('file')->put('ujian', $get_ujian);
         $get_ujian = Cache::store('file')->get('get_ujian');
         $user = auth()->user();
         $now = Carbon::now($user->timezone)->toDateTimeString();
